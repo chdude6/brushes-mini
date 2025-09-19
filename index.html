@@ -3,333 +3,225 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Photoshop‑esque UI Versions</title>
+  <title>Photoshop-esque UI Versions with Voting</title>
   <style>
-    :root{
-      --bg1:#0f1020; --bg2:#1a1c3b; --bg3:#121225;
-      --text:#e8e9ff;
-      --accent1:#6a8dff; --accent2:#7bffd7; --accent3:#ff7ad9;
-      --glow: rgba(122, 161, 255, 0.55);
+    :root {
+      --bg1: #0f1020; --bg2: #1a1c3b; --bg3: #121225;
+      --text: #e8e9ff;
+      --accent1: #6a8dff; --accent2: #7bffd7; --accent3: #ff7ad9;
     }
 
-    /* Page base */
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      color:var(--text);
-      font: 16px/1.5 "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 800px at 20% 10%, #232557 0%, rgba(18,18,37,0) 60%),
-                  radial-gradient(900px 700px at 80% 90%, #2a1a46 0%, rgba(18,18,37,0) 55%),
-                  linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
-      overflow-x:hidden;
-    }
-
-    /* Animated gradient halo */
-    .halo {
-      position: fixed;
-      inset: -30vmax;
-      background:
-        conic-gradient(from 0deg,
-          rgba(255,255,255,0.02),
-          rgba(255,255,255,0) 35%,
-          rgba(255,255,255,0.02) 70%,
-          rgba(255,255,255,0) 100%);
-      filter: blur(60px);
-      animation: spin 40s linear infinite;
-      pointer-events:none;
-      opacity: 0.6;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Floating orbs for depth */
-    .orb {
-      position: absolute;
-      width: clamp(200px, 25vw, 420px);
-      height: clamp(200px, 25vw, 420px);
-      border-radius: 50%;
-      filter: blur(40px);
-      opacity: 0.18;
-      mix-blend-mode: screen;
-      animation: float 14s ease-in-out infinite alternate;
-    }
-    .orb.one { top: 10%; left: -5%; background: radial-gradient(circle at 30% 30%, #6f7dff, transparent 55%); animation-duration: 13s; }
-    .orb.two { bottom: -10%; right: -5%; background: radial-gradient(circle at 60% 60%, #ff77c8, transparent 60%); animation-duration: 16s; }
-    @keyframes float {
-      0% { transform: translateY(-20px) translateX(0); }
-      100% { transform: translateY(30px) translateX(10px); }
-    }
-
-    /* Container */
-    .wrap {
-      position: relative;
-      min-height: 100%;
+    html, body { height: 100%; margin: 0; }
+    body {
+      font: 16px/1.5 "Inter", system-ui, sans-serif;
+      color: var(--text);
+      background: 
+        radial-gradient(1200px 800px at 20% 10%, #232557 0%, rgba(18,18,37,0) 60%),
+        radial-gradient(900px 700px at 80% 90%, #2a1a46 0%, rgba(18,18,37,0) 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
+      overflow-x: hidden;
       display: grid;
       place-items: center;
-      padding: 4rem 1rem;
+      padding: 2rem;
     }
 
     .card {
-      width: min(900px, 92vw);
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.14);
       border-radius: 20px;
-      box-shadow:
-        0 10px 40px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.06);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35),
+                  inset 0 1px 0 rgba(255,255,255,0.06);
       backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
       padding: 2.2rem;
+      width: min(900px, 92vw);
       position: relative;
       overflow: hidden;
     }
-
-    /* Subtle animated light sweep on the card */
-    .card::after{
-      content:"";
-      position:absolute; inset:-1px;
-      background:
-        linear-gradient(120deg, rgba(255,255,255,0.0) 40%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.0) 60%);
+    .card::after {
+      content: "";
+      position: absolute; inset: -1px;
+      background: linear-gradient(120deg,
+        rgba(255,255,255,0) 40%,
+        rgba(255,255,255,0.05) 50%,
+        rgba(255,255,255,0) 60%);
       transform: translateX(-100%);
       animation: sweep 6s ease-in-out infinite;
-      pointer-events:none;
+      pointer-events: none;
     }
     @keyframes sweep {
-      0%, 10% { transform: translateX(-120%); }
-      45%, 55% { transform: translateX(0%); }
-      90%, 100% { transform: translateX(120%); }
+      0%,10% { transform: translateX(-120%); }
+      45%,55% { transform: translateX(0%); }
+      90%,100% { transform: translateX(120%); }
     }
 
-    .title {
-      display:flex; align-items:center; gap:.75rem;
-      margin: 0 0 1rem;
-    }
-    .title h1 {
-      margin:0;
-      font-weight: 700;
-      letter-spacing: .3px;
-      font-size: clamp(1.6rem, 3vw, 2.2rem);
+    h1 {
+      margin-top: 0;
+      font-size: clamp(1.6rem,3vw,2.2rem);
       text-shadow: 0 2px 18px rgba(122,161,255,0.25);
     }
     .subtitle {
-      margin: .2rem 0 1.6rem;
       color: rgba(232,233,255,0.85);
-      font-size: 0.98rem;
+      margin-bottom: 1.6rem;
     }
 
-    /* Buttons grid */
     .btns {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3,1fr);
       gap: 1rem;
     }
-    @media (max-width: 720px){
+    @media (max-width: 720px) {
       .btns { grid-template-columns: 1fr; }
     }
 
-    /* Fancy buttons */
     .fancy {
       position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: .6rem;
-      padding: 1.05rem 1.2rem;
+      padding: 1rem 1.2rem;
       border-radius: 14px;
       text-decoration: none;
       color: #0b0c1a;
       font-weight: 700;
-      letter-spacing: .25px;
-      background: linear-gradient(135deg, #cfd8ff 0%, #ffffff 35%, #e9fffb 70%, #ffe6f7 100%);
+      background: linear-gradient(135deg,#cfd8ff 0%,#fff 35%,#e9fffb 70%,#ffe6f7 100%);
       border: 1px solid rgba(255,255,255,0.6);
-      box-shadow:
-        0 8px 24px rgba(0,0,0,0.3),
-        0 0 0 2px rgba(255,255,255,0.06) inset;
-      transition: transform .2s ease, box-shadow .2s ease, background-position .4s ease;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3), inset 0 0 0 2px rgba(255,255,255,0.06);
+      transition: transform .2s, box-shadow .2s, background-position .4s;
       background-size: 180% 180%;
-      will-change: transform;
       overflow: hidden;
-      isolation: isolate;
     }
-
-    /* Individual accent glows */
     .fancy.type1 { --ring: var(--accent1); }
     .fancy.type2 { --ring: var(--accent2); }
     .fancy.type3 { --ring: var(--accent3); }
 
-    /* Outer glow ring */
-    .fancy::before{
-      content:"";
-      position:absolute; inset:-2px;
-      border-radius: inherit;
+    .fancy::before {
+      content: "";
+      position: absolute; inset: -2px;
       padding: 2px;
+      border-radius: inherit;
       background: conic-gradient(from 0deg, transparent, var(--ring), transparent 30%);
-      -webkit-mask:
+      mask: 
         linear-gradient(#000 0 0) content-box,
         linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
       mask-composite: exclude;
-      opacity: .85;
       filter: blur(6px) saturate(1.3);
       animation: rotate 8s linear infinite;
       z-index: -1;
     }
     @keyframes rotate { to { transform: rotate(360deg); } }
 
-    /* Shimmer highlight */
-    .fancy .shine{
-      position:absolute; inset:0;
-      background: linear-gradient(120deg,
-        transparent 35%,
-        rgba(255,255,255,0.35) 50%,
-        transparent 65%);
+    .fancy .shine {
+      position: absolute; inset: 0;
+      background: linear-gradient(120deg,transparent 35%,rgba(255,255,255,0.35) 50%,transparent 65%);
       transform: translateX(-120%);
       animation: shine 3.5s ease-in-out infinite;
       mix-blend-mode: screen;
-      pointer-events:none;
+      pointer-events: none;
     }
     @keyframes shine {
-      0%, 25% { transform: translateX(-130%); }
-      60%, 75% { transform: translateX(130%); }
-      100% { transform: translateX(130%); }
+      0%,25% { transform: translateX(-130%); }
+      60%,75%,100% { transform: translateX(130%); }
     }
 
-    /* Hover/active effects */
-    .fancy:hover{
+    .fancy:hover {
       transform: translateY(-3px);
-      box-shadow:
-        0 14px 35px rgba(0,0,0,0.45),
-        0 0 0 2px rgba(255,255,255,0.08) inset,
-        0 0 24px 2px color-mix(in oklab, var(--ring) 70%, transparent);
-      background-position: 100% 0%;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.45),
+                  0 0 0 2px rgba(255,255,255,0.08) inset,
+                  0 0 24px 2px color-mix(in oklab,var(--ring) 70%,transparent);
+      background-position: 100% 0;
     }
-    .fancy:active{
+    .fancy:active {
       transform: translateY(0);
-      box-shadow:
-        0 8px 22px rgba(0,0,0,0.4),
-        0 0 0 2px rgba(255,255,255,0.1) inset;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.1) inset;
     }
 
-    /* Accent dot and label */
-    .dot{
-      width: .8rem; height: .8rem; border-radius: 50%;
-      box-shadow: 0 0 16px color-mix(in oklab, var(--ring) 65%, transparent);
-      background: radial-gradient(circle at 30% 30%, #fff, var(--ring));
-      border: 1px solid rgba(0,0,0,0.08);
-    }
-    .label{
-      font-size: 1.05rem;
-      text-transform: uppercase;
-    }
-
-    /* Tiny badges */
-    .badge{
-      margin-left: auto;
-      font-size: .72rem;
-      padding: .25rem .5rem;
-      border-radius: 999px;
-      color: #0b0c1a;
-      background: color-mix(in oklab, var(--ring) 85%, #ffffff 10%);
-      border: 1px solid rgba(0,0,0,0.06);
-      letter-spacing: .4px;
-    }
-
-    /* Ripple on click */
-    .ripple {
-      position: absolute;
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
+    .fancy.disabled {
       pointer-events: none;
-      background: radial-gradient(circle, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0) 60%);
-      width: 10px; height: 10px;
-      animation: ripple .6s ease-out forwards;
-      mix-blend-mode: overlay;
-    }
-    @keyframes ripple {
-      to { width: 320px; height: 320px; opacity: 0; }
+      opacity: 0.6;
     }
 
-    /* Footer hint */
-    .hint {
-      margin-top: 1.4rem;
-      font-size: .9rem;
+    .vote-info {
+      text-align: center;
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
       color: rgba(232,233,255,0.75);
-    }
-
-    /* Accessible focus */
-    .fancy:focus-visible{
-      outline: 3px solid color-mix(in oklab, var(--ring) 85%, #fff 10%);
-      outline-offset: 3px;
-    }
-
-    /* Respect reduced motion */
-    @media (prefers-reduced-motion: reduce) {
-      .halo, .orb, .card::after, .fancy::before, .fancy .shine { animation: none !important; }
-      .fancy, .fancy:hover, .fancy:active { transition: none !important; transform: none !important; }
     }
   </style>
 </head>
 <body>
-  <div class="halo" aria-hidden="true"></div>
-  <div class="orb one" aria-hidden="true"></div>
-  <div class="orb two" aria-hidden="true"></div>
 
-  <main class="wrap">
-    <section class="card" aria-label="Choose UI version">
-      <div class="title">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 16l7-12 3 6 6 3-12 7-1-4z" stroke="url(#g)" stroke-width="1.5" fill="none"/>
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="24" y2="24">
-              <stop offset="0" stop-color="#7aa1ff"/>
-              <stop offset="1" stop-color="#ff7ad9"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <h1>Photoshop‑esque app — UI versions</h1>
-      </div>
-      <p class="subtitle">Pick a layout style. Each link opens a different UI type with its own look and feel.</p>
+  <div class="card">
+    <h1>Photoshop-esque UI Versions</h1>
+    <p class="subtitle">Pick one and cast your vote (only once).</p>
 
-      <div class="btns">
-        <a class="fancy type1" href="type1" data-badge="Layers-first">
-          <span class="shine" aria-hidden="true"></span>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="label">Type 1</span>
-          <span class="badge" aria-hidden="true">Layers-first</span>
+    <div class="btns">
+      <div>
+        <a href="type1" class="fancy type1" data-type="type1">
+          <span class="shine"></span>
+          Type 1
         </a>
-
-        <a class="fancy type2" href="type2" data-badge="Toolbar-left">
-          <span class="shine" aria-hidden="true"></span>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="label">Type 2</span>
-          <span class="badge" aria-hidden="true">Toolbar-left</span>
-        </a>
-
-        <a class="fancy type3" href="type3" data-badge="Minimal">
-          <span class="shine" aria-hidden="true"></span>
-          <span class="dot" aria-hidden="true"></span>
-          <span class="label">Type 3</span>
-          <span class="badge" aria-hidden="true">Minimal</span>
-        </a>
+        <div class="vote-info">
+          Votes: <span id="count-type1">0</span>
+        </div>
       </div>
 
-      <p class="hint">Pro tip: hover for glow — click for ripple.</p>
-    </section>
-  </main>
+      <div>
+        <a href="type2" class="fancy type2" data-type="type2">
+          <span class="shine"></span>
+          Type 2
+        </a>
+        <div class="vote-info">
+          Votes: <span id="count-type2">0</span>
+        </div>
+      </div>
+
+      <div>
+        <a href="type3" class="fancy type3" data-type="type3">
+          <span class="shine"></span>
+          Type 3
+        </a>
+        <div class="vote-info">
+          Votes: <span id="count-type3">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script>
-    // Click ripple effect on buttons
-    document.querySelectorAll('.fancy').forEach(btn => {
-      btn.addEventListener('click', e => {
-        const r = document.createElement('span');
-        r.className = 'ripple';
-        const rect = btn.getBoundingClientRect();
-        r.style.left = (e.clientX - rect.left) + 'px';
-        r.style.top  = (e.clientY - rect.top)  + 'px';
-        btn.appendChild(r);
-        r.addEventListener('animationend', () => r.remove());
+    document.addEventListener('DOMContentLoaded', () => {
+      const types = ['type1','type2','type3'];
+      types.forEach(t => {
+        if (localStorage.getItem('count-' + t) === null) {
+          localStorage.setItem('count-' + t, '0');
+        }
+        document.getElementById('count-' + t).textContent =
+          localStorage.getItem('count-' + t);
+      });
+
+      const userVote = localStorage.getItem('voted');
+      if (userVote) {
+        document.querySelectorAll('.fancy').forEach(btn => {
+          btn.classList.add('disabled');
+        });
+      }
+
+      document.querySelectorAll('.fancy').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const choice = btn.dataset.type;
+          if (localStorage.getItem('voted')) return;
+          const key = 'count-' + choice;
+          const newCount = parseInt(localStorage.getItem(key), 10) + 1;
+          localStorage.setItem(key, newCount);
+          localStorage.setItem('voted', choice);
+          // Update UI immediately
+          document.getElementById(key).textContent = newCount;
+          document.querySelectorAll('.fancy').forEach(b => b.classList.add('disabled'));
+          // allow normal link navigation to continue
+        });
       });
     });
   </script>
+
 </body>
 </html>
