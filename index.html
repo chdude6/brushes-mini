@@ -1,372 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Photoshop-esque UI Versions & Voting</title>
-  <style>
-    :root {
-      --bg1: #0f1020; --bg2: #1a1c3b; --bg3: #121225;
-      --text: #e8e9ff;
-      --accent1: #6a8dff; --accent2: #7bffd7; --accent3: #ff7ad9;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font: 16px/1.5 "Inter", system-ui, sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(1200px 800px at 20% 10%, #232557 0%, rgba(18,18,37,0) 60%),
-        radial-gradient(900px 700px at 80% 90%, #2a1a46 0%, rgba(18,18,37,0) 55%),
-        linear-gradient(135deg, var(--bg1), var(--bg2) 50%, var(--bg3));
-      overflow-x: hidden;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brushes - The Future of Photo Editing</title>
+    <meta name="description" content="Brushes is a powerful, intuitive, and free photo editor for creatives. Featuring advanced brushes, layers, effects, and more.">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    /* animated halo */
-    .halo {
-      position: fixed; inset: -30vmax;
-      background: conic-gradient(from 0deg,
-        rgba(255,255,255,0.02),
-        rgba(255,255,255,0) 35%,
-        rgba(255,255,255,0.02) 70%,
-        rgba(255,255,255,0) 100%);
-      filter: blur(60px);
-      animation: spin 40s linear infinite;
-      opacity: 0.6; pointer-events: none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* floating orbs */
-    .orb {
-      position: absolute;
-      width: clamp(200px,25vw,420px);
-      height: clamp(200px,25vw,420px);
-      border-radius: 50%; filter: blur(40px);
-      opacity: 0.18; mix-blend-mode: screen;
-      animation: float 14s ease-in-out infinite alternate;
-    }
-    .orb.one {
-      top: 10%; left: -5%;
-      background: radial-gradient(circle at 30% 30%, #6f7dff, transparent 55%);
-      animation-duration: 13s;
-    }
-    .orb.two {
-      bottom: -10%; right: -5%;
-      background: radial-gradient(circle at 60% 60%, #ff77c8, transparent 60%);
-      animation-duration: 16s;
-    }
-    @keyframes float {
-      0%   { transform: translateY(-20px) translateX(0); }
-      100% { transform: translateY(30px) translateX(10px); }
-    }
-
-    /* glassy card */
-    .wrap {
-      display: grid; place-items: center;
-      min-height: 100%; padding: 4rem 1rem;
-      position: relative; z-index: 1;
-    }
-    .card {
-      width: min(900px, 92vw);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 20px;
-      box-shadow:
-        0 10px 40px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.06);
-      backdrop-filter: blur(14px);
-      padding: 2.2rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .card::after {
-      content: "";
-      position: absolute; inset: -1px;
-      background: linear-gradient(120deg,
-        rgba(255,255,255,0) 40%,
-        rgba(255,255,255,0.05) 50%,
-        rgba(255,255,255,0) 60%);
-      transform: translateX(-100%);
-      animation: sweep 6s ease-in-out infinite;
-      pointer-events: none;
-    }
-    @keyframes sweep {
-      0%,10%   { transform: translateX(-120%); }
-      45%,55%  { transform: translateX(0); }
-      90%,100% { transform: translateX(120%); }
-    }
-
-    /* headings */
-    .title {
-      display: flex; align-items: center; gap: .75rem;
-      margin-bottom: .5rem;
-    }
-    .title h1 {
-      margin: 0;
-      font-size: clamp(1.6rem,3vw,2.2rem);
-      font-weight: 700;
-      text-shadow: 0 2px 18px rgba(122,161,255,0.25);
-    }
-    .subtitle {
-      margin: .2rem 0 1.8rem;
-      color: rgba(232,233,255,0.85);
-      font-size: .98rem;
-    }
-
-    /* button grid */
-    .btns {
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 1rem;
-    }
-    @media (max-width: 720px) {
-      .btns { grid-template-columns: 1fr; }
-    }
-
-    /* fancy button base */
-    .fancy {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.05rem 1.2rem;
-      border-radius: 14px;
-      text-decoration: none;
-      color: #0b0c1a;
-      font-weight: 700;
-      letter-spacing: .25px;
-      background: linear-gradient(135deg,
-        #cfd8ff 0%, #ffffff 35%, #e9fffb 70%, #ffe6f7 100%);
-      border: 1px solid rgba(255,255,255,0.6);
-      box-shadow:
-        0 8px 24px rgba(0,0,0,0.3),
-        0 0 0 2px rgba(255,255,255,0.06) inset;
-      transition: transform .2s ease,
-                  box-shadow .2s ease,
-                  background-position .4s ease;
-      background-size: 180% 180%;
-      overflow: hidden;
-    }
-
-    /* per-type accent */
-    .fancy.type1 { --ring: var(--accent1); }
-    .fancy.type2 { --ring: var(--accent2); }
-    .fancy.type3 { --ring: var(--accent3); }
-
-    /* glowing ring */
-    .fancy::before {
-      content: "";
-      position: absolute; inset: -2px;
-      padding: 2px; border-radius: inherit;
-      background: conic-gradient(from 0deg,
-        transparent, var(--ring), transparent 30%);
-      -webkit-mask:
-        linear-gradient(#000 0 0) content-box,
-        linear-gradient(#000 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      filter: blur(6px) saturate(1.3);
-      animation: rotate 8s linear infinite;
-      z-index: -1;
-    }
-    @keyframes rotate { to { transform: rotate(360deg); } }
-
-    /* shimmer */
-    .shine {
-      position: absolute; inset: 0;
-      background: linear-gradient(120deg,
-        transparent 35%, rgba(255,255,255,0.35) 50%, transparent 65%);
-      transform: translateX(-120%);
-      animation: shine 3.5s ease-in-out infinite;
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-    @keyframes shine {
-      0%,25%   { transform: translateX(-130%); }
-      60%,75%  { transform: translateX(130%); }
-      100%     { transform: translateX(130%); }
-    }
-
-    /* hover & active */
-    .fancy:hover {
-      transform: translateY(-3px) scale(1.02);
-      box-shadow:
-        0 14px 35px rgba(0,0,0,0.45),
-        0 0 0 2px rgba(255,255,255,0.08) inset,
-        0 0 24px 2px color-mix(in oklab, var(--ring) 70%, transparent);
-      background-position: 100% 0;
-    }
-    .fancy:active {
-      transform: translateY(0);
-      box-shadow:
-        0 8px 22px rgba(0,0,0,0.4),
-        0 0 0 2px rgba(255,255,255,0.1) inset;
-    }
-
-    /* disables voting but not navigation */
-    .fancy.voted {
-      opacity: 0.8;
-      cursor: pointer;
-    }
-
-    /* ripple effect */
-    .ripple {
-      position: absolute; border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none;
-      background: radial-gradient(circle,
-        rgba(255,255,255,0.75) 0%,
-        rgba(255,255,255,0) 60%);
-      width: 10px; height: 10px;
-      animation: ripple .6s ease-out forwards;
-      mix-blend-mode: overlay;
-    }
-    @keyframes ripple {
-      to { width: 320px; height: 320px; opacity: 0; }
-    }
-
-    /* vote count text */
-    .vote-count {
-      margin-top: .4rem;
-      font-size: .9rem;
-      color: rgba(232,233,255,0.75);
-      text-align: center;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .halo, .orb, .card::after,
-      .fancy::before, .shine {
-        animation: none !important;
-      }
-      .fancy, .fancy:hover, .fancy:active {
-        transition: none !important;
-        transform: none !important;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="halo" aria-hidden="true"></div>
-  <div class="orb one" aria-hidden="true"></div>
-  <div class="orb two" aria-hidden="true"></div>
-
-  <div class="wrap">
-    <section class="card" aria-label="Choose UI version">
-      <div class="title">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M4 16l7-12 3 6 6 3-12 7-1-4z" stroke="url(#g)" stroke-width="1.5" fill="none"/>
-          <defs>
-            <linearGradient id="g" x1="0" y1="0" x2="24" y2="24">
-              <stop offset="0" stop-color="#7aa1ff"/>
-              <stop offset="1" stop-color="#ff7ad9"/>
-            </linearGradient>
-          </defs>
-        </svg>
-        <h1>Photoshop-esque UI Versions</h1>
-      </div>
-      <p class="subtitle">Select your favorite layout and vote once. You can still preview any version at any time.</p>
-
-      <div class="btns">
-        <div>
-          <a href="type1" class="fancy type1" data-type="type1">
-            <span class="shine" aria-hidden="true"></span>
-            <svg class="dot" width="12" height="12" aria-hidden="true">
-              <circle cx="6" cy="6" r="6" fill="url(#dot1)"/>
-              <defs>
-                <radialGradient id="dot1">
-                  <stop offset="0%" stop-color="#fff"/>
-                  <stop offset="100%" stop-color="var(--accent1)"/>
-                </radialGradient>
-              </defs>
-            </svg>
-            Type 1
-          </a>
-          <p class="vote-count">Votes: <span id="count-type1">0</span></p>
-        </div>
-
-        <div>
-          <a href="type2" class="fancy type2" data-type="type2">
-            <span class="shine" aria-hidden="true"></span>
-            <svg class="dot" width="12" height="12" aria-hidden="true">
-              <circle cx="6" cy="6" r="6" fill="url(#dot2)"/>
-              <defs>
-                <radialGradient id="dot2">
-                  <stop offset="0%" stop-color="#fff"/>
-                  <stop offset="100%" stop-color="var(--accent2)"/>
-                </radialGradient>
-              </defs>
-            </svg>
-            Type 2
-          </a>
-          <p class="vote-count">Votes: <span id="count-type2">0</span></p>
-        </div>
-
-        <div>
-          <a href="type3" class="fancy type3" data-type="type3">
-            <span class="shine" aria-hidden="true"></span>
-            <svg class="dot" width="12" height="12" aria-hidden="true">
-              <circle cx="6" cy="6" r="6" fill="url(#dot3)"/>
-              <defs>
-                <radialGradient id="dot3">
-                  <stop offset="0%" stop-color="#fff"/>
-                  <stop offset="100%" stop-color="var(--accent3)"/>
-                </radialGradient>
-              </defs>
-            </svg>
-            Type 3
-          </a>
-          <p class="vote-count">Votes: <span id="count-type3">0</span></p>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <script>
-    // initialize counts from localStorage
-    const types = ['type1','type2','type3'];
-    types.forEach(t => {
-      if (!localStorage.getItem('count-' + t)) {
-        localStorage.setItem('count-' + t, '0');
-      }
-      document.getElementById('count-' + t).textContent =
-        localStorage.getItem('count-' + t);
-    });
-
-    const hasVoted = !!localStorage.getItem('voted');
-    if (hasVoted) {
-      document.querySelectorAll('.fancy').forEach(btn => {
-        btn.classList.add('voted');
-      });
-    }
-
-    // attach ripple + vote logic
-    document.querySelectorAll('.fancy').forEach(btn => {
-      btn.addEventListener('click', e => {
-        const choice = btn.dataset.type;
-        // if not voted yet, count this vote
-        if (!localStorage.getItem('voted')) {
-          const key = 'count-' + choice;
-          const newCount = parseInt(localStorage.getItem(key), 10) + 1;
-          localStorage.setItem(key, newCount);
-          localStorage.setItem('voted', choice);
-          document.getElementById(key).textContent = newCount;
-          // mark all as voted
-          document.querySelectorAll('.fancy').forEach(b => {
-            b.classList.add('voted');
-          });
+    <!-- Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a1a1a; /* Dark background */
+            color: #f0f0f0; /* Light text */
         }
-        // ripple effect
-        const r = document.createElement('span');
-        r.className = 'ripple';
-        const rect = btn.getBoundingClientRect();
-        r.style.left = (e.clientX - rect.left) + 'px';
-        r.style.top  = (e.clientY - rect.top)  + 'px';
-        btn.appendChild(r);
-        r.addEventListener('animationend', () => r.remove());
-        // allow link navigation to continue
-      });
-    });
-  </script>
+
+        /* Custom gradient for hero section */
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 30%, rgba(255, 107, 53, 0.1), transparent 40%);
+        }
+
+        /* Custom styling for the primary call-to-action button */
+        .cta-button {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.6);
+        }
+        
+        /* Animation for feature cards */
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- App Container -->
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="py-4 px-4 sm:px-6 lg:px-8">
+            <nav class="flex justify-between items-center">
+                <div class="text-2xl font-bold text-orange-500">Brushes</div>
+                <div>
+                    <a href="type2.html" class="bg-orange-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-orange-700 transition-colors">Launch Editor</a>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Hero Section -->
+            <section class="text-center py-20 lg:py-32 hero-gradient">
+                <div class="container mx-auto px-4">
+                    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
+                        Unleash Your Creativity.
+                        <br>
+                        <span class="text-orange-500">Pixel by Pixel.</span>
+                    </h1>
+                    <p class="text-lg md:text-xl max-w-2xl mx-auto text-gray-300 mb-8">
+                        Brushes is a powerful and intuitive photo editor packed with professional tools to bring your ideas to life. Free, web-based, and ready when you are.
+                    </p>
+                    <a href="type2.html" class="cta-button inline-block bg-orange-600 text-white font-bold text-lg py-4 px-8 rounded-full">
+                        Start Editing Now
+                    </a>
+                    
+                    <!-- Editor Preview Image -->
+                    <div class="mt-16 max-w-4xl mx-auto">
+                        <div class="bg-gray-800 rounded-xl p-2 shadow-2xl">
+                             <img src="https://placehold.co/1200x750/2b2b2b/f0f0f0?text=Brushes+Editor+UI" alt="Brushes Photo Editor Interface" class="rounded-lg">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="py-20 bg-gray-900">
+                <div class="container mx-auto px-4">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl lg:text-4xl font-bold">Everything You Need, Nothing You Don't</h2>
+                        <p class="text-gray-400 mt-2 max-w-xl mx-auto">A full suite of professional-grade tools at your fingertips.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <!-- Feature 1: Advanced Brushes -->
+                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+                            <div class="text-4xl mb-4 text-orange-500">🖌️</div>
+                            <h3 class="text-xl font-semibold mb-2">Advanced Brushes</h3>
+                            <p class="text-gray-400">Customizable brushes with size, hardness, opacity, and flow controls for precise edits.</p>
+                        </div>
+                        <!-- Feature 2: Layer Management -->
+                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+                            <div class="text-4xl mb-4 text-orange-500">겹</div>
+                            <h3 class="text-xl font-semibold mb-2">Layer Management</h3>
+                            <p class="text-gray-400">Work non-destructively with layers, blend modes, and opacity controls, just like a desktop app.</p>
+                        </div>
+                        <!-- Feature 3: Powerful Effects -->
+                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+                            <div class="text-4xl mb-4 text-orange-500">✨</div>
+                            <h3 class="text-xl font-semibold mb-2">Powerful Effects</h3>
+                            <p class="text-gray-400">Apply a range of filters and effects, from blurs and sketches to noise reduction.</p>
+                        </div>
+                        <!-- Feature 4: Intuitive Interface -->
+                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+                            <div class="text-4xl mb-4 text-orange-500">🖱️</div>
+                            <h3 class="text-xl font-semibold mb-2">Intuitive Interface</h3>
+                            <p class="text-gray-400">A clean, organized workspace inspired by professional desktop editors.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Testimonials Section -->
+            <section class="py-20">
+                <div class="container mx-auto px-4">
+                     <div class="text-center mb-12">
+                        <h2 class="text-3xl lg:text-4xl font-bold">Loved by Creatives Everywhere</h2>
+                    </div>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <div class="bg-gray-800 p-8 rounded-lg">
+                            <p class="text-gray-300 mb-4">"Brushes has become my go-to for quick edits and even more complex projects. It's amazing that this runs in a browser!"</p>
+                            <div class="font-semibold">- Alex Johnson, Photographer</div>
+                        </div>
+                         <div class="bg-gray-800 p-8 rounded-lg">
+                            <p class="text-gray-300 mb-4">"The layer management and brush tools are top-notch. I can do almost everything I used to do in Photoshop, but for free."</p>
+                            <div class="font-semibold">- Samantha Lee, Digital Artist</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Final CTA -->
+            <section class="py-20">
+                <div class="container mx-auto px-4 text-center">
+                    <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Create Something Amazing?</h2>
+                    <p class="text-gray-300 max-w-xl mx-auto mb-8">Click the button below to launch the editor and start your next project. No sign-up required.</p>
+                    <a href="type2.html" class="cta-button inline-block bg-orange-600 text-white font-bold text-lg py-4 px-8 rounded-full">
+                        Launch the Free Editor
+                    </a>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-gray-900 border-t border-gray-800 py-6">
+            <div class="container mx-auto px-4 text-center text-gray-400">
+                <p>&copy; 2025 Brushes. All Rights Reserved.</p>
+            </div>
+        </footer>
+    </div>
 </body>
 </html>
-```
