@@ -1167,38 +1167,79 @@
                 }
             }
 
-            handleHealing(point) {
+             handleHealing(point) {
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
                 const size = this.state.brushSettings.size;
                 
-                const x = Math.max(0, point.x - size);
-                const y = Math.max(0, point.y - size);
-                const width = Math.min(size * 2, ctx.canvas.width - x);
-                const height = Math.min(size * 2, ctx.canvas.height - y);
-                
-                if (width <= 0 || height <= 0) return;
-                
-                const imageData = ctx.getImageData(x, y, width, height);
-                let r = 0, g = 0, b = 0, count = 0;
-                
-                for (let i = 0; i < imageData.data.length; i += 4) {
-                    r += imageData.data[i];
-                    g += imageData.data[i + 1];
-                    b += imageData.data[i + 2];
-                    count++;
+                // Set healing source if not already set
+                if (!this.healingSource && !this.altKeyPressed) {
+                    this.healingSource = point;
+                    this.showToast('Healing source set. Hold Alt and click to set new source.');
+                    return;
                 }
                 
-                if (count > 0) {
-                    const avgR = Math.floor(r / count);
-                    const avgG = Math.floor(g / count);
-                    const avgB = Math.floor(b / count);
+                // Allow setting new source with Alt+click
+                if (this.altKeyPressed) {
+                    this.healingSource = point;
+                    this.showToast('New healing source set');
+                    return;
+                }
+                
+                if (!this.healingSource) return;
+                
+                // Calculate offset from source
+                const offsetX = point.x - this.healingSource.x;
+                const offsetY = point.y - this.healingSource.y;
+                
+                // Sample from source area around the healing source point
+                const sampleRadius = size;
+                const sampleX = Math.max(0, Math.min(ctx.canvas.width - sampleRadius, this.healingSource.x - sampleRadius/2));
+                const sampleY = Math.max(0, Math.min(ctx.canvas.height - sampleRadius, this.healingSource.y - sampleRadius/2));
+                
+                try {
+                    const sourceData = ctx.getImageData(sampleX, sampleY, sampleRadius, sampleRadius);
                     
-                    ctx.fillStyle = `rgb(${avgR}, ${avgG}, ${avgB})`;
+                    // Create a temporary canvas for blending
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = size;
+                    tempCanvas.height = size;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Draw the source data
+                    tempCtx.putImageData(sourceData, 0, 0);
+                    
+                    // Apply healing with soft edges
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
                     ctx.globalAlpha = this.state.brushSettings.opacity / 100;
-                    ctx.beginPath();
-                    ctx.arc(point.x, point.y, size / 2, 0, Math.PI * 2);
-                    ctx.fill();
+                    
+                    // Create circular mask for soft healing
+                    const gradient = ctx.createRadialGradient(
+                        point.x, point.y, 0,
+                        point.x, point.y, size / 2
+                    );
+                    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+                    gradient.addColorStop(0.7, 'rgba(255,255,255,0.8)');
+                    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                    
+                    // Create mask
+                    const maskCanvas = document.createElement('canvas');
+                    maskCanvas.width = size;
+                    maskCanvas.height = size;
+                    const maskCtx = maskCanvas.getContext('2d');
+                    maskCtx.fillStyle = gradient;
+                    maskCtx.fillRect(0, 0, size, size);
+                    
+                    // Apply the healing with mask
+                    ctx.drawImage(tempCanvas, point.x - size/2, point.y - size/2);
+                    ctx.globalCompositeOperation = 'destination-in';
+                    ctx.drawImage(maskCanvas, point.x - size/2, point.y - size/2);
+                    
+                    ctx.restore();
+                    
+                } catch (e) {
+                    this.showToast('Cannot heal from this area', 'error');
                 }
             }
 
