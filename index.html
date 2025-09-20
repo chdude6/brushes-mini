@@ -1,167 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brushes - The Future of Photo Editing</title>
-    <meta name="description" content="Brushes is a powerful, intuitive, and free photo editor for creatives. Featuring advanced brushes, layers, effects, and more.">
-    
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brushes - The Future of Photo Editing</title>
+  <meta name="description" content="Brushes is a powerful, intuitive, and free photo editor for creatives. Featuring advanced brushes, layers, effects, and more.">
 
-    <!-- Custom Styles -->
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a; /* Dark background */
-            color: #f0f0f0; /* Light text */
-        }
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-        /* Custom gradient for hero section */
-        .hero-gradient {
-            background: radial-gradient(circle at 50% 30%, rgba(255, 107, 53, 0.1), transparent 40%);
-        }
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-        /* Custom styling for the primary call-to-action button */
-        .cta-button {
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 30px rgba(255, 107, 53, 0.6);
-        }
-        
-        /* Animation for feature cards */
-        .feature-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+  <!-- Custom Styles -->
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #1a1a1a;
+      color: #f0f0f0;
+    }
+    .hero-gradient {
+      background: radial-gradient(circle at 50% 30%, rgba(255, 107, 53, 0.15), transparent 50%);
+    }
+    .cta-button {
+      transition: all 0.3s ease;
+      box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+    }
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(255, 107, 53, 0.6);
+    }
+    .feature-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+    }
+  </style>
 </head>
 <body class="antialiased">
 
-    <!-- App Container -->
-    <div class="min-h-screen">
-        <!-- Header -->
-        <header class="py-4 px-4 sm:px-6 lg:px-8">
-            <nav class="flex justify-between items-center">
-                <div class="text-2xl font-bold text-orange-500">Brushes</div>
-                <div>
-                    <a href="type2.html" class="bg-orange-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-orange-700 transition-colors">Launch Editor</a>
-                </div>
-            </nav>
-        </header>
+  <div class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="py-4 px-6 lg:px-12">
+      <nav class="flex justify-between items-center">
+        <div class="text-2xl font-extrabold text-orange-500 tracking-tight">Brushes</div>
+        <div class="space-x-4">
+          <a href="#features" class="text-gray-300 hover:text-white transition">Features</a>
+          <a href="#opensource" class="text-gray-300 hover:text-white transition">Open Source</a>
+          <a href="type2.html" class="bg-orange-600 text-white font-semibold py-2 px-5 rounded-lg hover:bg-orange-700 transition-colors">Launch Editor</a>
+        </div>
+      </nav>
+    </header>
 
-        <!-- Main Content -->
-        <main>
-            <!-- Hero Section -->
-            <section class="text-center py-20 lg:py-32 hero-gradient">
-                <div class="container mx-auto px-4">
-                    <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
-                        Unleash Your Creativity.
-                        <br>
-                        <span class="text-orange-500">Pixel by Pixel.</span>
-                    </h1>
-                    <p class="text-lg md:text-xl max-w-2xl mx-auto text-gray-300 mb-8">
-                        Brushes is a powerful and intuitive photo editor packed with professional tools to bring your ideas to life. Free, web-based, and ready when you are.
-                    </p>
-                    <a href="type2.html" class="cta-button inline-block bg-orange-600 text-white font-bold text-lg py-4 px-8 rounded-full">
-                        Start Editing Now
-                    </a>
-                    
-                    <!-- Editor Preview Image -->
-                    <div class="mt-16 max-w-4xl mx-auto">
-                        <div class="bg-gray-800 rounded-xl p-2 shadow-2xl">
-                             <img src="https://placehold.co/1200x750/2b2b2b/f0f0f0?text=Brushes+Editor+UI" alt="Brushes Photo Editor Interface" class="rounded-lg">
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Features Section -->
-            <section id="features" class="py-20 bg-gray-900">
-                <div class="container mx-auto px-4">
-                    <div class="text-center mb-12">
-                        <h2 class="text-3xl lg:text-4xl font-bold">Everything You Need, Nothing You Don't</h2>
-                        <p class="text-gray-400 mt-2 max-w-xl mx-auto">A full suite of professional-grade tools at your fingertips.</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        <!-- Feature 1: Advanced Brushes -->
-                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
-                            <div class="text-4xl mb-4 text-orange-500">🖌️</div>
-                            <h3 class="text-xl font-semibold mb-2">Advanced Brushes</h3>
-                            <p class="text-gray-400">Customizable brushes with size, hardness, opacity, and flow controls for precise edits.</p>
-                        </div>
-                        <!-- Feature 2: Layer Management -->
-                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
-                            <div class="text-4xl mb-4 text-orange-500">겹</div>
-                            <h3 class="text-xl font-semibold mb-2">Layer Management</h3>
-                            <p class="text-gray-400">Work non-destructively with layers, blend modes, and opacity controls, just like a desktop app.</p>
-                        </div>
-                        <!-- Feature 3: Powerful Effects -->
-                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
-                            <div class="text-4xl mb-4 text-orange-500">✨</div>
-                            <h3 class="text-xl font-semibold mb-2">Powerful Effects</h3>
-                            <p class="text-gray-400">Apply a range of filters and effects, from blurs and sketches to noise reduction.</p>
-                        </div>
-                        <!-- Feature 4: Intuitive Interface -->
-                        <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
-                            <div class="text-4xl mb-4 text-orange-500">🖱️</div>
-                            <h3 class="text-xl font-semibold mb-2">Intuitive Interface</h3>
-                            <p class="text-gray-400">A clean, organized workspace inspired by professional desktop editors.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- Testimonials Section -->
-            <section class="py-20">
-                <div class="container mx-auto px-4">
-                     <div class="text-center mb-12">
-                        <h2 class="text-3xl lg:text-4xl font-bold">Loved by Creatives Everywhere</h2>
-                    </div>
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                        <div class="bg-gray-800 p-8 rounded-lg">
-                            <p class="text-gray-300 mb-4">"Brushes has become my go-to for quick edits and even more complex projects. It's amazing that this runs in a browser!"</p>
-                            <div class="font-semibold">- Alex Johnson, Photographer</div>
-                        </div>
-                         <div class="bg-gray-800 p-8 rounded-lg">
-                            <p class="text-gray-300 mb-4">"The layer management and brush tools are top-notch. I can do almost everything I used to do in Photoshop, but for free."</p>
-                            <div class="font-semibold">- Samantha Lee, Digital Artist</div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-            
-            <!-- Final CTA -->
-            <section class="py-20">
-                <div class="container mx-auto px-4 text-center">
-                    <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Create Something Amazing?</h2>
-                    <p class="text-gray-300 max-w-xl mx-auto mb-8">Click the button below to launch the editor and start your next project. No sign-up required.</p>
-                    <a href="type2.html" class="cta-button inline-block bg-orange-600 text-white font-bold text-lg py-4 px-8 rounded-full">
-                        Launch the Free Editor
-                    </a>
-                </div>
-            </section>
-        </main>
-        
-        <!-- Footer -->
-        <footer class="bg-gray-900 border-t border-gray-800 py-6">
-            <div class="container mx-auto px-4 text-center text-gray-400">
-                <p>&copy; 2025 Brushes. All Rights Reserved.</p>
+    <!-- Main -->
+    <main class="flex-grow">
+      <!-- Hero -->
+      <section class="text-center py-20 lg:py-32 hero-gradient">
+        <div class="container mx-auto px-4">
+          <span class="inline-block bg-green-600 text-white text-sm font-semibold px-4 py-1 rounded-full mb-6 shadow-md">🌍 100% Open Source</span>
+          <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">
+            Unleash Your Creativity.<br>
+            <span class="text-orange-500">Pixel by Pixel.</span>
+          </h1>
+          <p class="text-lg md:text-xl max-w-2xl mx-auto text-gray-300 mb-8">
+            Brushes is a powerful and intuitive photo editor packed with professional tools to bring your ideas to life. Free, web-based, and open source.
+          </p>
+          <a href="type2.html" class="cta-button inline-block bg-orange-600 text-white font-bold text-lg py-4 px-8 rounded-full">
+            Start Editing Now
+          </a>
+          <div class="mt-16 max-w-4xl mx-auto">
+            <div class="bg-gray-800 rounded-xl p-2 shadow-2xl">
+              <img src="https://placehold.co/1200x750/2b2b2b/f0f0f0?text=Brushes+Editor+UI" alt="Brushes Photo Editor Interface" class="rounded-lg">
             </div>
-        </footer>
-    </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section id="features" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-bold">Everything You Need, Nothing You Don’t</h2>
+            <p class="text-gray-400 mt-2 max-w-xl mx-auto">A full suite of professional-grade tools at your fingertips.</p>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+              <div class="text-4xl mb-4 text-orange-500">🖌️</div>
+              <h3 class="text-xl font-semibold mb-2">Advanced Brushes</h3>
+              <p class="text-gray-400">Customizable brushes with size, hardness, opacity, and flow controls for precise edits.</p>
+            </div>
+            <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+              <div class="text-4xl mb-4 text-orange-500">📑</div>
+              <h3 class="text-xl font-semibold mb-2">Layer Management</h3>
+              <p class="text-gray-400">Work non-destructively with layers, blend modes, and opacity controls, just like a desktop app.</p>
+            </div>
+            <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+              <div class="text-4xl mb-4 text-orange-500">✨</div>
+              <h3 class="text-xl font-semibold mb-2">Powerful Effects</h3>
+              <p class="text-gray-400">Apply a range of filters and effects, from blurs and sketches to noise reduction.</p>
+            </div>
+            <div class="feature-card bg-gray-800 p-6 rounded-lg text-center">
+              <div class="text-4xl mb-4 text-orange-500">🖱️</div>
+              <h3 class="text-xl font-semibold mb-2">Intuitive Interface</h3>
+              <p class="text-gray-400">A clean, organized workspace inspired by professional desktop editors.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section class="py-20">
+        <div class="container mx-auto px-4">
+          <div class="text-center mb-12">
+            <h2 class="text-3xl lg:text-4xl font-bold">Loved by Creatives Everywhere</h2>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <div class="bg-gray-800 p-8 rounded-lg">
+              <p class="text-gray-300 mb-4">"Brushes has become my go-to for quick edits and even more complex projects. It's amazing that this runs in a browser!"</p>
+              <div class="font-semibold">- Alex Johnson, Photographer</div>
+            </div>
+            <div class="bg-gray-800 p-8 rounded-lg">
+              <p class="text-gray-300 mb-4">"The layer management and brush tools are top-notch. I can do almost everything I used to do in Photoshop, but for free."</p>
+              <div class="font-semibold">- Samantha Lee, Digital Artist</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Open Source Section -->
+      <section id="opensource" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4 text-center">
+          <h2 class="text-3xl lg:text-4xl font-bold mb-4">Proudly Open Source</h2>
+          <p class="text-gray-300 max-w-2xl mx-auto mb-8">
+            Brushes is built by the community, for the community. Explore the code, contribute new features, or fork it for your own projects.
+          </p>
+          <a href="https://github.com/your-repo-link" target="_blank" class="cta-button inline-block bg-green-600 text-white font-bold text-lg py-4 px-8 rounded-full">
+            View on GitHub
+          </a>
+        </div>
+      </section>
+
+      <!-- Final CTA -->
+      <section class="py-20">
+        <div class="container mx-auto px-4 text-center">
+          <h2 class="text-3xl lg:text-4xl font-bold mb-4">Ready to Create Something Amazing?</h2>
+          <p class="text-gray-300 max-w-xl mx-auto mb-8">
+            Launch the editor now and start your next masterpiece. No sign-up, no paywalls — just pure creativity.
+          </p>
+          <a href="type2.html" class="cta-button inline-block bg-orange-600 text-white font-bold text-lg py-4 px-8 rounded-full">
+            Launch the Free Editor
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 border-t border-gray-800 py-8">
+      <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center text-gray-400">
+        <p class="mb-4 md:mb-0">&copy; 2025 Brushes. Built with ❤️ by the open source community.</p>
+        <div class="flex space-x-6">
+          <a href="https://github.com/ilovelasagne/brushes" target="_blank" class="hover:text-white transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current" viewBox="0 0 24 24">
+              <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.3.8-.6v-2.1c-3.2.7-3.9-1.5-3.9-1.5-.5-1.2-1.2-1.6-1.2-1.6-1-.7.1-.7.1-.7 1.1.1 1.7 1.1 1.7 1.1 1 .1.6 1.9 2.9 1.3.1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.4 1.2-3.3-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.4 1.2a11.7 11.7 0 0 1 6.2 0c2.4-1.5 3.4-1.2 3.4-1.2.6 1.6.2 2.8.1 3.1.8.9 1.2 2 1.2 3.3 0 4.5-2.7 5.5-5.3 5.8.4.3.8 1 .8 2.1v3.1c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.65 18.35.5 12 .5z"/>
+            </svg>
+          </a>
+          <a href="#features" class="hover:text-white transition">Features</a>
+          <a href="#opensource" class="hover:text-white transition">Open Source</a>
+        </div>
+      </div>
+    </footer>
+  </div>
 </body>
 </html>
