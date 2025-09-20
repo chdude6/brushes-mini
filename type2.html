@@ -292,6 +292,8 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             border-radius: 4px;
             overflow: hidden;
+            transform-origin: top left;
+            will-change: transform;
         }
 
         #main-canvas {
@@ -299,6 +301,25 @@
             cursor: crosshair;
             display: block;
         }
+
+        /* Transform handles overlay style (drawn on canvas) */
+        .canvas-area.grabbing,
+        #main-canvas.grabbing {
+            cursor: grabbing !important;
+        }
+
+        /* Minimal button style for inline controls in properties panel */
+        .inline-btn {
+            padding: 6px 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .inline-btn:hover { background: var(--hover-color); }
 
         /* Right Panel - Layers */
         .right-panel {
@@ -549,6 +570,15 @@
                 <button class="tool-btn" onclick="editor.undo()" title="Undo">↶</button>
                 <button class="tool-btn" onclick="editor.redo()" title="Redo">↷</button>
             </div>
+            <div class="tool-group">
+                <button class="tool-btn" onclick="editor.insertImage()" title="Insert Image">🖼️</button>
+                <button class="tool-btn" onclick="editor.insertText()" title="Insert Text">🔤</button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn" onclick="editor.fitToScreen()" title="Fit to Screen">⤧</button>
+                <button class="tool-btn" onclick="editor.setZoom(1)" title="Actual Size (100%)">100%</button>
+                <button class="tool-btn" onclick="editor.toggleGrid()" title="Toggle Grid">#</button>
+            </div>
         </div>
 
         <!-- Main Workspace -->
@@ -560,7 +590,7 @@
                 <button class="toolbox-btn" data-tool="eraser" title="Eraser Tool (E)">🧹</button>
                 <button class="toolbox-btn" data-tool="select" title="Select Tool (M)">⬚</button>
                 <button class="toolbox-btn" data-tool="eyedropper" title="Eyedropper (I)">💧</button>
-                <button class="toolbox-btn" data-tool="move" title="Move Tool (V)">✋</button>
+                <button class="toolbox-btn" data-tool="transform" title="Transform Tool (V)">⤡</button>
                 <button class="toolbox-btn" data-tool="crop" title="Crop Tool (C)">✂️</button>
                 <button class="toolbox-btn" data-tool="clone" title="Clone Tool (S)">📋</button>
                 <button class="toolbox-btn" data-tool="healing" title="Healing Tool (J)">🩹</button>
@@ -568,6 +598,7 @@
                 <button class="toolbox-btn" data-tool="sharpen" title="Sharpen Tool">🎯</button>
                 <button class="toolbox-btn" data-tool="dodge" title="Dodge Tool (O)">☀️</button>
                 <button class="toolbox-btn" data-tool="burn" title="Burn Tool">🌙</button>
+                <button class="toolbox-btn" data-tool="text" title="Text Tool (T)">T</button>
             </div>
 
             <!-- Properties Panel -->
@@ -641,12 +672,37 @@
                         <option value="hard-light">Hard Light</option>
                     </select>
                 </div>
+
+                <!-- Object Properties -->
+                <div class="property-section" id="object-section">
+                    <div class="section-title">Object</div>
+                    <div id="object-info" style="font-size:11px; color: var(--text-secondary);">No object selected</div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="inline-btn" onclick="editor.bringForward()" title="Bring Forward">⬆️</button>
+                        <button class="inline-btn" onclick="editor.sendBackward()" title="Send Backward">⬇️</button>
+                        <button class="inline-btn" onclick="editor.duplicateSelected()" title="Duplicate">⧉</button>
+                        <button class="inline-btn" onclick="editor.deleteSelected()" title="Delete">🗑️</button>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="inline-btn" onclick="editor.flipSelected('h')" title="Flip Horizontal">⇋</button>
+                        <button class="inline-btn" onclick="editor.flipSelected('v')" title="Flip Vertical">⇵</button>
+                        <button class="inline-btn" onclick="editor.exportSelected()" title="Export Selection">📤</button>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center; margin-top:10px;">
+                        <label style="font-size:11px; color:var(--text-secondary);">Rotate</label>
+                        <input id="rotate-input" type="number" min="-180" max="180" value="0" style="flex:1; background:var(--bg-dark); color:var(--text-primary); border:1px solid var(--border-color); border-radius:4px; padding:4px; font-size:11px;"/>
+                        <label style="font-size:11px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                            <input id="snap-grid-toggle" type="checkbox"/> Snap
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Canvas Area -->
             <div class="canvas-area">
                 <div class="canvas-wrapper">
                     <canvas id="main-canvas" width="800" height="600"></canvas>
+                    <textarea id="text-editor" style="position:absolute; display:none; min-width:60px; min-height:24px; background: transparent; color:#000; border: 1px dashed var(--selection-color); outline: none; resize: none; padding: 2px; line-height:1.2;"></textarea>
                 </div>
             </div>
 
@@ -669,6 +725,9 @@
                     <div class="layer-controls">
                         <button class="layer-btn" onclick="editor.addLayer()">Add</button>
                         <button class="layer-btn" onclick="editor.duplicateLayer()">Duplicate</button>
+                        <button class="layer-btn" onclick="editor.moveLayerUp()">Up</button>
+                        <button class="layer-btn" onclick="editor.moveLayerDown()">Down</button>
+                        <button class="layer-btn" onclick="editor.toggleLayerLock()">Lock</button>
                         <button class="layer-btn" onclick="editor.deleteLayer()">Delete</button>
                     </div>
                 </div>
@@ -715,6 +774,9 @@
                 <button class="zoom-btn" onclick="editor.zoomOut()">-</button>
                 <span id="zoom-level">100%</span>
                 <button class="zoom-btn" onclick="editor.zoomIn()">+</button>
+                <button class="zoom-btn" onclick="editor.fitToScreen()" title="Fit">F</button>
+                <button class="zoom-btn" onclick="editor.setZoom(1)" title="100%">1:1</button>
+                <button class="zoom-btn" onclick="editor.toggleGrid()" title="Grid">#</button>
             </div>
         </div>
     </div>
@@ -743,13 +805,31 @@
                     history: [],
                     historyIndex: -1,
                     blendMode: 'source-over',
-                    clipboard: null
+                    clipboard: null,
+                    // Object system
+                    objects: [],
+                    activeObjectId: null,
+                    showGrid: false,
+                    snapToGrid: false,
+                    objectClipboard: null
                 };
 
                 this.canvas = document.getElementById('main-canvas');
                 this.ctx = this.canvas.getContext('2d');
+                this.textEditor = document.getElementById('text-editor');
+                this.canvasArea = document.querySelector('.canvas-area');
+                this.wrapper = document.querySelector('.canvas-wrapper');
                 this.isDrawing = false;
                 this.lastPoint = null;
+                this.isPanning = false;
+                this.isSpacePressed = false;
+                this.activeHandle = null;
+                this.draggingObject = false;
+                this.transformStart = null;
+
+                // Improve image quality when viewing
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
                 
                 this.initializeEditor();
             }
@@ -758,6 +838,7 @@
                 this.createInitialLayer();
                 this.initializeEventListeners();
                 this.initializeKeyboardShortcuts();
+                this.attachObjectUIControls();
                 this.updateUI();
                 this.updateLayersUI();
                 this.updateHistoryUI();
@@ -794,6 +875,15 @@
                 this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
                 this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
 
+                // Zoom at cursor with Ctrl/Cmd + wheel
+                this.canvasArea.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+                        this.setZoom(this.state.zoom * factor, { clientX: e.clientX, clientY: e.clientY });
+                    }
+                }, { passive: false });
+
                 // Tool selection
                 document.querySelectorAll('.toolbox-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -814,6 +904,35 @@
                 document.getElementById('blend-mode').addEventListener('change', (e) => {
                     this.state.blendMode = e.target.value;
                 });
+            }
+
+            attachObjectUIControls() {
+                const rotateInput = document.getElementById('rotate-input');
+                const snapToggle = document.getElementById('snap-grid-toggle');
+                if (rotateInput) {
+                    rotateInput.addEventListener('input', () => {
+                        const obj = this.getActiveObject();
+                        if (obj) {
+                            obj.rotation = (parseFloat(rotateInput.value) || 0) * Math.PI / 180;
+                            this.redrawCanvas();
+                            this.saveToHistory('Rotate Object');
+                        }
+                    });
+                }
+                if (snapToggle) {
+                    snapToggle.addEventListener('change', (e) => {
+                        this.state.snapToGrid = !!e.target.checked;
+                    });
+                }
+                if (this.textEditor) {
+                    this.textEditor.addEventListener('blur', () => this.commitTextEditor());
+                    this.textEditor.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.commitTextEditor();
+                        }
+                    });
+                }
             }
 
             setupSliderEvents() {
@@ -837,41 +956,75 @@
 
             initializeKeyboardShortcuts() {
                 document.addEventListener('keydown', (e) => {
+                    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+                    const isEditing = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
+                    if (isEditing) return;
                     if (e.ctrlKey || e.metaKey) {
                         switch (e.key.toLowerCase()) {
                             case 'z':
                                 e.preventDefault();
-                                if (e.shiftKey) {
-                                    this.redo();
-                                } else {
-                                    this.undo();
-                                }
+                                if (e.shiftKey) this.redo(); else this.undo();
                                 break;
-                            case 'n':
-                                e.preventDefault();
-                                this.newDocument();
+                            case 'n': e.preventDefault(); this.newDocument(); break;
+                            case 'o': e.preventDefault(); this.openFile(); break;
+                            case 's': e.preventDefault(); this.saveFile(); break;
+                            case 'c':
+                                if (this.getActiveObject()) { e.preventDefault(); this.copySelected(); }
                                 break;
-                            case 'o':
-                                e.preventDefault();
-                                this.openFile();
+                            case 'v':
+                                if (this.state.objectClipboard) { e.preventDefault(); this.pasteSelected(); }
                                 break;
-                            case 's':
-                                e.preventDefault();
-                                this.saveFile();
-                                break;
+                            case '+':
+                            case '=': e.preventDefault(); this.zoomIn(); break;
+                            case '-': e.preventDefault(); this.zoomOut(); break;
                         }
                     } else {
                         switch (e.key.toLowerCase()) {
                             case 'b': this.selectTool('brush'); break;
                             case 'e': this.selectTool('eraser'); break;
                             case 'i': this.selectTool('eyedropper'); break;
-                            case 'v': this.selectTool('move'); break;
+                            case 'v': this.selectTool('transform'); break;
                             case 'm': this.selectTool('select'); break;
                             case 'c': this.selectTool('crop'); break;
                             case 's': this.selectTool('clone'); break;
                             case 'j': this.selectTool('healing'); break;
                             case 'o': this.selectTool('dodge'); break;
+                            case 't': this.selectTool('text'); break;
+                            case 'g': this.toggleGrid(); break;
+                            case 'f': this.fitToScreen(); break;
+                            case 'delete':
+                            case 'backspace':
+                                if (this.getActiveObject()) { e.preventDefault(); this.deleteSelected(); }
+                                break;
+                            case 'arrowup':
+                            case 'arrowdown':
+                            case 'arrowleft':
+                            case 'arrowright':
+                                if (this.getActiveObject()) {
+                                    e.preventDefault();
+                                    const step = e.shiftKey ? 10 : 1;
+                                    this.nudgeSelected(e.key.toLowerCase(), step);
+                                }
+                                break;
+                            case ' ': // Space for panning
+                                if (!this.isSpacePressed) {
+                                    e.preventDefault();
+                                    this.isSpacePressed = true;
+                                    this.canvasArea.classList.add('grabbing');
+                                    this.canvas.classList.add('grabbing');
+                                }
+                                break;
                         }
+                    }
+                });
+                document.addEventListener('keyup', (e) => {
+                    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+                    const isEditing = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
+                    if (isEditing) return;
+                    if (e.key === ' ') {
+                        this.isSpacePressed = false;
+                        this.canvasArea.classList.remove('grabbing');
+                        this.canvas.classList.remove('grabbing');
                     }
                 });
             }
@@ -891,6 +1044,10 @@
                 // Update status
                 document.getElementById('tool-info').textContent = this.getToolDisplayName(tool);
                 this.updateCanvasCursor();
+                // Hide/commit any active text editor when switching tools
+                if (this.textEditor && this.textEditor.style.display !== 'none') {
+                    this.commitTextEditor();
+                }
                 this.showToast(`${this.getToolDisplayName(tool)} selected`);
             }
 
@@ -901,14 +1058,15 @@
                     'eraser': 'Eraser Tool',
                     'select': 'Select Tool',
                     'eyedropper': 'Eyedropper',
-                    'move': 'Move Tool',
+                    'transform': 'Transform Tool',
                     'crop': 'Crop Tool',
                     'clone': 'Clone Tool',
                     'healing': 'Healing Tool',
                     'blur': 'Blur Tool',
                     'sharpen': 'Sharpen Tool',
                     'dodge': 'Dodge Tool',
-                    'burn': 'Burn Tool'
+                    'burn': 'Burn Tool',
+                    'text': 'Text Tool'
                 };
                 return names[tool] || tool;
             }
@@ -920,14 +1078,15 @@
                     'eraser': 'crosshair',
                     'select': 'crosshair',
                     'eyedropper': 'crosshair',
-                    'move': 'move',
+                    'transform': 'default',
                     'crop': 'crosshair',
                     'clone': 'crosshair',
                     'healing': 'crosshair',
                     'blur': 'crosshair',
                     'sharpen': 'crosshair',
                     'dodge': 'crosshair',
-                    'burn': 'crosshair'
+                    'burn': 'crosshair',
+                    'text': 'text'
                 };
                 this.canvas.style.cursor = cursors[this.state.currentTool] || 'default';
             }
@@ -956,7 +1115,13 @@
                     return;
                 }
 
-                this.saveToHistory(`${this.getToolDisplayName(this.state.currentTool)} stroke`);
+                // Space-drag panning or middle-click
+                if (this.isSpacePressed || e.button === 1) {
+                    this.startPan(e);
+                    return;
+                }
+
+                this.saveToHistory(`${this.getToolDisplayName(this.state.currentTool)} action`);
 
                 switch (this.state.currentTool) {
                     case 'brush':
@@ -986,8 +1151,11 @@
                     case 'select':
                         this.startSelection(point);
                         break;
-                    case 'move':
-                        this.startMove(point);
+                    case 'transform':
+                        this.startTransform(point);
+                        break;
+                    case 'text':
+                        this.handleTextToolDown(point);
                         break;
                 }
 
@@ -995,6 +1163,7 @@
             }
 
             handleMouseMove(e) {
+                if (this.isPanning) { this.updatePan(e); return; }
                 if (!this.isDrawing) return;
 
                 const point = this.getMousePos(e);
@@ -1020,8 +1189,8 @@
                     case 'select':
                         this.updateSelection(point);
                         break;
-                    case 'move':
-                        this.updateMove(point);
+                    case 'transform':
+                        this.updateTransform(point);
                         break;
                 }
 
@@ -1030,6 +1199,7 @@
             }
 
             handleMouseUp() {
+                if (this.isPanning) { this.endPan(); return; }
                 if (this.isDrawing) {
                     this.finishStroke();
                     this.isDrawing = false;
@@ -1465,6 +1635,36 @@
                 this.showToast('Layer deleted');
             }
 
+            moveLayerUp() {
+                const idx = this.state.layers.findIndex(l => l.id === this.state.currentLayerId);
+                if (idx < 0 || idx === this.state.layers.length - 1) return;
+                const tmp = this.state.layers[idx];
+                this.state.layers[idx] = this.state.layers[idx + 1];
+                this.state.layers[idx + 1] = tmp;
+                this.updateLayersUI();
+                this.redrawCanvas();
+                this.saveToHistory('Move Layer Up');
+            }
+
+            moveLayerDown() {
+                const idx = this.state.layers.findIndex(l => l.id === this.state.currentLayerId);
+                if (idx <= 0) return;
+                const tmp = this.state.layers[idx];
+                this.state.layers[idx] = this.state.layers[idx - 1];
+                this.state.layers[idx - 1] = tmp;
+                this.updateLayersUI();
+                this.redrawCanvas();
+                this.saveToHistory('Move Layer Down');
+            }
+
+            toggleLayerLock() {
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer) return;
+                currentLayer.locked = !currentLayer.locked;
+                this.updateLayersUI();
+                this.showToast(currentLayer.locked ? 'Layer locked' : 'Layer unlocked');
+            }
+
             // Filter effects
             applyFilter(filterName) {
                 const currentLayer = this.getCurrentLayer();
@@ -1732,21 +1932,7 @@
                 this.showToast('Colors swapped');
             }
 
-            // Zoom operations
-            setZoom(zoom) {
-                this.state.zoom = Math.max(0.1, Math.min(10, zoom));
-                const wrapper = this.canvas.parentElement;
-                wrapper.style.transform = `scale(${this.state.zoom})`;
-                this.updateStatusBar();
-            }
-
-            zoomIn() {
-                this.setZoom(this.state.zoom + 0.1);
-            }
-
-            zoomOut() {
-                this.setZoom(this.state.zoom - 0.1);
-            }
+            // Zoom operations moved below with focal-point support
 
             // History management
             saveToHistory(action) {
@@ -1761,6 +1947,7 @@
                     action: action,
                     layerId: this.state.currentLayerId,
                     imageData: imageData,
+                    objects: this.cloneObjects(),
                     timestamp: Date.now()
                 });
 
@@ -1782,6 +1969,7 @@
                         const ctx = layer.canvas.getContext('2d');
                         ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
                         ctx.putImageData(historyEntry.imageData, 0, 0);
+                        if (historyEntry.objects) { this.restoreObjects(historyEntry.objects); }
                         this.redrawCanvas();
                         this.updateHistoryUI();
                         this.showToast(`Undo: ${historyEntry.action}`);
@@ -1801,6 +1989,7 @@
                         const ctx = layer.canvas.getContext('2d');
                         ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
                         ctx.putImageData(historyEntry.imageData, 0, 0);
+                        if (historyEntry.objects) { this.restoreObjects(historyEntry.objects); }
                         this.redrawCanvas();
                         this.updateHistoryUI();
                         this.showToast(`Redo: ${historyEntry.action}`);
@@ -1887,6 +2076,7 @@
                             const ctx = layer.canvas.getContext('2d');
                             ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
                             ctx.putImageData(entry.imageData, 0, 0);
+                            if (entry.objects) { this.restoreObjects(entry.objects); }
                             this.redrawCanvas();
                             this.updateHistoryUI();
                         }
@@ -1912,31 +2102,329 @@
             }
 
             redrawCanvas() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+                if (this.state.showGrid) this.drawGrid(ctx);
+
+                // Draw layers
                 this.state.layers.forEach(layer => {
                     if (layer.visible) {
-                        this.ctx.save();
-                        this.ctx.globalAlpha = layer.opacity / 100;
-                        this.ctx.globalCompositeOperation = this.getBlendMode(layer.blendMode);
-                        this.ctx.drawImage(layer.canvas, 0, 0);
-                        this.ctx.restore();
+                        ctx.save();
+                        ctx.globalAlpha = layer.opacity / 100;
+                        ctx.globalCompositeOperation = this.getBlendMode(layer.blendMode);
+                        ctx.drawImage(layer.canvas, 0, 0);
+                        ctx.restore();
                     }
                 });
 
+                // Draw objects
+                for (const obj of this.state.objects) {
+                    if (obj.visible === false) continue;
+                    this.drawObject(ctx, obj);
+                }
+
+                // Selection marquee
                 if (this.state.selection) {
-                    this.ctx.save();
-                    this.ctx.strokeStyle = '#000';
-                    this.ctx.setLineDash([5, 5]);
-                    this.ctx.strokeRect(
+                    ctx.save();
+                    ctx.strokeStyle = '#000';
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(
                         this.state.selection.x,
                         this.state.selection.y,
                         this.state.selection.width,
                         this.state.selection.height
                     );
-                    this.ctx.restore();
+                    ctx.restore();
+                }
+
+                // Active transform overlay
+                const active = this.getActiveObject();
+                if (active) this.drawTransformBox(ctx, active);
+            }
+
+            // ================= View helpers =================
+            toggleGrid() { this.state.showGrid = !this.state.showGrid; this.redrawCanvas(); }
+            drawGrid(ctx) {
+                const step = 32;
+                ctx.save();
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < this.canvas.width; x += step) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height); ctx.stroke();
+                }
+                for (let y = 0; y < this.canvas.height; y += step) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y); ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            setZoom(zoom, focal) {
+                const prevZoom = this.state.zoom;
+                this.state.zoom = Math.max(0.1, Math.min(10, zoom));
+                const wrapper = this.wrapper;
+                const area = this.canvasArea;
+                if (!wrapper || !area) return;
+
+                const rect = wrapper.getBoundingClientRect();
+                const areaRect = area.getBoundingClientRect();
+
+                let sx = area.scrollLeft; let sy = area.scrollTop;
+                let cx = 0; let cy = 0;
+                if (focal) {
+                    cx = focal.clientX - rect.left + area.scrollLeft - areaRect.left;
+                    cy = focal.clientY - rect.top + area.scrollTop - areaRect.top;
+                }
+
+                wrapper.style.transform = `scale(${this.state.zoom})`;
+                this.updateStatusBar();
+
+                if (focal) {
+                    const scale = this.state.zoom / prevZoom;
+                    area.scrollLeft = (sx + cx) * scale - cx;
+                    area.scrollTop  = (sy + cy) * scale - cy;
                 }
             }
+            zoomIn() { this.setZoom(this.state.zoom + 0.1); }
+            zoomOut() { this.setZoom(this.state.zoom - 0.1); }
+            fitToScreen() {
+                const area = this.canvasArea; const wrapper = this.wrapper;
+                if (!area || !wrapper) return;
+                const margin = 40;
+                const scaleX = (area.clientWidth - margin) / this.canvas.width;
+                const scaleY = (area.clientHeight - margin) / this.canvas.height;
+                this.setZoom(Math.max(0.1, Math.min(scaleX, scaleY)));
+            }
+            startPan(e) {
+                this.isPanning = true;
+                this.panStart = { x: e.clientX, y: e.clientY, sx: this.canvasArea.scrollLeft, sy: this.canvasArea.scrollTop };
+            }
+            updatePan(e) {
+                if (!this.isPanning) return;
+                const dx = this.panStart.x - e.clientX;
+                const dy = this.panStart.y - e.clientY;
+                this.canvasArea.scrollLeft = this.panStart.sx + dx;
+                this.canvasArea.scrollTop  = this.panStart.sy + dy;
+            }
+            endPan() { this.isPanning = false; }
+
+            // ================= Objects =================
+            createImageObject(img, x, y, w, h) {
+                return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'image', img, x, y, width: w, height: h, rotation: 0, scaleX: 1, scaleY: 1, flipX: false, flipY: false, visible: true, opacity: 1 };
+            }
+            createTextObject(text, x, y) {
+                return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'text', text: text || 'Text', x, y, fontFamily: 'Arial', fontSize: 32, fontWeight: '400', fill: '#000000', width: 160, height: 40, rotation: 0, scaleX: 1, scaleY: 1, align: 'left' };
+            }
+            getActiveObject() { return this.state.objects.find(o => o.id === this.state.activeObjectId) || null; }
+            setActiveObject(id) { this.state.activeObjectId = id; this.updateObjectInfoUI(); this.redrawCanvas(); }
+            updateObjectInfoUI() {
+                const info = document.getElementById('object-info'); const rotateInput = document.getElementById('rotate-input');
+                const obj = this.getActiveObject();
+                if (!info || !rotateInput) return;
+                if (!obj) { info.textContent = 'No object selected'; rotateInput.value = 0; return; }
+                const deg = Math.round((obj.rotation || 0) * 180 / Math.PI);
+                rotateInput.value = deg;
+                info.textContent = `${obj.type} @ (${Math.round(obj.x)}, ${Math.round(obj.y)}) ${Math.round(obj.width)}x${Math.round(obj.height)}`;
+            }
+            drawObject(ctx, obj) {
+                ctx.save();
+                const cx = obj.x + obj.width/2; const cy = obj.y + obj.height/2;
+                ctx.translate(cx, cy); ctx.rotate(obj.rotation || 0); ctx.scale((obj.flipX?-1:1) * (obj.scaleX||1), (obj.flipY?-1:1) * (obj.scaleY||1));
+                ctx.globalAlpha = obj.opacity ?? 1;
+                if (obj.type === 'image') {
+                    ctx.drawImage(obj.img, -obj.width/2, -obj.height/2, obj.width, obj.height);
+                } else if (obj.type === 'text') {
+                    ctx.fillStyle = obj.fill || '#000';
+                    ctx.textBaseline = 'top';
+                    ctx.textAlign = (obj.align||'left');
+                    ctx.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                    const lines = (obj.text||'').split('\n');
+                    const lineHeight = (obj.fontSize||32) * 1.2;
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, -obj.width/2, -obj.height/2 + i*lineHeight, obj.width);
+                    });
+                }
+                ctx.restore();
+            }
+            getObjectCorners(obj) {
+                const pts = [ {x:0,y:0}, {x:obj.width,y:0}, {x:obj.width,y:obj.height}, {x:0,y:obj.height} ];
+                const angle = obj.rotation||0; const cos=Math.cos(angle), sin=Math.sin(angle);
+                const cx = obj.x + obj.width/2; const cy = obj.y + obj.height/2;
+                return pts.map(p=>{ const dx=p.x-obj.width/2, dy=p.y-obj.height/2; return { x: cx + dx*cos - dy*sin, y: cy + dx*sin + dy*cos }; });
+            }
+            getHandlePoints(corners) {
+                const mid = (a,b)=>({ x:(a.x+b.x)/2, y:(a.y+b.y)/2 });
+                const [tl,tr,br,bl] = [corners[0], corners[1], corners[2], corners[3]];
+                const handles = [
+                    {key:'tl', x:tl.x, y:tl.y}, {key:'tm', ...mid(tl,tr)}, {key:'tr', x:tr.x, y:tr.y},
+                    {key:'rm', ...mid(tr,br)}, {key:'br', x:br.x, y:br.y}, {key:'bm', ...mid(bl,br)},
+                    {key:'bl', x:bl.x, y:bl.y}, {key:'lm', ...mid(tl,bl)}
+                ];
+                // rotation handle above top mid
+                const tm = mid(tl,tr); const nx = tm.x + (tm.x - mid(bl,br).x) * 0.1; const ny = tm.y + (tm.y - mid(bl,br).y) * 0.1;
+                handles.push({key:'rotate', x:nx, y:ny});
+                return handles;
+            }
+            drawTransformBox(ctx, obj) {
+                const corners = this.getObjectCorners(obj);
+                const hs = 8 / this.state.zoom; // handle size scales with zoom
+                ctx.save();
+                ctx.strokeStyle = '#4da3ff'; ctx.lineWidth = 1/this.state.zoom; ctx.setLineDash([4/this.state.zoom, 4/this.state.zoom]);
+                ctx.beginPath(); ctx.moveTo(corners[0].x, corners[0].y); for (let i=1;i<corners.length;i++) ctx.lineTo(corners[i].x, corners[i].y); ctx.closePath(); ctx.stroke();
+                ctx.setLineDash([]); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#0078d4';
+                const handles = this.getHandlePoints(corners);
+                for (const h of handles) { ctx.beginPath(); ctx.rect(h.x-hs/2, h.y-hs/2, hs, hs); ctx.fill(); ctx.stroke(); }
+                // rotation handle line
+                const tm = this.getHandlePoints(corners).find(h=>h.key==='tm'); const rot = this.getHandlePoints(corners).find(h=>h.key==='rotate');
+                if (tm && rot) { ctx.beginPath(); ctx.moveTo(tm.x, tm.y); ctx.lineTo(rot.x, rot.y); ctx.stroke(); }
+                ctx.restore();
+            }
+            hitTestObject(obj, pt) {
+                // Transform point into object local space
+                const cx = obj.x + obj.width/2, cy = obj.y + obj.height/2;
+                const dx = pt.x - cx, dy = pt.y - cy; const ang = -(obj.rotation||0);
+                const lx = dx*Math.cos(ang) - dy*Math.sin(ang); const ly = dx*Math.sin(ang) + dy*Math.cos(ang);
+                return Math.abs(lx) <= obj.width/2 && Math.abs(ly) <= obj.height/2;
+            }
+            hitTestHandles(obj, pt) {
+                const hs = 8 / this.state.zoom; const handles = this.getHandlePoints(this.getObjectCorners(obj));
+                for (const h of handles) { if (Math.abs(pt.x - h.x) <= hs/2 && Math.abs(pt.y - h.y) <= hs/2) return h.key; }
+                return null;
+            }
+            startTransform(point) {
+                // Select topmost object under cursor
+                let target = null; let handle = null;
+                for (let i=this.state.objects.length-1; i>=0; i--) {
+                    const obj = this.state.objects[i];
+                    const h = this.hitTestHandles(obj, point);
+                    if (h) { target = obj; handle = h; break; }
+                    if (this.hitTestObject(obj, point)) { target = obj; break; }
+                }
+                if (target) {
+                    this.setActiveObject(target.id);
+                    this.activeHandle = handle || 'move';
+                    this.transformStart = { x: point.x, y: point.y, snapshot: { ...target } };
+                    this.draggingObject = true;
+                } else {
+                    this.setActiveObject(null);
+                    this.draggingObject = false;
+                }
+            }
+            updateTransform(point) {
+                const obj = this.getActiveObject(); if (!obj || !this.draggingObject || !this.transformStart) return;
+                const dx = point.x - this.transformStart.x; const dy = point.y - this.transformStart.y;
+                const snap = this.state.snapToGrid ? 8 : 1;
+                if (this.activeHandle === 'move') {
+                    obj.x = this.transformStart.snapshot.x + Math.round(dx / snap) * snap;
+                    obj.y = this.transformStart.snapshot.y + Math.round(dy / snap) * snap;
+                } else if (this.activeHandle === 'rotate') {
+                    const cx = obj.x + obj.width/2; const cy = obj.y + obj.height/2;
+                    obj.rotation = Math.atan2(point.y - cy, point.x - cx) + Math.PI/2; // relative orientation
+                } else {
+                    // Resize based on handle; operate in object space ignoring rotation for simplicity
+                    const start = this.transformStart.snapshot;
+                    let newX = start.x, newY = start.y, newW = start.width, newH = start.height;
+                    const minSize = 10;
+                    switch (this.activeHandle) {
+                        case 'tl': newX = start.x + dx; newY = start.y + dy; newW = start.width - dx; newH = start.height - dy; break;
+                        case 'tr': newY = start.y + dy; newW = start.width + dx; newH = start.height - dy; break;
+                        case 'br': newW = start.width + dx; newH = start.height + dy; break;
+                        case 'bl': newX = start.x + dx; newW = start.width - dx; newH = start.height + dy; break;
+                        case 'tm': newY = start.y + dy; newH = start.height - dy; break;
+                        case 'bm': newH = start.height + dy; break;
+                        case 'lm': newX = start.x + dx; newW = start.width - dx; break;
+                        case 'rm': newW = start.width + dx; break;
+                    }
+                    newW = Math.max(minSize, newW); newH = Math.max(minSize, newH);
+                    if (this.state.snapToGrid) { newX = Math.round(newX / snap) * snap; newY = Math.round(newY / snap) * snap; newW = Math.round(newW / snap) * snap; newH = Math.round(newH / snap) * snap; }
+                    obj.x = newX; obj.y = newY; obj.width = newW; obj.height = newH;
+                }
+            }
+            finishStroke() {
+                if (this.state.currentTool === 'select' && this.state.selection) {
+                    this.showToast(`Selection: ${Math.round(this.state.selection.width)}x${Math.round(this.state.selection.height)}`);
+                }
+                if (this.state.currentTool === 'transform' && this.draggingObject) {
+                    this.draggingObject = false; this.activeHandle = null; this.transformStart = null; this.saveToHistory('Transform Object');
+                }
+            }
+
+            // Insertions
+            insertImage() {
+                const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { const img = new Image(); img.onload = () => {
+                        const maxW = Math.min(this.canvas.width * 0.6, img.width);
+                        const scale = maxW / img.width; const w = img.width * scale; const h = img.height * scale;
+                        const x = (this.canvas.width - w)/2; const y = (this.canvas.height - h)/2;
+                        const obj = this.createImageObject(img, x, y, w, h);
+                        this.state.objects.push(obj); this.setActiveObject(obj.id); this.selectTool('transform'); this.saveToHistory('Insert Image'); this.redrawCanvas(); };
+                        img.src = ev.target.result; };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            }
+            insertText() { this.selectTool('text'); this.showToast('Click on canvas to place text'); }
+            handleTextToolDown(point) {
+                const obj = this.createTextObject('Text', point.x, point.y);
+                this.state.objects.push(obj); this.setActiveObject(obj.id);
+                this.showTextEditorForObject(obj);
+            }
+            showTextEditorForObject(obj) {
+                if (!this.textEditor) return;
+                const rect = this.wrapper.getBoundingClientRect();
+                this.textEditor.style.left = `${obj.x}px`; this.textEditor.style.top = `${obj.y}px`;
+                this.textEditor.style.width = `${obj.width}px`; this.textEditor.style.height = `${obj.height}px`;
+                this.textEditor.style.display = 'block'; this.textEditor.value = obj.text || '';
+                this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                this.textEditor.style.color = obj.fill || '#000';
+                this.textEditor.focus();
+            }
+            commitTextEditor() {
+                if (!this.textEditor || this.textEditor.style.display === 'none') return;
+                const obj = this.getActiveObject(); if (obj && obj.type === 'text') {
+                    obj.text = this.textEditor.value;
+                    const lines = obj.text.split('\n'); const lineHeight = (obj.fontSize||32) * 1.2; obj.height = Math.max(lineHeight, lines.length * lineHeight);
+                    // approximate width by max measure
+                    const measure = (text)=>{ const c=this.ctx; c.save(); c.font=`${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`; const m = Math.max(...lines.map(l=>c.measureText(l).width), 1); c.restore(); return m; };
+                    obj.width = Math.max(60, Math.min(this.canvas.width, measure(obj.text)) + 10);
+                }
+                this.textEditor.style.display = 'none';
+                this.saveToHistory('Edit Text'); this.redrawCanvas();
+            }
+
+            // Object ops
+            bringForward() { const i=this.state.objects.findIndex(o=>o.id===this.state.activeObjectId); if (i>=0 && i<this.state.objects.length-1){ const [o]=this.state.objects.splice(i,1); this.state.objects.splice(i+1,0,o); this.redrawCanvas(); } }
+            sendBackward() { const i=this.state.objects.findIndex(o=>o.id===this.state.activeObjectId); if (i>0){ const [o]=this.state.objects.splice(i,1); this.state.objects.splice(i-1,0,o); this.redrawCanvas(); } }
+            duplicateSelected() { const obj=this.getActiveObject(); if (!obj) return; const copy=this.deserializeObject(this.serializeObject(obj)); copy.id=`obj-${Date.now()}`; copy.x+=20; copy.y+=20; this.state.objects.push(copy); this.setActiveObject(copy.id); this.saveToHistory('Duplicate Object'); }
+            deleteSelected() { const id=this.state.activeObjectId; if (!id) return; this.state.objects = this.state.objects.filter(o=>o.id!==id); this.state.activeObjectId=null; this.updateObjectInfoUI(); this.saveToHistory('Delete Object'); this.redrawCanvas(); }
+            flipSelected(axis) { const obj=this.getActiveObject(); if (!obj) return; if (axis==='h') obj.flipX=!obj.flipX; if (axis==='v') obj.flipY=!obj.flipY; this.saveToHistory('Flip Object'); this.redrawCanvas(); }
+            exportSelected() { const obj=this.getActiveObject(); if (!obj) return; const c=document.createElement('canvas'); c.width=obj.width; c.height=obj.height; const cx=c.getContext('2d'); cx.imageSmoothingQuality='high'; cx.save(); cx.translate(obj.width/2,obj.height/2); cx.rotate(obj.rotation||0); cx.scale((obj.flipX?-1:1)*(obj.scaleX||1),(obj.flipY?-1:1)*(obj.scaleY||1)); if (obj.type==='image'){cx.drawImage(obj.img,-obj.width/2,-obj.height/2,obj.width,obj.height);} else {cx.fillStyle=obj.fill||'#000'; cx.font=`${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`; const lines=(obj.text||'').split('\n'); const lh=(obj.fontSize||32)*1.2; lines.forEach((line,i)=>cx.fillText(line,-obj.width/2,-obj.height/2+i*lh,obj.width));} cx.restore(); const link=document.createElement('a'); link.download='selection.png'; link.href=c.toDataURL('image/png'); link.click(); }
+            nudgeSelected(dir, step) { const obj=this.getActiveObject(); if (!obj) return; if (dir==='arrowup') obj.y-=step; if (dir==='arrowdown') obj.y+=step; if (dir==='arrowleft') obj.x-=step; if (dir==='arrowright') obj.x+=step; this.redrawCanvas(); this.saveToHistory('Nudge Object'); }
+            copySelected() { const obj=this.getActiveObject(); if (obj) this.state.objectClipboard = this.serializeObject(obj); }
+            pasteSelected() { const clip=this.state.objectClipboard; if (!clip) return; const obj=this.deserializeObject(clip); obj.id=`obj-${Date.now()}`; obj.x+=30; obj.y+=30; this.state.objects.push(obj); this.setActiveObject(obj.id); this.saveToHistory('Paste Object'); }
+
+            serializeObject(obj) {
+                const base = { ...obj };
+                if (base.type === 'image') {
+                    base.imgSrc = obj.img?.src || obj.imgSrc || '';
+                    delete base.img;
+                }
+                return JSON.parse(JSON.stringify(base));
+            }
+            deserializeObject(serialized) {
+                const obj = JSON.parse(JSON.stringify(serialized));
+                if (obj.type === 'image') {
+                    const img = new Image();
+                    if (obj.imgSrc) img.src = obj.imgSrc;
+                    obj.img = img;
+                }
+                return obj;
+            }
+            cloneObjects() { return this.state.objects.map(o => this.serializeObject(o)); }
+            restoreObjects(objs) { this.state.objects = (objs||[]).map(o => this.deserializeObject(o)); this.setActiveObject(null); }
 
             getBlendMode(mode) {
                 const modes = {
