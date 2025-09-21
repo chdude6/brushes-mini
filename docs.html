@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Brushes — Documentation & How-To</title>
+<style>
+  :root{
+    --bg:#0f1720; --card:#0b1220; --muted:#9aa5b1; --accent:#39a0ff; --text:#e6eef6;
+    --glass: rgba(255,255,255,0.03);
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,#07101a 0%, #071827 100%); color:var(--text);}
+  .wrap{max-width:1100px;margin:28px auto;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); border-radius:12px; box-shadow:0 10px 40px rgba(2,6,23,0.6);}
+  header{display:flex;gap:16px;align-items:center;margin-bottom:18px;}
+  .logo{font-weight:700;color:var(--accent);font-size:20px;}
+  .subtitle{color:var(--muted);font-size:13px;}
+  #searchbar{display:flex;gap:8px;margin-top:8px;}
+  input[type="search"]{flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:var(--text);outline:none;font-size:14px;}
+  button{background:var(--accent);color:#02101a;border:none;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:600;}
+  nav{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+  nav a{color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.02);font-size:13px;}
+  .grid{display:grid;grid-template-columns: 1fr 350px; gap:18px;align-items:start;}
+  .card{background:rgba(255,255,255,0.02);padding:16px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);}
+  h2{margin:0 0 8px 0}
+  pre{background:#041121;padding:12px;border-radius:8px;overflow:auto;color:#c6e3ff;font-size:13px}
+  .section{margin-bottom:18px}
+  .faq-item{margin-bottom:10px}
+  .faq-q{font-weight:700;color:#dbeffd}
+  .faq-a{color:var(--muted);margin-top:4px}
+  .changelog{font-size:14px}
+  .result-list{max-height:260px;overflow:auto;margin-top:12px;border-radius:8px;padding:8px;background:#03121a;border:1px solid rgba(255,255,255,0.02)}
+  .result-item{padding:8px;border-radius:6px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.02);cursor:pointer}
+  .meta{color:var(--muted);font-size:12px}
+  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+  code.inline{background:#071827;padding:2px 6px;border-radius:6px;color:#bfe1ff}
+</style>
+</head>
+<body>
+  <div class="wrap" id="top">
+    <header>
+      <div>
+        <div class="logo">Brushes — Documentation</div>
+        <div class="subtitle">Complete usage guide, keyboard shortcuts, changelog and FAQ for the Brushes canvas editor</div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <div class="meta">Generated from uploaded source (editor implementation & UI)</div>
+        <div style="font-size:12px;color:var(--muted)">References: code snippets used from uploaded `type2(1).html`.</div>
+      </div>
+    </header>
+
+    <!-- Search -->
+    <div id="searchbar">
+      <input id="q" type="search" placeholder="Search docs & FAQ — try: 'layers', 'save', 'image resize', 'shortcuts'">
+      <button id="searchBtn">Search</button>
+    </div>
+
+    <nav>
+      <a href="#overview">Overview</a>
+      <a href="#quickstart">Quick start</a>
+      <a href="#tools">Tools & Controls</a>
+      <a href="#files">File Operations</a>
+      <a href="#layers">Layers & History</a>
+      <a href="#objects">Objects & Images</a>
+      <a href="#shortcuts">Keyboard Shortcuts</a>
+      <a href="#changelog">Changelog</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="grid" style="margin-top:18px">
+      <main>
+        <!-- Overview -->
+        <section id="overview" class="card section">
+          <h2>Overview</h2>
+          <p class="meta">What this documentation covers</p>
+          <p>This document explains how to use the Brushes editor: tools, layers, objects (images & text), file workflow, keyboard shortcuts, history/undo, and advanced behaviors (WASM acceleration, object transforms, image insertion/resizing). It also contains a searchable FAQ and changelog.</p>
+          <p><strong>Implementation notes:</strong> the editor uses an HTML <code class="inline">canvas</code> as the final output and manages layers as separate off-screen canvases. Image insertion automatically scales images when inserted (see <em>Objects & Images</em>). Features like history/undo store canvas image data and object lists (see history/undo description below). For low-level details, see the source code snippets in the uploaded file. :contentReference[oaicite:3]{index=3}</p>
+        </section>
+
+        <!-- Quick Start -->
+        <section id="quickstart" class="card section">
+          <h2>Quick start</h2>
+          <ol>
+            <li>Open the app page that contains the editor (the one with the big canvas).</li>
+            <li>To create a new document: top toolbar → <strong>New</strong> or <code class="inline">N</code> (Ctrl/Cmd+N also supported). The app creates an initial white background layer automatically. :contentReference[oaicite:4]{index=4}</li>
+            <li>Use the left toolbox to select a tool (Brush, Pencil, Eraser, Text, Transform, etc.).</li>
+            <li>Insert an image: toolbar → <strong>Insert Image</strong> or menu Insert → Image. The editor scales inserted images to fit (scaled to at most 60% of canvas width by default). :contentReference[oaicite:5]{index=5}</li>
+            <li>Save: toolbar → <strong>Save</strong> or Ctrl/Cmd+S to export the current canvas as PNG. :contentReference[oaicite:6]{index=6}</li>
+          </ol>
+          <p class="meta">Tip: When you insert text you enter an inline text editor that commits on blur or Enter (without shift). :contentReference[oaicite:7]{index=7}</p>
+        </section>
+
+        <!-- Tools -->
+        <section id="tools" class="card section">
+          <h2>Tools & What they do</h2>
+          <p class="meta">Tool list (left toolbox)</p>
+          <ul>
+            <li><strong>Brush</strong> — pressure-like brush with size/hardness/opacity/flow sliders. Use mouse or stylus to paint. (Brush uses radial gradients to simulate hardness when <code>hardness &lt; 100%</code>.) :contentReference[oaicite:8]{index=8}</li>
+            <li><strong>Pencil</strong> — hard-edged stroke (similar control to brush but optimized for pixel-like strokes).</li>
+            <li><strong>Eraser</strong> — draws with <code>destination-out</code> to erase pixels or uses WASM eraser if WASM engine is present. :contentReference[oaicite:9]{index=9}</li>
+            <li><strong>Select</strong> — rectangular selection; selection bounds are shown and can be committed.</li>
+            <li><strong>Eyedropper</strong> — pick a pixel color from the canvas and set it as foreground. :contentReference[oaicite:10]{index=10}</li>
+            <li><strong>Transform</strong> — move, rotate, resize objects (images & text). Supports handles, rotation, and snapping to grid.</li>
+            <li><strong>Crop</strong> — crop canvas area.</li>
+            <li><strong>Clone</strong> — clone stamp (set source point then paint).</li>
+            <li><strong>Healing</strong> — sample a source and apply blended heal to target area; supports Alt to re-pick source. :contentReference[oaicite:11]{index=11}</li>
+            <li><strong>Blur / Sharpen / Dodge / Burn</strong> — localized filters applied either via JS or through WASM acceleration if enabled. :contentReference[oaicite:12]{index=12}</li>
+            <li><strong>Text</strong> — creates text objects editable with an inline textarea; font family, font size, weight, color and alignment controls available. :contentReference[oaicite:13]{index=13}</li>
+          </ul>
+        </section>
+
+        <!-- File operations -->
+        <section id="files" class="card section">
+          <h2>File operations</h2>
+          <p class="meta">New / Open / Save</p>
+          <ul>
+            <li><strong>New</strong> — resets layers, history and creates the initial white background layer.</li>
+            <li><strong>Open</strong> — loads an image file; the canvas is resized to the image size and the image becomes the single loaded layer. When an image is opened the WASM engine (if enabled) is resized to match the new canvas size. :contentReference[oaicite:14]{index=14}</li>
+            <li><strong>Save</strong> — exports the composited canvas as PNG (`canvas.toDataURL('image/png')`) and triggers a download. :contentReference[oaicite:15]{index=15}</li>
+          </ul>
+        </section>
+
+        <!-- Layers & History -->
+        <section id="layers" class="card section">
+          <h2>Layers & History</h2>
+          <p class="meta">Layer model</p>
+          <ul>
+            <li>Each layer is an off-screen canvas (separate <code>canvas</code> element). Layers have properties: <code>id</code>, <code>name</code>, <code>visible</code>, <code>opacity</code>, <code>blendMode</code>, and <code>locked</code>. The UI lists layers and allows toggling visibility and selecting the current layer. :contentReference[oaicite:16]{index=16}</li>
+            <li>Layer operations: Add, Duplicate, Move Up/Down, Lock, Delete. The app prevents deleting the last (background) layer. :contentReference[oaicite:17]{index=17}</li>
+          </ul>
+
+          <h3>History / Undo / Redo</h3>
+          <p>History entries store imageData for the affected layer and serialized objects list. Clicking history items restores the canvas imageData and object state. Undo/redo adjust history index and reapply stored imageData. :contentReference[oaicite:18]{index=18}</p>
+        </section>
+
+        <!-- Objects & Images -->
+        <section id="objects" class="card section">
+          <h2>Objects (images & text)</h2>
+          <p class="meta">Overview</p>
+          <p>The editor supports placing objects on top of the layer stack: images and text objects with position, rotation, scale, flip, visible, and other properties. Objects are drawn on the canvas during redraw and are separate from pixels stored in layer canvases. This allows moving/resizing without re-painting pixels. :contentReference[oaicite:19]{index=19}</p>
+
+          <h3>Insert Image — scaling behavior</h3>
+          <p>When you insert an image (Insert → Image), the editor:</p>
+          <ul>
+            <li>Loads the image with FileReader, creates an <code>&lt;img&gt;</code> then measures it.</li>
+            <li>Computes a maximum width as <code>min(canvas.width * 0.6, img.width)</code> and scales image proportionally so it fits comfortably in the canvas. The created object is centered on the canvas and becomes the active object. This is the implemented "image resizing" behavior. :contentReference[oaicite:20]{index=20}</li>
+          </ul>
+
+          <h3>Text objects</h3>
+          <p>Text objects are created by selecting the Text tool and clicking. An inline textarea appears for editing; commit on blur or Enter. Font family/size/weight and color controls are available; the editor loads fonts via <code>document.fonts.load</code> when necessary. :contentReference[oaicite:21]{index=21}</p>
+        </section>
+
+        <!-- Shortcuts -->
+        <section id="shortcuts" class="card section">
+          <h2>Keyboard shortcuts</h2>
+          <div class="result-list">
+            <div class="result-item"><strong>Ctrl/Cmd + N</strong> — New document</div>
+            <div class="result-item"><strong>Ctrl/Cmd + O</strong> — Open</div>
+            <div class="result-item"><strong>Ctrl/Cmd + S</strong> — Save (export PNG). :contentReference[oaicite:22]{index=22}</div>
+            <div class="result-item"><strong>Ctrl/Cmd + Z</strong> — Undo (Shift to redo). :contentReference[oaicite:23]{index=23}</div>
+            <div class="result-item"><strong>B</strong> — Brush</div>
+            <div class="result-item"><strong>E</strong> — Eraser</div>
+            <div class="result-item"><strong>I</strong> — Eyedropper</div>
+            <div class="result-item"><strong>V</strong> — Transform</div>
+            <div class="result-item"><strong>M</strong> — Select</div>
+            <div class="result-item"><strong>T</strong> — Text</div>
+            <div class="result-item"><strong>Space</strong> — Hold to pan (press/hold to grab canvas)</div>
+            <div class="result-item"><strong>Arrow keys</strong> — Nudge selected object (Shift for larger step)</div>
+          </div>
+        </section>
+
+        <!-- Changelog -->
+        <section id="changelog" class="card section">
+          <h2>Changelog</h2>
+          <div class="changelog">
+            <ul>
+              <li><strong>[Latest]</strong> Added image resizing on insert — inserted images now scale to at most 60% of canvas width and are centered automatically. (This is the "added image resizing" entry you asked for.) :contentReference[oaicite:24]{index=24}</li>
+              <li><strong>Feature:</strong> WASM engine support detected at startup — when available, brush/eraser/filters can call into the WasmEngine for faster operations. :contentReference[oaicite:25]{index=25}</li>
+              <li><strong>UX:</strong> inline text editor for editing text objects with font loading support.</li>
+              <li><strong>Fix:</strong> save/export uses canvas.toDataURL('image/png') and triggers download reliably. :contentReference[oaicite:26]{index=26}</li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- FAQ -->
+        <section id="faq" class="card section">
+          <h2>Frequently Asked Questions (FAQ)</h2>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: How do I export a PNG of my work?</div>
+            <div class="faq-a">A: Use the Save button in the toolbar or press <code class="inline">Ctrl/Cmd + S</code>. The editor uses the main canvas' data URL and triggers a file download. :contentReference[oaicite:27]{index=27}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: How does image insertion size get computed?</div>
+            <div class="faq-a">A: Inserted images are scaled proportionally so their width is at most 60% of the canvas width (or less if the image is smaller), and they are centered. This prevents huge imported images from overflowing the view. :contentReference[oaicite:28]{index=28}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: Can I undo multiple steps?</div>
+            <div class="faq-a">A: Yes — every significant change saves a history entry with imageData and objects. Use Undo/Redo from the Edit menu or keyboard shortcuts. Clicking a history item will restore that state. :contentReference[oaicite:29]{index=29}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: Does the editor support pressure/stylus?</div>
+            <div class="faq-a">A: The core brush uses size/hardness/opacity controls. If you have a pointer/stylus device the browser may supply pressure data — the current engine does not explicitly show pressure mapping code in the uploaded file; it would be straightforward to map <code>pointer.pressure</code> to brush size/alpha in the input handlers.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: What happens if the WASM engine is not available?</div>
+            <div class="faq-a">A: The editor falls back to pure JavaScript implementations for brush strokes, filters and healing — the fallback code is included and works without WASM. If WasmEngine is available it attempts initialization at startup and uses it for expensive ops. :contentReference[oaicite:30]{index=30}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: Can I copy/paste objects?</div>
+            <div class="faq-a">A: Yes — objects can be serialized into a clipboard and pasted back — images keep a source if present, text becomes text objects. There's a copy/paste object clipboard in the runtime. :contentReference[oaicite:31]{index=31}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: My inserted image is too big/small — can I resize it?</div>
+            <div class="faq-a">A: Yes. After insertion the image becomes an object. Use the Transform tool to drag handles and resize; hold Snap toggle for snapping to grid. Rotations and flips are supported. Resizing modifies object properties not pixels, so you can resize without losing quality. :contentReference[oaicite:32]{index=32}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: How can I use custom fonts with text objects?</div>
+            <div class="faq-a">A: Choose font family and weight from the text controls. The editor calls <code>document.fonts.load()</code> to ensure the font is available prior to measuring/drawing text. If a font isn't loaded, the editor falls back to system fonts. :contentReference[oaicite:33]{index=33}</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q">Q: Where are the brush settings located?</div>
+            <div class="faq-a">A: Brush settings (Size, Hardness, Opacity, Flow) live in the properties panel on the left. Adjust them while painting to change stroke characteristics. :contentReference[oaicite:34]{index=34}</div>
+          </div>
+
+          <div style="margin-top:12px;color:var(--muted)">If your question isn't in this FAQ, use the search box above to find relevant documentation and examples.</div>
+        </section>
+      </main>
+
+      <!-- Right column: Search results + quick reference -->
+      <aside>
+        <div class="card">
+          <h3>Search results</h3>
+          <div id="results" class="result-list">
+            <div style="color:var(--muted)">Use the search box to list matching docs & FAQs. Results appear here and link to sections.</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Quick reference</h3>
+          <p class="meta">Common actions</p>
+          <ul>
+            <li><strong>New</strong> — New document</li>
+            <li><strong>Open</strong> — load image (canvas resizes)</li>
+            <li><strong>Save</strong> — export PNG</li>
+            <li><strong>Insert Image</strong> — scales to 60% width and centers</li>
+            <li><strong>Undo/Redo</strong> — persistent per-session history</li>
+          </ul>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Developer notes</h3>
+          <p class="meta">Important implementation points</p>
+          <ul>
+            <li>Layers are off-screen canvases — drawing operations occur on layer canvases and final redraw composes them into the main canvas. :contentReference[oaicite:35]{index=35}</li>
+            <li>History stores <code>ImageData</code> for layers and serializes object lists for restoration. :contentReference[oaicite:36]{index=36}</li>
+            <li>WASM engine detection occurs at initialize; if present, the WasmEngine is used for brushes and filters. :contentReference[oaicite:37]{index=37}</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      <div>Generated documentation • Based on uploaded code file. For exact runtime behavior, inspect the original HTML/JS source. </div>
+      <div style="margin-top:8px;color:var(--muted)">Source excerpts used: image insertion, file operations, history — see code references above. :contentReference[oaicite:38]{index=38} :contentReference[oaicite:39]{index=39} :contentReference[oaicite:40]{index=40}</div>
+    </footer>
+  </div>
+
+<script>
+  // --- Search index (docs + FAQ) ---
+  const INDEX = [
+    { id:'overview', title:'Overview', type:'doc', text:'overview canvas layers objects was engine brushes' },
+    { id:'quickstart', title:'Quick start', type:'doc', text:'new open save insert image quick start' },
+    { id:'tools', title:'Tools & What they do', type:'doc', text:'brush pencil eraser select eyedropper transform clone healing blur sharpen dodge burn text' },
+    { id:'files', title:'File operations', type:'doc', text:'new open save export png canvas toDataURL open image resize' },
+    { id:'layers', title:'Layers & History', type:'doc', text:'layers history undo redo imageData objects restore' },
+    { id:'objects', title:'Objects (images & text)', type:'doc', text:'insert image resize create image object text font load transform' },
+    { id:'shortcuts', title:'Keyboard shortcuts', type:'doc', text:'shortcuts keys undo redo brush text pan nudge' },
+    { id:'changelog', title:'Changelog', type:'doc', text:'changelog image resizing wasm added feature fix' },
+    { id:'faq', title:'FAQ', type:'doc', text:'faq inserted image resize save undo paste copy objects fonts' },
+    // FAQs as separate searchable entries:
+    { id:'faq-a-export', title:'How to export a PNG?', type:'faq', text:'save export png download canvas.toDataURL' },
+    { id:'faq-a-image-size', title:'How does image insertion size get computed?', type:'faq', text:'image insertion scaled 60% canvas width insert image' },
+    { id:'faq-a-undo', title:'Undo / history behavior', type:'faq', text:'undo redo history imageData objects restore' },
+    { id:'faq-a-wasm', title:'WASM engine fallback', type:'faq', text:'wasm fallback js implementation WasmEngine' },
+    { id:'faq-a-fonts', title:'Using custom fonts', type:'faq', text:'fonts document.fonts.load text objects font family' },
+    { id:'faq-a-resize', title:'Resizing inserted image', type:'faq', text:'transform resize handles object flip scale snap' }
+  ];
+
+  function renderResults(list){
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+    if(list.length===0){
+      container.innerHTML = '<div style="color:var(--muted)">No results found.</div>';
+      return;
+    }
+    list.forEach(item=>{
+      const el = document.createElement('div');
+      el.className = 'result-item';
+      el.innerHTML = `<strong>${item.title}</strong><div class="meta">${item.type.toUpperCase()}</div>`;
+      el.onclick = ()=>{ location.hash = '#'+item.id; document.getElementById(item.id)?.scrollIntoView({behavior:'smooth'}); };
+      container.appendChild(el);
+    });
+  }
+
+  document.getElementById('searchBtn').addEventListener('click', doSearch);
+  document.getElementById('q').addEventListener('keydown', (e)=>{ if(e.key==='Enter') doSearch(); });
+
+  function doSearch(){
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    if(!q){ renderResults(INDEX.slice(0,6)); return; }
+    // simple token search
+    const tokens = q.split(/\s+/);
+    const results = INDEX.map(entry=>{
+      let score = 0;
+      tokens.forEach(t=>{ if(entry.title.toLowerCase().includes(t)) score += 3; if(entry.text && entry.text.includes(t)) score += 1; });
+      return {...entry,score};
+    }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+    renderResults(results);
+  }
+
+  // show default suggestions
+  renderResults(INDEX.slice(0,6));
+</script>
+</body>
+</html>
