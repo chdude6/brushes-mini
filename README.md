@@ -7,3 +7,4 @@ Free. Open source. Powerful. Web based.
  - Scroll down in sidebar
 ### "I can't resize images and text with the grab bars"
  - Put the editor in resize mode by selecting the resize (↔️) button
+# There are docs btw
