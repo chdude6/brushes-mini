@@ -588,6 +588,264 @@
             background: var(--selection-color);
             color: var(--text-primary);
         }
+
+        /* Tabs System */
+        .tabs-container {
+            height: 36px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .tabs-container.hidden {
+            display: none;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            min-width: 120px;
+            max-width: 200px;
+            transition: all 0.15s;
+        }
+
+        .tab:hover {
+            background: var(--hover-color);
+        }
+
+        .tab.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        .tab-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tab-close {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.15s;
+        }
+
+        .tab-close:hover {
+            background: var(--hover-color);
+            color: var(--text-primary);
+        }
+
+        .tab-toggle-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 1001;
+            transition: all 0.15s;
+        }
+
+        .tab-toggle-btn:hover {
+            background: var(--hover-color);
+        }
+
+        /* Recent Projects Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: var(--hover-color);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .recent-projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .project-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .project-card:hover {
+            background: var(--hover-color);
+            border-color: var(--border-light);
+        }
+
+        .project-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            overflow: hidden;
+        }
+
+        .project-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .project-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .project-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .project-action-btn {
+            flex: 1;
+            padding: 6px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .project-action-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .project-action-btn.delete {
+            color: #ef4444;
+        }
+
+        .project-action-btn.delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .empty-projects {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 20px;
+        }
+
+        .empty-projects .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
     </style>
 </head>
 <body>
@@ -599,7 +857,10 @@
                 <div class="menu-dropdown">
                     <button class="menu-action" data-action="file-new">New…</button>
                     <button class="menu-action" data-action="file-open">Open…</button>
+                    <button class="menu-action" data-action="file-recent">Recent Projects…</button>
+                    <hr class="menu-sep"/>
                     <button class="menu-action" data-action="file-save">Save</button>
+                    <button class="menu-action" data-action="file-save-as">Save As…</button>
                 </div>
             </div>
             <div class="menu-item" data-menu="edit">Edit
@@ -620,6 +881,7 @@
                     <button class="menu-action" data-action="view-actual">Actual Size (100%)</button>
                     <hr class="menu-sep"/>
                     <button class="menu-action" data-action="view-grid">Toggle Grid</button>
+                    <button class="menu-action" data-action="view-tabs">Toggle Tabs</button>
                 </div>
             </div>
             <div class="menu-item" data-menu="help">Help
@@ -628,6 +890,14 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tabs Container -->
+        <div class="tabs-container" id="tabs-container">
+            <!-- Tabs will be dynamically added here -->
+        </div>
+
+        <!-- Tab Toggle Button -->
+        <button class="tab-toggle-btn" id="tab-toggle-btn" title="Toggle Tabs">⇅</button>
 
         <!-- Tool Bar -->
         <div class="tool-bar">
@@ -892,6 +1162,21 @@
         </div>
     </div>
 
+    <!-- Recent Projects Modal -->
+    <div class="modal-overlay" id="recent-projects-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Recent Projects</h2>
+                <button class="modal-close" onclick="editor.closeRecentProjectsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="recent-projects-content">
+                    <!-- Recent projects will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="dist/brushes_wasm.js"></script>
     <script src="js/wasm_adapter.js"></script>
     <script>
@@ -924,8 +1209,18 @@
                     activeObjectId: null,
                     showGrid: false,
                     snapToGrid: false,
-                    objectClipboard: null
+                    objectClipboard: null,
+                    // Project management
+                    currentProjectId: null,
+                    projectName: 'Untitled Project',
+                    openTabs: [],
+                    activeTabId: null,
+                    tabsVisible: true
                 };
+
+                // Recent projects storage
+                this.recentProjects = this.loadRecentProjects();
+                this.autosaveInterval = null;
 
                 this.canvas = document.getElementById('main-canvas');
                 this.ctx = this.canvas.getContext('2d');
@@ -949,6 +1244,416 @@
                 this.initializeEditor();
             }
 
+            // ================= Recent Projects Management =================
+            loadRecentProjects() {
+                try {
+                    const projects = localStorage.getItem('brushes-recent-projects');
+                    return projects ? JSON.parse(projects) : [];
+                } catch (e) {
+                    console.warn('Failed to load recent projects:', e);
+                    return [];
+                }
+            }
+
+            saveRecentProjects() {
+                try {
+                    localStorage.setItem('brushes-recent-projects', JSON.stringify(this.recentProjects));
+                } catch (e) {
+                    console.warn('Failed to save recent projects:', e);
+                }
+            }
+
+            addToRecentProjects(projectData) {
+                const existingIndex = this.recentProjects.findIndex(p => p.id === projectData.id);
+                if (existingIndex >= 0) {
+                    this.recentProjects.splice(existingIndex, 1);
+                }
+                
+                this.recentProjects.unshift({
+                    ...projectData,
+                    lastModified: Date.now()
+                });
+
+                // Keep only the 20 most recent projects
+                if (this.recentProjects.length > 20) {
+                    this.recentProjects = this.recentProjects.slice(0, 20);
+                }
+
+                this.saveRecentProjects();
+            }
+
+            removeFromRecentProjects(projectId) {
+                this.recentProjects = this.recentProjects.filter(p => p.id !== projectId);
+                this.saveRecentProjects();
+                this.updateRecentProjectsModal();
+            }
+
+            saveCurrentProject(name = null) {
+                if (name) {
+                    this.state.projectName = name;
+                }
+
+                const projectData = {
+                    id: this.state.currentProjectId || `project-${Date.now()}`,
+                    name: this.state.projectName,
+                    thumbnail: this.generateThumbnail(),
+                    data: this.serializeProject(),
+                    lastModified: Date.now()
+                };
+
+                if (!this.state.currentProjectId) {
+                    this.state.currentProjectId = projectData.id;
+                }
+
+                this.addToRecentProjects(projectData);
+                this.showToast(`Project "${this.state.projectName}" saved`);
+                this.updateActiveTab();
+            }
+
+            loadProject(projectData) {
+                try {
+                    this.deserializeProject(projectData.data);
+                    this.state.currentProjectId = projectData.id;
+                    this.state.projectName = projectData.name;
+                    this.updateActiveTab();
+                    this.showToast(`Project "${projectData.name}" loaded`);
+                } catch (e) {
+                    console.error('Failed to load project:', e);
+                    this.showToast('Failed to load project', 'error');
+                }
+            }
+
+            serializeProject() {
+                return {
+                    layers: this.state.layers.map(layer => ({
+                        ...layer,
+                        canvas: layer.canvas.toDataURL('image/png')
+                    })),
+                    objects: this.cloneObjects(),
+                    canvasSize: {
+                        width: this.canvas.width,
+                        height: this.canvas.height
+                    },
+                    currentLayerId: this.state.currentLayerId,
+                    brushSettings: { ...this.state.brushSettings },
+                    colors: { ...this.state.colors }
+                };
+            }
+
+            deserializeProject(data) {
+                // Clear current state
+                this.state.layers = [];
+                this.state.objects = [];
+                this.state.history = [];
+                this.state.historyIndex = -1;
+
+                // Restore canvas size
+                if (data.canvasSize) {
+                    this.canvas.width = data.canvasSize.width;
+                    this.canvas.height = data.canvasSize.height;
+                }
+
+                // Restore layers
+                const layerPromises = data.layers.map(layerData => {
+                    return new Promise((resolve) => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = this.canvas.width;
+                        canvas.height = this.canvas.height;
+                        const ctx = canvas.getContext('2d');
+
+                        const img = new Image();
+                        img.onload = () => {
+                            ctx.drawImage(img, 0, 0);
+                            resolve({
+                                ...layerData,
+                                canvas: canvas
+                            });
+                        };
+                        img.onerror = () => {
+                            // Create empty layer if image fails to load
+                            resolve({
+                                ...layerData,
+                                canvas: canvas
+                            });
+                        };
+                        img.src = layerData.canvas;
+                    });
+                });
+
+                Promise.all(layerPromises).then(layers => {
+                    this.state.layers = layers;
+                    this.state.currentLayerId = data.currentLayerId;
+                    this.state.brushSettings = { ...this.state.brushSettings, ...data.brushSettings };
+                    this.state.colors = { ...this.state.colors, ...data.colors };
+                    
+                    if (data.objects) {
+                        this.restoreObjects(data.objects);
+                    }
+
+                    this.updateLayersUI();
+                    this.updateUI();
+                    this.redrawCanvas();
+                    this.saveToHistory('Load Project');
+                });
+            }
+
+            generateThumbnail() {
+                const thumbnailCanvas = document.createElement('canvas');
+                thumbnailCanvas.width = 200;
+                thumbnailCanvas.height = 150;
+                const ctx = thumbnailCanvas.getContext('2d');
+                
+                // Fill with white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+                
+                // Draw scaled version of main canvas
+                ctx.drawImage(this.canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+                
+                return thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+            }
+
+            // ================= Tab Management =================
+            createNewTab(name = 'Untitled Project') {
+                const tabId = `tab-${Date.now()}`;
+                const tab = {
+                    id: tabId,
+                    name: name,
+                    projectId: null,
+                    saved: false
+                };
+
+                this.state.openTabs.push(tab);
+                this.state.activeTabId = tabId;
+                this.state.projectName = name;
+                this.state.currentProjectId = null;
+
+                this.updateTabsUI();
+                this.newDocument();
+                return tab;
+            }
+
+            switchToTab(tabId) {
+                const tab = this.state.openTabs.find(t => t.id === tabId);
+                if (!tab) return;
+
+                // Save current tab state if needed
+                this.saveCurrentTabState();
+
+                this.state.activeTabId = tabId;
+                this.state.projectName = tab.name;
+                this.state.currentProjectId = tab.projectId;
+
+                // Load tab state
+                this.loadTabState(tab);
+                this.updateTabsUI();
+            }
+
+            closeTab(tabId) {
+                const tabIndex = this.state.openTabs.findIndex(t => t.id === tabId);
+                if (tabIndex === -1) return;
+
+                const tab = this.state.openTabs[tabIndex];
+                
+                // If it's the active tab and there are other tabs, switch to another
+                if (tab.id === this.state.activeTabId && this.state.openTabs.length > 1) {
+                    const newActiveIndex = tabIndex > 0 ? tabIndex - 1 : tabIndex + 1;
+                    this.switchToTab(this.state.openTabs[newActiveIndex].id);
+                }
+
+                this.state.openTabs.splice(tabIndex, 1);
+
+                // If no tabs left, create a new one
+                if (this.state.openTabs.length === 0) {
+                    this.createNewTab();
+                } else {
+                    this.updateTabsUI();
+                }
+            }
+
+            updateActiveTab() {
+                const activeTab = this.state.openTabs.find(t => t.id === this.state.activeTabId);
+                if (activeTab) {
+                    activeTab.name = this.state.projectName;
+                    activeTab.projectId = this.state.currentProjectId;
+                    activeTab.saved = !!this.state.currentProjectId;
+                    this.updateTabsUI();
+                }
+            }
+
+            saveCurrentTabState() {
+                const activeTab = this.state.openTabs.find(t => t.id === this.state.activeTabId);
+                if (activeTab) {
+                    activeTab.state = this.serializeProject();
+                }
+            }
+
+            loadTabState(tab) {
+                if (tab.state) {
+                    this.deserializeProject(tab.state);
+                } else if (tab.projectId) {
+                    const project = this.recentProjects.find(p => p.id === tab.projectId);
+                    if (project) {
+                        this.loadProject(project);
+                    }
+                } else {
+                    this.newDocument();
+                }
+            }
+
+            updateTabsUI() {
+                const tabsContainer = document.getElementById('tabs-container');
+                if (!tabsContainer) return;
+
+                tabsContainer.innerHTML = '';
+
+                this.state.openTabs.forEach(tab => {
+                    const tabElement = document.createElement('div');
+                    tabElement.className = `tab ${tab.id === this.state.activeTabId ? 'active' : ''}`;
+                    tabElement.innerHTML = `
+                        <span class="tab-name">${tab.name}${tab.saved ? '' : '*'}</span>
+                        <button class="tab-close" onclick="editor.closeTab('${tab.id}')" title="Close tab">×</button>
+                    `;
+                    
+                    tabElement.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('tab-close')) {
+                            this.switchToTab(tab.id);
+                        }
+                    });
+
+                    tabsContainer.appendChild(tabElement);
+                });
+            }
+
+            toggleTabs() {
+                this.state.tabsVisible = !this.state.tabsVisible;
+                const tabsContainer = document.getElementById('tabs-container');
+                if (tabsContainer) {
+                    tabsContainer.classList.toggle('hidden', !this.state.tabsVisible);
+                }
+                this.showToast(this.state.tabsVisible ? 'Tabs shown' : 'Tabs hidden');
+            }
+
+            setupTabEventListeners() {
+                const tabToggleBtn = document.getElementById('tab-toggle-btn');
+                if (tabToggleBtn) {
+                    tabToggleBtn.addEventListener('click', () => this.toggleTabs());
+                }
+
+                // Close modal when clicking outside
+                const modal = document.getElementById('recent-projects-modal');
+                if (modal) {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            this.closeRecentProjectsModal();
+                        }
+                    });
+                }
+            }
+
+            // ================= Autosave =================
+            setupAutosave() {
+                // Autosave every 30 seconds
+                this.autosaveInterval = setInterval(() => {
+                    if (this.state.currentProjectId) {
+                        this.saveCurrentProject();
+                    }
+                }, 30000);
+
+                // Save on window beforeunload
+                window.addEventListener('beforeunload', () => {
+                    if (this.state.currentProjectId) {
+                        this.saveCurrentProject();
+                    }
+                });
+            }
+
+            // ================= Recent Projects Modal =================
+            showRecentProjectsModal() {
+                const modal = document.getElementById('recent-projects-modal');
+                if (modal) {
+                    modal.classList.add('show');
+                    this.updateRecentProjectsModal();
+                }
+            }
+
+            closeRecentProjectsModal() {
+                const modal = document.getElementById('recent-projects-modal');
+                if (modal) {
+                    modal.classList.remove('show');
+                }
+            }
+
+            updateRecentProjectsModal() {
+                const content = document.getElementById('recent-projects-content');
+                if (!content) return;
+
+                if (this.recentProjects.length === 0) {
+                    content.innerHTML = `
+                        <div class="empty-projects">
+                            <div class="icon">📁</div>
+                            <p>No recent projects found</p>
+                            <p>Create a new project or open an existing one to get started.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const projectsHTML = this.recentProjects.map(project => {
+                    const date = new Date(project.lastModified).toLocaleDateString();
+                    return `
+                        <div class="project-card" onclick="editor.loadRecentProject('${project.id}')">
+                            <div class="project-thumbnail">
+                                ${project.thumbnail ? `<img src="${project.thumbnail}" alt="${project.name}">` : 'No preview'}
+                            </div>
+                            <div class="project-name">${project.name}</div>
+                            <div class="project-date">Modified: ${date}</div>
+                            <div class="project-actions">
+                                <button class="project-action-btn" onclick="event.stopPropagation(); editor.loadRecentProject('${project.id}')">Open</button>
+                                <button class="project-action-btn" onclick="event.stopPropagation(); editor.openProjectInNewTab('${project.id}')">New Tab</button>
+                                <button class="project-action-btn delete" onclick="event.stopPropagation(); editor.deleteRecentProject('${project.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                content.innerHTML = `<div class="recent-projects-grid">${projectsHTML}</div>`;
+            }
+
+            loadRecentProject(projectId) {
+                const project = this.recentProjects.find(p => p.id === projectId);
+                if (project) {
+                    this.loadProject(project);
+                    this.closeRecentProjectsModal();
+                }
+            }
+
+            openProjectInNewTab(projectId) {
+                const project = this.recentProjects.find(p => p.id === projectId);
+                if (project) {
+                    const tab = this.createNewTab(project.name);
+                    tab.projectId = project.id;
+                    tab.saved = true;
+                    this.loadProject(project);
+                    this.closeRecentProjectsModal();
+                }
+            }
+
+            deleteRecentProject(projectId) {
+                if (confirm('Are you sure you want to remove this project from recent projects?')) {
+                    this.removeFromRecentProjects(projectId);
+                }
+            }
+
+            // ================= Enhanced File Operations =================
+            saveAsProject() {
+                const name = prompt('Enter project name:', this.state.projectName);
+                if (name && name.trim()) {
+                    this.state.currentProjectId = null; // Force new ID
+                    this.saveCurrentProject(name.trim());
+                }
+            }
+
             initializeEditor() {
                 this.createInitialLayer();
                 this.initializeEventListeners();
@@ -960,6 +1665,11 @@
                 this.updateHistoryUI();
                 this.redrawCanvas();
                 this.saveToHistory('New Document');
+
+                // Initialize tabs system
+                this.createNewTab();
+                this.setupTabEventListeners();
+                this.setupAutosave();
 
                 // Attempt to initialize the WASM engine (non-blocking)
                 if (window.WasmEngine && typeof WasmEngine.init === 'function') {
@@ -2155,12 +2865,16 @@
             // File operations
             newDocument() {
                 this.state.layers = [];
+                this.state.objects = [];
                 this.state.history = [];
                 this.state.historyIndex = -1;
+                this.state.currentProjectId = null;
+                this.state.projectName = 'Untitled Project';
                 
                 this.createInitialLayer();
                 this.updateLayersUI();
                 this.updateHistoryUI();
+                this.updateActiveTab();
                 this.redrawCanvas();
                 this.saveToHistory('New Document');
                 this.showToast('New document created');
@@ -2897,7 +3611,9 @@
                 switch (action) {
                     case 'file-new': this.newDocument(); break;
                     case 'file-open': this.openFile(); break;
-                    case 'file-save': this.saveFile(); break;
+                    case 'file-recent': this.showRecentProjectsModal(); break;
+                    case 'file-save': this.saveCurrentProject(); break;
+                    case 'file-save-as': this.saveAsProject(); break;
                     case 'edit-undo': this.undo(); break;
                     case 'edit-redo': this.redo(); break;
                     case 'insert-image': this.insertImage(); break;
@@ -2905,6 +3621,7 @@
                     case 'view-fit': this.fitToScreen(); break;
                     case 'view-actual': this.setZoom(1); break;
                     case 'view-grid': this.toggleGrid(); break;
+                    case 'view-tabs': this.toggleTabs(); break;
                     case 'help-about':
                         window.open('docs.html', '_blank');
                         break;
