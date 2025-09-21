@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brushes - Professional Photo Editor</title>
     <meta name="description" content="Professional photo editing suite with 50+ tools including advanced brushes, selections, masks, and effects">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Roboto:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -31,7 +34,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-family: 'Roboto', 'Open Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow: hidden;
@@ -54,6 +57,7 @@
             padding: 0 12px;
             gap: 24px;
         }
+        .menu-bar, .tool-bar, .status-bar { flex-shrink: 0; }
 
         .logo {
             font-weight: 600;
@@ -66,10 +70,44 @@
             cursor: pointer;
             border-radius: 3px;
             transition: background 0.15s;
+            position: relative;
         }
 
         .menu-item:hover {
             background: var(--hover-color);
+        }
+
+        /* Dropdown menus */
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            padding: 6px 0;
+            z-index: 2000;
+        }
+        .menu-item.open > .menu-dropdown { display: block; }
+        .menu-action {
+            width: 100%;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            text-align: left;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .menu-action:hover { background: var(--hover-color); }
+        .menu-sep {
+            height: 0;
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 6px 0;
         }
 
         /* Tool Bar */
@@ -120,6 +158,7 @@
             flex: 1;
             display: flex;
             background: var(--bg-primary);
+            min-height: 0;
         }
 
         /* Left Panel - Tools */
@@ -131,6 +170,8 @@
             flex-direction: column;
             padding: 8px;
             gap: 4px;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         .toolbox-btn {
@@ -162,6 +203,7 @@
             background: var(--bg-secondary);
             border-right: 1px solid var(--border-color);
             overflow-y: auto;
+            min-height: 0;
         }
 
         .property-section {
@@ -264,10 +306,12 @@
             outline: none;
             cursor: pointer;
             -webkit-appearance: none;
+            appearance: none;
         }
 
         .slider::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             width: 16px;
             height: 16px;
             background: var(--text-primary);
@@ -285,6 +329,7 @@
             justify-content: center;
             position: relative;
             overflow: auto;
+            min-height: 0;
         }
 
         .canvas-wrapper {
@@ -328,6 +373,8 @@
             border-left: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         /* Layers Panel */
@@ -548,15 +595,38 @@
         <!-- Menu Bar -->
         <div class="menu-bar">
             <div class="logo">Brushes</div>
-            <div class="menu-item" onclick="editor.newDocument()">File</div>
-            <div class="menu-item">Edit</div>
-            <div class="menu-item">Image</div>
-            <div class="menu-item">Layer</div>
-            <div class="menu-item">Select</div>
-            <div class="menu-item">Filter</div>
-            <div class="menu-item">View</div>
-            <div class="menu-item">Window</div>
-            <div class="menu-item">Help</div>
+            <div class="menu-item" data-menu="file">File
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="file-new">New…</button>
+                    <button class="menu-action" data-action="file-open">Open…</button>
+                    <button class="menu-action" data-action="file-save">Save</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="edit">Edit
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="edit-undo">Undo</button>
+                    <button class="menu-action" data-action="edit-redo">Redo</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="insert">Insert
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="insert-image">Image…</button>
+                    <button class="menu-action" data-action="insert-text">Text</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="view">View
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="view-fit">Fit to Screen</button>
+                    <button class="menu-action" data-action="view-actual">Actual Size (100%)</button>
+                    <hr class="menu-sep"/>
+                    <button class="menu-action" data-action="view-grid">Toggle Grid</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="help">Help
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="help-about">About</button>
+                </div>
+            </div>
         </div>
 
         <!-- Tool Bar -->
@@ -696,6 +766,47 @@
                         </label>
                     </div>
                 </div>
+                <!-- Text Properties -->
+                <div class="property-section" id="text-section">
+                    <div class="section-title">Text</div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+                        <button class="inline-btn" id="text-edit-btn" title="Edit Text">Edit</button>
+                        <input id="text-color" type="color" style="width:32px; height:32px; background:var(--bg-dark); border:1px solid var(--border-color); border-radius:4px; padding:0;"/>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:6px;">
+                        <select id="text-font-family" class="blend-select" style="flex:1;">
+                            <option value="Arial">Arial</option>
+                            <option value="Helvetica">Helvetica</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Verdana">Verdana</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Open Sans">Open Sans</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+                        <label style="font-size:11px; color:var(--text-secondary);">Size</label>
+                        <input id="text-font-size" type="number" min="6" max="300" value="32" style="width:70px; background:var(--bg-dark); color:var(--text-primary); border:1px solid var(--border-color); border-radius:4px; padding:4px; font-size:11px;"/>
+                        <label style="font-size:11px; color:var(--text-secondary);">Weight</label>
+                        <select id="text-font-weight" class="blend-select" style="width:90px;">
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value="400" selected>400</option>
+                            <option value="500">500</option>
+                            <option value="600">600</option>
+                            <option value="700">700</option>
+                            <option value="800">800</option>
+                            <option value="900">900</option>
+                        </select>
+                        <div style="display:flex; gap:4px; margin-left:auto;">
+                            <button class="inline-btn" id="text-align-left" title="Align Left">L</button>
+                            <button class="inline-btn" id="text-align-center" title="Align Center">C</button>
+                            <button class="inline-btn" id="text-align-right" title="Align Right">R</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Canvas Area -->
@@ -781,6 +892,8 @@
         </div>
     </div>
 
+    <script src="dist/brushes_wasm.js"></script>
+    <script src="js/wasm_adapter.js"></script>
     <script>
         class BrushesEditor {
             constructor() {
@@ -826,6 +939,8 @@
                 this.activeHandle = null;
                 this.draggingObject = false;
                 this.transformStart = null;
+                this.useWasm = false;
+                this.wasmStrokeActive = false;
 
                 // Improve image quality when viewing
                 this.ctx.imageSmoothingEnabled = true;
@@ -839,11 +954,24 @@
                 this.initializeEventListeners();
                 this.initializeKeyboardShortcuts();
                 this.attachObjectUIControls();
+                this.setupMenuBar();
                 this.updateUI();
                 this.updateLayersUI();
                 this.updateHistoryUI();
                 this.redrawCanvas();
                 this.saveToHistory('New Document');
+
+                // Attempt to initialize the WASM engine (non-blocking)
+                if (window.WasmEngine && typeof WasmEngine.init === 'function') {
+                    WasmEngine.init(this.canvas.width, this.canvas.height)
+                        .then(() => {
+                            this.useWasm = true;
+                            this.showToast('WASM engine enabled');
+                        })
+                        .catch(() => {
+                            this.useWasm = false;
+                        });
+                }
             }
 
             createInitialLayer() {
@@ -874,6 +1002,7 @@
                 this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
                 this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
                 this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+                this.canvas.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
 
                 // Zoom at cursor with Ctrl/Cmd + wheel
                 this.canvasArea.addEventListener('wheel', (e) => {
@@ -933,6 +1062,90 @@
                         }
                     });
                 }
+                // Text controls
+                const editBtn = document.getElementById('text-edit-btn');
+                const colorInput = document.getElementById('text-color');
+                const ffSelect = document.getElementById('text-font-family');
+                const fsInput = document.getElementById('text-font-size');
+                const fwSelect = document.getElementById('text-font-weight');
+                const alignL = document.getElementById('text-align-left');
+                const alignC = document.getElementById('text-align-center');
+                const alignR = document.getElementById('text-align-right');
+
+                if (editBtn) {
+                    editBtn.addEventListener('click', () => {
+                        const obj = this.getActiveObject();
+                        if (obj && obj.type === 'text') {
+                            this.showTextEditorForObject(obj);
+                        } else {
+                            this.showToast('Select a text object first', 'error');
+                        }
+                    });
+                }
+                if (colorInput) {
+                    colorInput.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        obj.fill = e.target.value;
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.color = obj.fill;
+                        }
+                        this.redrawCanvas();
+                        this.saveToHistory('Text Color');
+                    });
+                }
+                if (ffSelect) {
+                    ffSelect.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        obj.fontFamily = e.target.value;
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily}`;
+                        }
+                        this.ensureFontLoaded(obj.fontFamily, obj.fontWeight || '400', obj.fontSize || 32).then(() => {
+                            this.updateTextMetrics(obj);
+                            this.redrawCanvas();
+                            this.saveToHistory('Text Font Family');
+                        });
+                    });
+                }
+                if (fsInput) {
+                    fsInput.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        const sz = parseInt(e.target.value, 10) || 12;
+                        obj.fontSize = Math.max(6, Math.min(300, sz));
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize}px ${obj.fontFamily||'Arial'}`;
+                        }
+                        this.ensureFontLoaded(obj.fontFamily || 'Arial', obj.fontWeight || '400', obj.fontSize).then(() => {
+                            this.updateTextMetrics(obj);
+                            this.redrawCanvas();
+                            this.saveToHistory('Text Size');
+                        });
+                    });
+                }
+                if (fwSelect) {
+                    fwSelect.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        obj.fontWeight = e.target.value;
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.font = `${obj.fontWeight} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                        }
+                        this.ensureFontLoaded(obj.fontFamily || 'Arial', obj.fontWeight, obj.fontSize || 32).then(() => {
+                            this.updateTextMetrics(obj);
+                            this.redrawCanvas();
+                            this.saveToHistory('Text Weight');
+                        });
+                    });
+                }
+                if (alignL) alignL.addEventListener('click', () => this.setTextAlign('left'));
+                if (alignC) alignC.addEventListener('click', () => this.setTextAlign('center'));
+                if (alignR) alignR.addEventListener('click', () => this.setTextAlign('right'));
+
+                // Initial controls state
+                this.updateTextControlsUI();
             }
 
             setupSliderEvents() {
@@ -1211,25 +1424,44 @@
             startPaintStroke(point) {
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
-                
-                ctx.globalCompositeOperation = this.state.blendMode;
-                ctx.globalAlpha = this.state.brushSettings.opacity / 100;
-                ctx.strokeStyle = this.state.colors.foreground;
-                ctx.fillStyle = this.state.colors.foreground;
-                ctx.lineWidth = this.state.brushSettings.size;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-
-                this.drawBrushDab(ctx, point);
+                const canUseWasm = this.useWasm && window.WasmEngine && WasmEngine.ready() && (this.state.blendMode === 'source-over');
+                if (canUseWasm) {
+                    // Sync, configure and dab via WASM
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    const { r, g, b } = this.parseHexToRgb(this.state.colors.foreground);
+                    WasmEngine.setColor(r, g, b, 255);
+                    WasmEngine.brushDab(point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    this.wasmStrokeActive = true;
+                } else {
+                    ctx.globalCompositeOperation = this.state.blendMode;
+                    ctx.globalAlpha = this.state.brushSettings.opacity / 100;
+                    ctx.strokeStyle = this.state.colors.foreground;
+                    ctx.fillStyle = this.state.colors.foreground;
+                    ctx.lineWidth = this.state.brushSettings.size;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    this.drawBrushDab(ctx, point);
+                }
             }
 
             continuePaintStroke(point) {
                 if (!this.lastPoint) return;
-                
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
-                
-                this.drawBrushLine(ctx, this.lastPoint, point);
+                const canUseWasm = this.useWasm && window.WasmEngine && WasmEngine.ready() && (this.state.blendMode === 'source-over');
+                if (canUseWasm && this.wasmStrokeActive) {
+                    // No need to resync from canvas on every move; engine has latest pixels
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    const { r, g, b } = this.parseHexToRgb(this.state.colors.foreground);
+                    WasmEngine.setColor(r, g, b, 255);
+                    WasmEngine.brushLine(this.lastPoint.x, this.lastPoint.y, point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    this.drawBrushLine(ctx, this.lastPoint, point);
+                }
             }
 
             drawBrushDab(ctx, point) {
@@ -1277,27 +1509,38 @@
             startEraseStroke(point) {
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
-                
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.globalAlpha = this.state.brushSettings.opacity / 100;
-                ctx.lineWidth = this.state.brushSettings.size;
-                ctx.lineCap = 'round';
-
-                ctx.beginPath();
-                ctx.arc(point.x, point.y, this.state.brushSettings.size / 2, 0, Math.PI * 2);
-                ctx.fill();
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    WasmEngine.eraserDab(point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    this.wasmStrokeActive = true;
+                } else {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.globalAlpha = this.state.brushSettings.opacity / 100;
+                    ctx.lineWidth = this.state.brushSettings.size;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, this.state.brushSettings.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             }
 
             continueEraseStroke(point) {
                 if (!this.lastPoint) return;
-                
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
-                
-                ctx.beginPath();
-                ctx.moveTo(this.lastPoint.x, this.lastPoint.y);
-                ctx.lineTo(point.x, point.y);
-                ctx.stroke();
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready() && this.wasmStrokeActive) {
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    WasmEngine.eraserLine(this.lastPoint.x, this.lastPoint.y, point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(this.lastPoint.x, this.lastPoint.y);
+                    ctx.lineTo(point.x, point.y);
+                    ctx.stroke();
+                }
             }
 
             pickColorFromCanvas(point) {
@@ -1417,48 +1660,60 @@
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
                 const size = this.state.brushSettings.size;
-                
-                const x = Math.max(0, point.x - size/2);
-                const y = Math.max(0, point.y - size/2);
+                const x = Math.max(0, Math.floor(point.x - size/2));
+                const y = Math.max(0, Math.floor(point.y - size/2));
                 const width = Math.min(size, ctx.canvas.width - x);
                 const height = Math.min(size, ctx.canvas.height - y);
-                
                 if (width <= 0 || height <= 0) return;
-                
-                const imageData = ctx.getImageData(x, y, width, height);
-                const strength = this.state.brushSettings.opacity / 100 * 0.1;
-                
-                for (let i = 0; i < imageData.data.length; i += 4) {
-                    if (this.state.currentTool === 'dodge') {
-                        imageData.data[i] = Math.min(255, imageData.data[i] * (1 + strength));
-                        imageData.data[i + 1] = Math.min(255, imageData.data[i + 1] * (1 + strength));
-                        imageData.data[i + 2] = Math.min(255, imageData.data[i + 2] * (1 + strength));
-                    } else {
-                        imageData.data[i] = Math.max(0, imageData.data[i] * (1 - strength));
-                        imageData.data[i + 1] = Math.max(0, imageData.data[i + 1] * (1 - strength));
-                        imageData.data[i + 2] = Math.max(0, imageData.data[i + 2] * (1 - strength));
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    const dodge = this.state.currentTool === 'dodge';
+                    const strength = this.state.brushSettings.opacity / 100 * 0.1;
+                    WasmEngine.dodgeBurn(x, y, Math.floor(width), Math.floor(height), dodge, strength);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(x, y, width, height);
+                    const strength = this.state.brushSettings.opacity / 100 * 0.1;
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        if (this.state.currentTool === 'dodge') {
+                            imageData.data[i] = Math.min(255, imageData.data[i] * (1 + strength));
+                            imageData.data[i + 1] = Math.min(255, imageData.data[i + 1] * (1 + strength));
+                            imageData.data[i + 2] = Math.min(255, imageData.data[i + 2] * (1 + strength));
+                        } else {
+                            imageData.data[i] = Math.max(0, imageData.data[i] * (1 - strength));
+                            imageData.data[i + 1] = Math.max(0, imageData.data[i + 1] * (1 - strength));
+                            imageData.data[i + 2] = Math.max(0, imageData.data[i + 2] * (1 - strength));
+                        }
                     }
+                    ctx.putImageData(imageData, x, y);
                 }
-                
-                ctx.putImageData(imageData, x, y);
             }
 
             handleBlurSharpen(point) {
                 const currentLayer = this.getCurrentLayer();
                 const ctx = currentLayer.canvas.getContext('2d');
                 const size = this.state.brushSettings.size;
-                
-                const x = Math.max(0, point.x - size/2);
-                const y = Math.max(0, point.y - size/2);
+                const x = Math.max(0, Math.floor(point.x - size/2));
+                const y = Math.max(0, Math.floor(point.y - size/2));
                 const width = Math.min(size, ctx.canvas.width - x);
                 const height = Math.min(size, ctx.canvas.height - y);
-                
                 if (width <= 0 || height <= 0) return;
-                
-                if (this.state.currentTool === 'blur') {
-                    this.applyBlurEffect(ctx, x, y, width, height);
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    if (this.state.currentTool === 'blur') {
+                        WasmEngine.blurRegion(x, y, Math.floor(width), Math.floor(height));
+                    } else {
+                        WasmEngine.sharpenRegion(x, y, Math.floor(width), Math.floor(height));
+                    }
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
                 } else {
-                    this.applySharpenEffect(ctx, x, y, width, height);
+                    if (this.state.currentTool === 'blur') {
+                        this.applyBlurEffect(ctx, x, y, width, height);
+                    } else {
+                        this.applySharpenEffect(ctx, x, y, width, height);
+                    }
                 }
             }
 
@@ -1561,6 +1816,8 @@
             }
 
             finishStroke() {
+                // End any active WASM stroke session
+                this.wasmStrokeActive = false;
                 if (this.state.currentTool === 'select' && this.state.selection) {
                     this.showToast(`Selection: ${Math.round(this.state.selection.width)}x${Math.round(this.state.selection.height)}`);
                 }
@@ -1708,64 +1965,109 @@
             }
 
             applyGaussianBlur(ctx) {
-                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-                const output = new Uint8ClampedArray(imageData.data);
-                const radius = 3;
-
-                for (let y = radius; y < ctx.canvas.height - radius; y++) {
-                    for (let x = radius; x < ctx.canvas.width - radius; x++) {
-                        let r = 0, g = 0, b = 0, count = 0;
-
-                        for (let dy = -radius; dy <= radius; dy++) {
-                            for (let dx = -radius; dx <= radius; dx++) {
-                                const weight = Math.exp(-(dx*dx + dy*dy) / (2 * radius * radius));
-                                const idx = ((y + dy) * ctx.canvas.width + (x + dx)) * 4;
-                                
-                                r += imageData.data[idx] * weight;
-                                g += imageData.data[idx + 1] * weight;
-                                b += imageData.data[idx + 2] * weight;
-                                count += weight;
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.gaussianBlur(3);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const output = new Uint8ClampedArray(imageData.data);
+                    const radius = 3;
+                    for (let y = radius; y < ctx.canvas.height - radius; y++) {
+                        for (let x = radius; x < ctx.canvas.width - radius; x++) {
+                            let r = 0, g = 0, b = 0, count = 0;
+                            for (let dy = -radius; dy <= radius; dy++) {
+                                for (let dx = -radius; dx <= radius; dx++) {
+                                    const weight = Math.exp(-(dx*dx + dy*dy) / (2 * radius * radius));
+                                    const idx = ((y + dy) * ctx.canvas.width + (x + dx)) * 4;
+                                    r += imageData.data[idx] * weight;
+                                    g += imageData.data[idx + 1] * weight;
+                                    b += imageData.data[idx + 2] * weight;
+                                    count += weight;
+                                }
                             }
+                            const idx = (y * ctx.canvas.width + x) * 4;
+                            output[idx] = r / count;
+                            output[idx + 1] = g / count;
+                            output[idx + 2] = b / count;
                         }
-
-                        const idx = (y * ctx.canvas.width + x) * 4;
-                        output[idx] = r / count;
-                        output[idx + 1] = g / count;
-                        output[idx + 2] = b / count;
                     }
+                    ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
                 }
-
-                ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
             }
 
             applyMotionBlur(ctx) {
-                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-                const output = new Uint8ClampedArray(imageData.data);
-                const distance = 10;
-
-                for (let y = 0; y < ctx.canvas.height; y++) {
-                    for (let x = 0; x < ctx.canvas.width; x++) {
-                        let r = 0, g = 0, b = 0, count = 0;
-
-                        for (let i = -distance; i <= distance; i++) {
-                            const nx = x + i;
-                            if (nx >= 0 && nx < ctx.canvas.width) {
-                                const idx = (y * ctx.canvas.width + nx) * 4;
-                                r += imageData.data[idx];
-                                g += imageData.data[idx + 1];
-                                b += imageData.data[idx + 2];
-                                count++;
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.motionBlur(10);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const output = new Uint8ClampedArray(imageData.data);
+                    const distance = 10;
+                    for (let y = 0; y < ctx.canvas.height; y++) {
+                        for (let x = 0; x < ctx.canvas.width; x++) {
+                            let r = 0, g = 0, b = 0, count = 0;
+                            for (let i = -distance; i <= distance; i++) {
+                                const nx = x + i;
+                                if (nx >= 0 && nx < ctx.canvas.width) {
+                                    const idx = (y * ctx.canvas.width + nx) * 4;
+                                    r += imageData.data[idx];
+                                    g += imageData.data[idx + 1];
+                                    b += imageData.data[idx + 2];
+                                    count++;
+                                }
                             }
+                            const idx = (y * ctx.canvas.width + x) * 4;
+                            output[idx] = r / count;
+                            output[idx + 1] = g / count;
+                            output[idx + 2] = b / count;
                         }
-
-                        const idx = (y * ctx.canvas.width + x) * 4;
-                        output[idx] = r / count;
-                        output[idx + 1] = g / count;
-                        output[idx + 2] = b / count;
                     }
+                    ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
                 }
+            }
 
-                ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
+            applyOilPainting(ctx) {
+                // Simple posterization + slight blur as an approximation
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.gaussianBlur(2);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                }
+                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                const levels = 8;
+                const step = 255 / (levels - 1);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i]   = Math.round(imageData.data[i]   / step) * step;
+                    imageData.data[i+1] = Math.round(imageData.data[i+1] / step) * step;
+                    imageData.data[i+2] = Math.round(imageData.data[i+2] / step) * step;
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            applyWatercolor(ctx) {
+                // Strong blur + posterize for watercolor-like look
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.gaussianBlur(4);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    this.applyGaussianBlur(ctx);
+                }
+                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                const levels = 10;
+                const step = 255 / (levels - 1);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i]   = Math.round(imageData.data[i]   / step) * step;
+                    imageData.data[i+1] = Math.round(imageData.data[i+1] / step) * step;
+                    imageData.data[i+2] = Math.round(imageData.data[i+2] / step) * step;
+                }
+                ctx.putImageData(imageData, 0, 0);
             }
 
             applyPencilSketch(ctx) {
@@ -1798,49 +2100,56 @@
             }
 
             applyNoise(ctx) {
-                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-                const intensity = 50;
-
-                for (let i = 0; i < imageData.data.length; i += 4) {
-                    const noise = (Math.random() - 0.5) * intensity;
-                    imageData.data[i] = Math.max(0, Math.min(255, imageData.data[i] + noise));
-                    imageData.data[i + 1] = Math.max(0, Math.min(255, imageData.data[i + 1] + noise));
-                    imageData.data[i + 2] = Math.max(0, Math.min(255, imageData.data[i + 2] + noise));
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.addNoise(50);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const intensity = 50;
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        const noise = (Math.random() - 0.5) * intensity;
+                        imageData.data[i] = Math.max(0, Math.min(255, imageData.data[i] + noise));
+                        imageData.data[i + 1] = Math.max(0, Math.min(255, imageData.data[i + 1] + noise));
+                        imageData.data[i + 2] = Math.max(0, Math.min(255, imageData.data[i + 2] + noise));
+                    }
+                    ctx.putImageData(imageData, 0, 0);
                 }
-
-                ctx.putImageData(imageData, 0, 0);
             }
 
             applyNoiseReduction(ctx) {
-                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
-                const output = new Uint8ClampedArray(imageData.data);
-
-                for (let y = 1; y < ctx.canvas.height - 1; y++) {
-                    for (let x = 1; x < ctx.canvas.width - 1; x++) {
-                        const pixels = [];
-
-                        for (let dy = -1; dy <= 1; dy++) {
-                            for (let dx = -1; dx <= 1; dx++) {
-                                const idx = ((y + dy) * ctx.canvas.width + (x + dx)) * 4;
-                                pixels.push([
-                                    imageData.data[idx],
-                                    imageData.data[idx + 1],
-                                    imageData.data[idx + 2]
-                                ]);
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.reduceNoise();
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const output = new Uint8ClampedArray(imageData.data);
+                    for (let y = 1; y < ctx.canvas.height - 1; y++) {
+                        for (let x = 1; x < ctx.canvas.width - 1; x++) {
+                            const pixels = [];
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    const idx = ((y + dy) * ctx.canvas.width + (x + dx)) * 4;
+                                    pixels.push([
+                                        imageData.data[idx],
+                                        imageData.data[idx + 1],
+                                        imageData.data[idx + 2]
+                                    ]);
+                                }
                             }
+                            pixels.sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
+                            const median = pixels[4];
+                            const idx = (y * ctx.canvas.width + x) * 4;
+                            output[idx] = median[0];
+                            output[idx + 1] = median[1];
+                            output[idx + 2] = median[2];
                         }
-
-                        pixels.sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
-                        const median = pixels[4];
-
-                        const idx = (y * ctx.canvas.width + x) * 4;
-                        output[idx] = median[0];
-                        output[idx + 1] = median[1];
-                        output[idx + 2] = median[2];
                     }
+                    ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
                 }
-
-                ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
             }
 
             // File operations
@@ -1896,6 +2205,10 @@
                             this.redrawCanvas();
                             this.saveToHistory('Open File');
                             this.showToast('Image loaded successfully');
+                            // Resize WASM engine to new canvas size
+                            if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                                WasmEngine.resize(this.canvas.width, this.canvas.height);
+                            }
                         };
                         img.src = event.target.result;
                     };
@@ -2213,7 +2526,7 @@
                 return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'image', img, x, y, width: w, height: h, rotation: 0, scaleX: 1, scaleY: 1, flipX: false, flipY: false, visible: true, opacity: 1 };
             }
             createTextObject(text, x, y) {
-                return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'text', text: text || 'Text', x, y, fontFamily: 'Arial', fontSize: 32, fontWeight: '400', fill: '#000000', width: 160, height: 40, rotation: 0, scaleX: 1, scaleY: 1, align: 'left' };
+                return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'text', text: text || 'Text', x, y, fontFamily: 'Roboto', fontSize: 32, fontWeight: '400', fill: '#000000', width: 160, height: 40, rotation: 0, scaleX: 1, scaleY: 1, align: 'left' };
             }
             getActiveObject() { return this.state.objects.find(o => o.id === this.state.activeObjectId) || null; }
             setActiveObject(id) { this.state.activeObjectId = id; this.updateObjectInfoUI(); this.redrawCanvas(); }
@@ -2225,6 +2538,26 @@
                 const deg = Math.round((obj.rotation || 0) * 180 / Math.PI);
                 rotateInput.value = deg;
                 info.textContent = `${obj.type} @ (${Math.round(obj.x)}, ${Math.round(obj.y)}) ${Math.round(obj.width)}x${Math.round(obj.height)}`;
+                this.updateTextControlsUI();
+            }
+            updateTextControlsUI() {
+                const obj = this.getActiveObject();
+                const enabled = !!obj && obj.type === 'text';
+                const ids = ['text-edit-btn','text-color','text-font-family','text-font-size','text-font-weight','text-align-left','text-align-center','text-align-right'];
+                ids.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !enabled; });
+                if (enabled) {
+                    const colorInput = document.getElementById('text-color'); if (colorInput) colorInput.value = obj.fill || '#000000';
+                    const ff = document.getElementById('text-font-family'); if (ff) ff.value = obj.fontFamily || 'Arial';
+                    const fs = document.getElementById('text-font-size'); if (fs) fs.value = obj.fontSize || 32;
+                    const fw = document.getElementById('text-font-weight'); if (fw) fw.value = obj.fontWeight || '400';
+                }
+            }
+            setTextAlign(align) {
+                const obj = this.getActiveObject();
+                if (!obj || obj.type !== 'text') return;
+                obj.align = align;
+                this.redrawCanvas();
+                this.saveToHistory('Text Align');
             }
             drawObject(ctx, obj) {
                 ctx.save();
@@ -2236,12 +2569,14 @@
                 } else if (obj.type === 'text') {
                     ctx.fillStyle = obj.fill || '#000';
                     ctx.textBaseline = 'top';
-                    ctx.textAlign = (obj.align||'left');
+                    const align = (obj.align||'left');
+                    ctx.textAlign = align;
                     ctx.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
                     const lines = (obj.text||'').split('\n');
                     const lineHeight = (obj.fontSize||32) * 1.2;
+                    const anchorX = align === 'center' ? 0 : (align === 'right' ? obj.width/2 : -obj.width/2);
                     lines.forEach((line, i) => {
-                        ctx.fillText(line, -obj.width/2, -obj.height/2 + i*lineHeight, obj.width);
+                        ctx.fillText(line, anchorX, -obj.height/2 + i*lineHeight, obj.width);
                     });
                 }
                 ctx.restore();
@@ -2341,6 +2676,8 @@
                 }
             }
             finishStroke() {
+                // End any active WASM stroke session
+                this.wasmStrokeActive = false;
                 if (this.state.currentTool === 'select' && this.state.selection) {
                     this.showToast(`Selection: ${Math.round(this.state.selection.width)}x${Math.round(this.state.selection.height)}`);
                 }
@@ -2368,7 +2705,17 @@
             }
             insertText() { this.selectTool('text'); this.showToast('Click on canvas to place text'); }
             handleTextToolDown(point) {
-                const obj = this.createTextObject('Text', point.x, point.y);
+                // If clicking on existing text, edit it
+                for (let i = this.state.objects.length - 1; i >= 0; i--) {
+                    const o = this.state.objects[i];
+                    if (o.type === 'text' && this.hitTestObject(o, point)) {
+                        this.setActiveObject(o.id);
+                        this.showTextEditorForObject(o);
+                        return;
+                    }
+                }
+                // Create a new, empty text object so typing doesn't append to the word "Text"
+                const obj = this.createTextObject('', point.x, point.y);
                 this.state.objects.push(obj); this.setActiveObject(obj.id);
                 this.showTextEditorForObject(obj);
             }
@@ -2377,22 +2724,63 @@
                 const rect = this.wrapper.getBoundingClientRect();
                 this.textEditor.style.left = `${obj.x}px`; this.textEditor.style.top = `${obj.y}px`;
                 this.textEditor.style.width = `${obj.width}px`; this.textEditor.style.height = `${obj.height}px`;
-                this.textEditor.style.display = 'block'; this.textEditor.value = obj.text || '';
+                this.textEditor.style.display = 'block';
+                // If the object still has the default label, start with an empty editor but show a placeholder
+                const isDefault = (obj.text === 'Text');
+                this.textEditor.value = isDefault ? '' : (obj.text || '');
+                this.textEditor.placeholder = 'Text';
                 this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
                 this.textEditor.style.color = obj.fill || '#000';
+                this.textEditor.style.textAlign = obj.align || 'left';
                 this.textEditor.focus();
+                // Select all text so new typing replaces existing content
+                try { this.textEditor.setSelectionRange(0, this.textEditor.value.length); } catch(e) {}
             }
             commitTextEditor() {
                 if (!this.textEditor || this.textEditor.style.display === 'none') return;
-                const obj = this.getActiveObject(); if (obj && obj.type === 'text') {
+                const obj = this.getActiveObject();
+                const finalize = () => {
+                    this.textEditor.style.display = 'none';
+                    this.saveToHistory('Edit Text');
+                    this.redrawCanvas();
+                };
+                if (obj && obj.type === 'text') {
                     obj.text = this.textEditor.value;
-                    const lines = obj.text.split('\n'); const lineHeight = (obj.fontSize||32) * 1.2; obj.height = Math.max(lineHeight, lines.length * lineHeight);
-                    // approximate width by max measure
-                    const measure = (text)=>{ const c=this.ctx; c.save(); c.font=`${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`; const m = Math.max(...lines.map(l=>c.measureText(l).width), 1); c.restore(); return m; };
-                    obj.width = Math.max(60, Math.min(this.canvas.width, measure(obj.text)) + 10);
+                    this.ensureFontLoaded(obj.fontFamily || 'Roboto', obj.fontWeight || '400', obj.fontSize || 32)
+                        .then(() => { this.updateTextMetrics(obj); })
+                        .finally(finalize);
+                } else {
+                    finalize();
                 }
-                this.textEditor.style.display = 'none';
-                this.saveToHistory('Edit Text'); this.redrawCanvas();
+            }
+
+            handleDoubleClick(e) {
+                const point = this.getMousePos(e);
+                // Edit topmost text object under cursor
+                for (let i = this.state.objects.length - 1; i >= 0; i--) {
+                    const obj = this.state.objects[i];
+                    if (obj.type === 'text' && this.hitTestObject(obj, point)) {
+                        this.setActiveObject(obj.id);
+                        this.showTextEditorForObject(obj);
+                        return;
+                    }
+                }
+            }
+
+            updateTextMetrics(obj) {
+                if (!obj || obj.type !== 'text') return;
+                const lines = (obj.text || '').split('\n');
+                const lineHeight = (obj.fontSize || 32) * 1.2;
+                obj.height = Math.max(lineHeight, lines.length * lineHeight);
+                const c = this.ctx;
+                c.save();
+                c.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                let maxWidth = 1;
+                for (const line of lines) {
+                    maxWidth = Math.max(maxWidth, c.measureText(line).width);
+                }
+                c.restore();
+                obj.width = Math.max(60, Math.min(this.canvas.width, maxWidth) + 10);
             }
 
             // Object ops
@@ -2401,7 +2789,7 @@
             duplicateSelected() { const obj=this.getActiveObject(); if (!obj) return; const copy=this.deserializeObject(this.serializeObject(obj)); copy.id=`obj-${Date.now()}`; copy.x+=20; copy.y+=20; this.state.objects.push(copy); this.setActiveObject(copy.id); this.saveToHistory('Duplicate Object'); }
             deleteSelected() { const id=this.state.activeObjectId; if (!id) return; this.state.objects = this.state.objects.filter(o=>o.id!==id); this.state.activeObjectId=null; this.updateObjectInfoUI(); this.saveToHistory('Delete Object'); this.redrawCanvas(); }
             flipSelected(axis) { const obj=this.getActiveObject(); if (!obj) return; if (axis==='h') obj.flipX=!obj.flipX; if (axis==='v') obj.flipY=!obj.flipY; this.saveToHistory('Flip Object'); this.redrawCanvas(); }
-            exportSelected() { const obj=this.getActiveObject(); if (!obj) return; const c=document.createElement('canvas'); c.width=obj.width; c.height=obj.height; const cx=c.getContext('2d'); cx.imageSmoothingQuality='high'; cx.save(); cx.translate(obj.width/2,obj.height/2); cx.rotate(obj.rotation||0); cx.scale((obj.flipX?-1:1)*(obj.scaleX||1),(obj.flipY?-1:1)*(obj.scaleY||1)); if (obj.type==='image'){cx.drawImage(obj.img,-obj.width/2,-obj.height/2,obj.width,obj.height);} else {cx.fillStyle=obj.fill||'#000'; cx.font=`${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`; const lines=(obj.text||'').split('\n'); const lh=(obj.fontSize||32)*1.2; lines.forEach((line,i)=>cx.fillText(line,-obj.width/2,-obj.height/2+i*lh,obj.width));} cx.restore(); const link=document.createElement('a'); link.download='selection.png'; link.href=c.toDataURL('image/png'); link.click(); }
+            exportSelected() { const obj=this.getActiveObject(); if (!obj) return; const c=document.createElement('canvas'); c.width=obj.width; c.height=obj.height; const cx=c.getContext('2d'); cx.imageSmoothingQuality='high'; cx.save(); cx.translate(obj.width/2,obj.height/2); cx.rotate(obj.rotation||0); cx.scale((obj.flipX?-1:1)*(obj.scaleX||1),(obj.flipY?-1:1)*(obj.scaleY||1)); if (obj.type==='image'){cx.drawImage(obj.img,-obj.width/2,-obj.height/2,obj.width,obj.height);} else {cx.fillStyle=obj.fill||'#000'; const align=(obj.align||'left'); cx.textAlign=align; cx.font=`${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`; const lines=(obj.text||'').split('\n'); const lh=(obj.fontSize||32)*1.2; const anchorX = align==='center'?0:(align==='right'?obj.width/2:-obj.width/2); lines.forEach((line,i)=>cx.fillText(line,anchorX,-obj.height/2+i*lh,obj.width));} cx.restore(); const link=document.createElement('a'); link.download='selection.png'; link.href=c.toDataURL('image/png'); link.click(); }
             nudgeSelected(dir, step) { const obj=this.getActiveObject(); if (!obj) return; if (dir==='arrowup') obj.y-=step; if (dir==='arrowdown') obj.y+=step; if (dir==='arrowleft') obj.x-=step; if (dir==='arrowright') obj.x+=step; this.redrawCanvas(); this.saveToHistory('Nudge Object'); }
             copySelected() { const obj=this.getActiveObject(); if (obj) this.state.objectClipboard = this.serializeObject(obj); }
             pasteSelected() { const clip=this.state.objectClipboard; if (!clip) return; const obj=this.deserializeObject(clip); obj.id=`obj-${Date.now()}`; obj.x+=30; obj.y+=30; this.state.objects.push(obj); this.setActiveObject(obj.id); this.saveToHistory('Paste Object'); }
@@ -2446,11 +2834,81 @@
                 return `rgba(${r}, ${g}, ${b}, ${alpha})`;
             }
 
+            parseHexToRgb(hex) {
+                const r = parseInt(hex.slice(1, 3), 16) || 0;
+                const g = parseInt(hex.slice(3, 5), 16) || 0;
+                const b = parseInt(hex.slice(5, 7), 16) || 0;
+                return { r, g, b };
+            }
+
             rgbaToHex(r, g, b) {
                 return '#' + [r, g, b].map(x => {
                     const hex = x.toString(16);
                     return hex.length === 1 ? '0' + hex : hex;
                 }).join('');
+            }
+
+            ensureFontLoaded(family, weight = '400', size = 32) {
+                try {
+                    if (document.fonts && document.fonts.load) {
+                        const desc = `${weight} ${size}px ${family}`;
+                        return document.fonts.load(desc, ' ');
+                    }
+                } catch (e) { /* no-op */ }
+                return Promise.resolve();
+            }
+
+            // =============== Menu bar ===============
+            setupMenuBar() {
+                const menuItems = document.querySelectorAll('.menu-bar .menu-item');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        // Toggle this menu; close others
+                        const isOpen = item.classList.contains('open');
+                        this.closeAllMenus();
+                        if (!isOpen) item.classList.add('open');
+                        e.stopPropagation();
+                    });
+                });
+
+                // Menu actions
+                document.querySelectorAll('.menu-action').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const action = btn.getAttribute('data-action');
+                        this.handleMenuAction(action);
+                        this.closeAllMenus();
+                        e.stopPropagation();
+                    });
+                });
+
+                // Click outside to close
+                document.addEventListener('click', () => this.closeAllMenus());
+                // Escape closes menus
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeAllMenus();
+                });
+            }
+
+            closeAllMenus() {
+                document.querySelectorAll('.menu-bar .menu-item.open').forEach(el => el.classList.remove('open'));
+            }
+
+            handleMenuAction(action) {
+                switch (action) {
+                    case 'file-new': this.newDocument(); break;
+                    case 'file-open': this.openFile(); break;
+                    case 'file-save': this.saveFile(); break;
+                    case 'edit-undo': this.undo(); break;
+                    case 'edit-redo': this.redo(); break;
+                    case 'insert-image': this.insertImage(); break;
+                    case 'insert-text': this.insertText(); break;
+                    case 'view-fit': this.fitToScreen(); break;
+                    case 'view-actual': this.setZoom(1); break;
+                    case 'view-grid': this.toggleGrid(); break;
+                    case 'help-about':
+                        this.showToast('Brushes – Professional Photo Editor');
+                        break;
+                }
             }
 
             showToast(message, type = 'success') {
