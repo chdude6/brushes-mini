@@ -1,6 +1,6 @@
 This is a website. Feel free to visit it at https://ilovelasagne.github.io/brushes/
 # Brushes.
-## An image manipulator like no other.
+## An image editor like no other.
 Free. Open source. Powerful. Web based.
 ## FAQ
 ### "I can't edit the text content??"
