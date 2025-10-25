@@ -36,7 +36,7 @@
         body {
             font-family: 'Roboto', 'Open Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
             background: var(--bg-primary);
-            color: var(--text-primary);
+            color: var(---text-primary);
             overflow: hidden;
             font-size: 12px;
         }
@@ -679,74 +679,127 @@
             background: var(--hover-color);
         }
 
-        /* Recent Projects Modal */
+        /* Recent Projects Modal (No longer used, replaced by Home) */
         .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
+            display: none; /* Replaced by Home Screen */
         }
 
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow: hidden;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 18px;
-            font-weight: 600;
+        /* --- Home Screen Styles --- */
+        .home-screen {
+            flex: 1;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            background: var(--bg-primary);
             color: var(--text-primary);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-close:hover {
-            background: var(--hover-color);
-            color: var(--text-primary);
-        }
-
-        .modal-body {
-            padding: 20px;
-            max-height: 60vh;
+            padding: 40px;
             overflow-y: auto;
         }
 
+        .app-container.home-active .home-screen {
+            display: flex;
+        }
+
+        /* Hide editor UI when home is active */
+        .app-container.home-active .tool-bar,
+        .app-container.home-active .workspace,
+        .app-container.home-active .status-bar,
+        .app-container.home-active .tabs-container {
+            display: none;
+        }
+
+        .home-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .home-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .home-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        #draft-permission-prompt {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 0 auto 32px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        #draft-permission-prompt p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        #draft-permission-prompt .permission-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .home-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .home-btn.primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+        .home-btn.primary:hover {
+            background: #008cff;
+        }
+        
+        .home-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .home-btn.secondary:hover {
+            background: var(--hover-color);
+        }
+
+        #home-actions {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        #home-create-new {
+            font-size: 16px;
+            padding: 12px 24px;
+        }
+        
+        .drafts-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        #drafts-list-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Re-use project card styles from modal */
         .recent-projects-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -846,10 +899,11 @@
             margin-bottom: 16px;
             opacity: 0.5;
         }
+
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="app-container" id="app-container">
         <!-- Menu Bar -->
         <div class="menu-bar">
             <div class="logo">Brushes</div>
@@ -857,7 +911,7 @@
                 <div class="menu-dropdown">
                     <button class="menu-action" data-action="file-new">New…</button>
                     <button class="menu-action" data-action="file-open">Open…</button>
-                    <button class="menu-action" data-action="file-recent">Recent Projects…</button>
+                    <button class="menu-action" data-action="file-recent">Open Home…</button>
                     <hr class="menu-sep"/>
                     <button class="menu-action" data-action="file-save">Save</button>
                     <button class="menu-action" data-action="file-save-as">Save As…</button>
@@ -888,6 +942,31 @@
                 <div class="menu-dropdown">
                     <button class="menu-action" data-action="help-about">About</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="home-screen" id="home-screen">
+            <div class="home-header">
+                <h1>Welcome to Brushes</h1>
+                <p>Your professional open-source photo editor.</p>
+            </div>
+
+            <div id="draft-permission-prompt" style="display: none;">
+                <p>Enable auto-saving drafts to your computer? <br/> This uses cookies to store your work automatically so you don't lose progress.</p>
+                <div class="permission-buttons">
+                    <button class="home-btn primary" id="draft-yes">Yes, enable auto-save</button>
+                    <button class="home-btn secondary" id="draft-no">No, not right now</button>
+                </div>
+            </div>
+
+            <div id="home-actions">
+                <button class="home-btn primary" id="home-create-new">Create New Project</button>
+            </div>
+
+            <h3 class="drafts-header" id="drafts-header">Projects</h3>
+            <div id="drafts-list-container">
+                <!-- Drafts/Projects will be loaded here -->
             </div>
         </div>
 
@@ -1063,7 +1142,7 @@
                         <select id="text-font-weight" class="blend-select" style="width:90px;">
                             <option value="200">200</option>
                             <option value="300">300</option>
-                            <option value="400" selected>400</option>
+                            <option value_a="400" selected>400</option>
                             <option value="500">500</option>
                             <option value="600">600</option>
                             <option value="700">700</option>
@@ -1162,19 +1241,8 @@
         </div>
     </div>
 
-    <!-- Recent Projects Modal -->
+    <!-- Modal for "Recent Projects" - no longer used -->
     <div class="modal-overlay" id="recent-projects-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2 class="modal-title">Recent Projects</h2>
-                <button class="modal-close" onclick="editor.closeRecentProjectsModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div id="recent-projects-content">
-                    <!-- Recent projects will be loaded here -->
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="dist/brushes_wasm.js"></script>
@@ -1215,11 +1283,14 @@
                     projectName: 'Untitled Project',
                     openTabs: [],
                     activeTabId: null,
-                    tabsVisible: true
+                    tabsVisible: true,
+                    // Drafts
+                    draftsEnabled: null, // null = not set, true, false
                 };
 
-                // Recent projects storage
-                this.recentProjects = this.loadRecentProjects();
+                // Storage
+                this.recentProjects = []; // Used for localStorage
+                this.cookieDraftsIndex = []; // Used for cookie drafts
                 this.autosaveInterval = null;
 
                 this.canvas = document.getElementById('main-canvas');
@@ -1241,53 +1312,201 @@
                 this.ctx.imageSmoothingEnabled = true;
                 this.ctx.imageSmoothingQuality = 'high';
                 
-                this.initializeEditor();
+                this.initializeHomeScreen();
             }
 
-            // ================= Recent Projects Management =================
-            loadRecentProjects() {
-                try {
-                    const projects = localStorage.getItem('brushes-recent-projects');
-                    return projects ? JSON.parse(projects) : [];
-                } catch (e) {
-                    console.warn('Failed to load recent projects:', e);
-                    return [];
+            // ================= Cookie Helpers =================
+            setCookie(name, value, days) {
+                let expires = "";
+                if (days) {
+                    const date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
                 }
+                // Use encodeURIComponent for value, but not for name
+                document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/; SameSite=Lax";
             }
 
-            saveRecentProjects() {
-                try {
-                    localStorage.setItem('brushes-recent-projects', JSON.stringify(this.recentProjects));
-                } catch (e) {
-                    console.warn('Failed to save recent projects:', e);
+            getCookie(name) {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) == 0) {
+                        return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                    }
                 }
+                return null;
+            }
+            
+            deleteCookie(name) {   
+                document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
             }
 
-            addToRecentProjects(projectData) {
-                const existingIndex = this.recentProjects.findIndex(p => p.id === projectData.id);
-                if (existingIndex >= 0) {
-                    this.recentProjects.splice(existingIndex, 1);
+
+            // ================= Home Screen & Initialization =================
+
+            initializeHomeScreen() {
+                // Show home screen first
+                document.getElementById('app-container').classList.add('home-active');
+
+                // Check draft permission
+                const permission = this.getCookie('brushes_drafts_enabled');
+                if (permission === 'true') {
+                    this.state.draftsEnabled = true;
+                    this.setupDraftsUI(true);
+                } else if (permission === 'false') {
+                    this.state.draftsEnabled = false;
+                    this.setupDraftsUI(false);
+                } else {
+                    this.state.draftsEnabled = null;
+                    this.setupDraftsUI(null);
                 }
+
+                // Load and show projects/drafts
+                this.loadAndRenderProjects();
+
+                // Attach home screen listeners
+                document.getElementById('draft-yes').addEventListener('click', () => this.handleDraftPermission(true));
+                document.getElementById('draft-no').addEventListener('click', () => this.handleDraftPermission(false));
+                document.getElementById('home-create-new').addEventListener('click', () => this.createNewFromHome());
+            }
+
+            setupDraftsUI(state) {
+                const prompt = document.getElementById('draft-permission-prompt');
+                const header = document.getElementById('drafts-header');
                 
-                this.recentProjects.unshift({
-                    ...projectData,
-                    lastModified: Date.now()
-                });
+                if (state === null) {
+                    prompt.style.display = 'block';
+                    header.textContent = 'Projects';
+                } else if (state === true) {
+                    prompt.style.display = 'none';
+                    header.textContent = 'Auto-Saved Drafts';
+                } else {
+                    prompt.style.display = 'none';
+                    header.textContent = 'Recent Projects (Local Storage)';
+                }
+            }
 
-                // Keep only the 20 most recent projects
-                if (this.recentProjects.length > 20) {
-                    this.recentProjects = this.recentProjects.slice(0, 20);
+            handleDraftPermission(enable) {
+                this.setCookie('brushes_drafts_enabled', enable ? 'true' : 'false', 365);
+                this.state.draftsEnabled = enable;
+                this.setupDraftsUI(enable);
+                // Re-load and render the list based on the new setting
+                this.loadAndRenderProjects();
+                this.showToast(enable ? 'Auto-save drafts enabled' : 'Auto-save drafts disabled');
+            }
+
+            createNewFromHome() {
+                document.getElementById('app-container').classList.remove('home-active');
+                // Pass null to signal a new project
+                this.finishEditorInitialization(null);
+            }
+
+            loadDraftFromHome(projectId) {
+                document.getElementById('app-container').classList.remove('home-active');
+                // Pass the ID to load
+                this.finishEditorInitialization(projectId);
+            }
+
+            /**
+             * Finishes initializing the main editor UI.
+             * This is called *after* the user leaves the home screen.
+             * @param {string | null} projectIdToLoad - If provided, loads this project. Otherwise, creates a new one.
+             */
+            async finishEditorInitialization(projectIdToLoad = null) {
+                if (projectIdToLoad) {
+                    const projectData = await this.loadProjectData(projectIdToLoad);
+                    if (projectData) {
+                        const tab = this.createNewTab(projectData.name, false); // Don't create new doc
+                        tab.projectId = projectData.id;
+                        tab.saved = true;
+                        this.loadProject(projectData); // This will deserialize
+                    } else {
+                        // Fallback: couldn't load, create new
+                        this.createNewTab('Untitled Project', true);
+                    }
+                } else {
+                    // Create a new tab and a new document
+                    this.createNewTab('Untitled Project', true);
                 }
 
-                this.saveRecentProjects();
+                // Setup all editor event listeners
+                this.initializeEventListeners();
+                this.initializeKeyboardShortcuts();
+                this.attachObjectUIControls();
+                this.setupMenuBar();
+                this.updateUI();
+                this.updateLayersUI();
+                this.updateHistoryUI();
+                this.redrawCanvas();
+                
+                this.setupTabEventListeners();
+                this.setupAutosave();
+
+                // Attempt to initialize the WASM engine (non-blocking)
+                if (window.WasmEngine && typeof WasmEngine.init === 'function') {
+                    WasmEngine.init(this.canvas.width, this.canvas.height)
+                        .then(() => {
+                            this.useWasm = true;
+                            this.showToast('WASM engine enabled');
+                        })
+                        .catch(() => {
+                            this.useWasm = false;
+                        });
+                }
             }
 
-            removeFromRecentProjects(projectId) {
-                this.recentProjects = this.recentProjects.filter(p => p.id !== projectId);
-                this.saveRecentProjects();
-                this.updateRecentProjectsModal();
+            // ================= Project Storage (Unified) =================
+            
+            /** Loads the index of projects/drafts based on user setting */
+            loadProjectsIndex() {
+                if (this.state.draftsEnabled) {
+                    // Load from Cookie
+                    try {
+                        const indexCookie = this.getCookie('brushes_drafts_index');
+                        this.cookieDraftsIndex = indexCookie ? JSON.parse(indexCookie) : [];
+                        return this.cookieDraftsIndex;
+                    } catch (e) {
+                        console.warn('Failed to load cookie draft index:', e);
+                        this.cookieDraftsIndex = [];
+                        return [];
+                    }
+                } else {
+                    // Load from LocalStorage
+                    try {
+                        const projects = localStorage.getItem('brushes-recent-projects');
+                        this.recentProjects = projects ? JSON.parse(projects) : [];
+                        return this.recentProjects;
+                    } catch (e) {
+                        console.warn('Failed to load recent projects from localStorage:', e);
+                        this.recentProjects = [];
+                        return [];
+                    }
+                }
             }
 
+            /** Loads the full data for a single project */
+            async loadProjectData(projectId) {
+                let projectIndex = this.state.draftsEnabled ? this.cookieDraftsIndex : this.recentProjects;
+                const projectInfo = projectIndex.find(p => p.id === projectId);
+                if (!projectInfo) return null;
+
+                if (this.state.draftsEnabled) {
+                    // Load data from its own cookie
+                    const dataCookie = this.getCookie('brushes_draft_' + projectId);
+                    if (dataCookie) {
+                        return { ...projectInfo, data: dataCookie };
+                    }
+                } else {
+                    // Data is already in the `recentProjects` array from localStorage
+                    return projectInfo;
+                }
+                return null;
+            }
+
+            /** Saves the current project state (to cookie or localStorage) */
             saveCurrentProject(name = null) {
                 if (name) {
                     this.state.projectName = name;
@@ -1297,7 +1516,7 @@
                     id: this.state.currentProjectId || `project-${Date.now()}`,
                     name: this.state.projectName,
                     thumbnail: this.generateThumbnail(),
-                    data: this.serializeProject(),
+                    data: this.serializeProject(), // This is the heavy data
                     lastModified: Date.now()
                 };
 
@@ -1305,116 +1524,192 @@
                     this.state.currentProjectId = projectData.id;
                 }
 
-                this.addToRecentProjects(projectData);
-                this.showToast(`Project "${this.state.projectName}" saved`);
+                if (this.state.draftsEnabled) {
+                    this.saveProjectToCookie(projectData);
+                    this.showToast(`Draft "${this.state.projectName}" auto-saved`);
+                } else {
+                    this.saveProjectToLocalStorage(projectData);
+                    this.showToast(`Project "${this.state.projectName}" saved to Recents`);
+                }
                 this.updateActiveTab();
             }
 
+            saveProjectToCookie(projectData) {
+                // Update index
+                this.cookieDraftsIndex = this.cookieDraftsIndex.filter(p => p.id !== projectData.id);
+                // Add simplified info to index
+                this.cookieDraftsIndex.unshift({
+                    id: projectData.id,
+                    name: projectData.name,
+                    lastModified: projectData.lastModified,
+                    thumbnail: projectData.thumbnail
+                });
+                this.cookieDraftsIndex = this.cookieDraftsIndex.slice(0, 20); // Limit index size
+
+                try {
+                    // Save index
+                    this.setCookie('brushes_drafts_index', JSON.stringify(this.cookieDraftsIndex), 365);
+                    // Save full project data in its own cookie
+                    this.setCookie('brushes_draft_' + projectData.id, projectData.data, 365);
+                } catch (e) {
+                    console.error("Failed to save draft to cookie (might be too large):", e);
+                    this.showToast('Failed to save draft. Cookie might be full.', 'error');
+                }
+            }
+
+            saveProjectToLocalStorage(projectData) {
+                // This is the old `addToRecentProjects`
+                const existingIndex = this.recentProjects.findIndex(p => p.id === projectData.id);
+                if (existingIndex >= 0) {
+                    this.recentProjects.splice(existingIndex, 1);
+                }
+                
+                // Full data is stored in the index for localStorage
+                this.recentProjects.unshift(projectData);
+
+                if (this.recentProjects.length > 20) {
+                    this.recentProjects = this.recentProjects.slice(0, 20);
+                }
+                this.saveProjectsIndexToLocalStorage();
+            }
+
+            saveProjectsIndexToLocalStorage() {
+                try {
+                    localStorage.setItem('brushes-recent-projects', JSON.stringify(this.recentProjects));
+                } catch (e) {
+                    console.warn('Failed to save recent projects to localStorage:', e);
+                }
+            }
+
+            deleteProject(projectId) {
+                if (!confirm('Are you sure you want to remove this project? This cannot be undone.')) {
+                    return;
+                }
+
+                if (this.state.draftsEnabled) {
+                    // Delete from cookies
+                    this.cookieDraftsIndex = this.cookieDraftsIndex.filter(p => p.id !== projectId);
+                    this.setCookie('brushes_drafts_index', JSON.stringify(this.cookieDraftsIndex), 365);
+                    this.deleteCookie('brushes_draft_' + projectId);
+                } else {
+                    // Delete from localStorage
+                    this.recentProjects = this.recentProjects.filter(p => p.id !== projectId);
+                    this.saveProjectsIndexToLocalStorage();
+                }
+                this.loadAndRenderProjects(); // Refresh home screen list
+                this.showToast('Project deleted');
+            }
+            
+            // ================= Home Screen UI (was Modal UI) =================
+            
+            showHomeScreen() {
+                document.getElementById('app-container').classList.add('home-active');
+                this.loadAndRenderProjects();
+            }
+
+            /** Renders the project list on the home screen */
+            loadAndRenderProjects() {
+                const projects = this.loadProjectsIndex(); // Gets index from cookie or localStorage
+                const content = document.getElementById('drafts-list-container');
+                if (!content) return;
+
+                if (projects.length === 0) {
+                    const emptyMsg = this.state.draftsEnabled ? 'No auto-saved drafts found' : 'No recent projects found';
+                    content.innerHTML = `
+                        <div class="empty-projects">
+                            <div class="icon">📁</div>
+                            <p>${emptyMsg}</p>
+                            <p>Create a new project to get started.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const projectsHTML = projects.map(project => {
+                    const date = new Date(project.lastModified).toLocaleDateString();
+                    // Use a unique function name for the new home screen load
+                    return `
+                        <div class="project-card" onclick="editor.loadDraftFromHome('${project.id}')">
+                            <div class="project-thumbnail">
+                                ${project.thumbnail ? `<img src="${project.thumbnail}" alt="${project.name}">` : 'No preview'}
+                            </div>
+                            <div class="project-name">${project.name}</div>
+                            <div class="project-date">Modified: ${date}</div>
+                            <div class="project-actions">
+                                <button class="project-action-btn" onclick="event.stopPropagation(); editor.loadDraftFromHome('${project.id}')">Open</button>
+                                <button class="project-action-btn delete" onclick="event.stopPropagation(); editor.deleteProject('${project.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                content.innerHTML = `<div class="recent-projects-grid">${projectsHTML}</div>`;
+            }
+
+            // ================= Project Loading =================
+
+            /**
+             * Loads project data into the editor state.
+             * Assumes projectData.data is the serialized string.
+             */
             loadProject(projectData) {
                 try {
-                    this.deserializeProject(projectData.data);
+                    // Check if data is a string (from cookie) or object (from localStorage)
+                    const dataToDeserialize = typeof projectData.data === 'string' ? JSON.parse(projectData.data) : projectData.data;
+                    this.deserializeProject(dataToDeserialize);
                     this.state.currentProjectId = projectData.id;
                     this.state.projectName = projectData.name;
                     this.updateActiveTab();
                     this.showToast(`Project "${projectData.name}" loaded`);
                 } catch (e) {
                     console.error('Failed to load project:', e);
-                    this.showToast('Failed to load project', 'error');
+                    this.showToast('Failed to load project data', 'error');
                 }
             }
-
-            serializeProject() {
-                return {
-                    layers: this.state.layers.map(layer => ({
-                        ...layer,
-                        canvas: layer.canvas.toDataURL('image/png')
-                    })),
-                    objects: this.cloneObjects(),
-                    canvasSize: {
-                        width: this.canvas.width,
-                        height: this.canvas.height
-                    },
-                    currentLayerId: this.state.currentLayerId,
-                    brushSettings: { ...this.state.brushSettings },
-                    colors: { ...this.state.colors }
-                };
-            }
-
-            deserializeProject(data) {
-                // Clear current state
-                this.state.layers = [];
-                this.state.objects = [];
-                this.state.history = [];
-                this.state.historyIndex = -1;
-
-                // Restore canvas size
-                if (data.canvasSize) {
-                    this.canvas.width = data.canvasSize.width;
-                    this.canvas.height = data.canvasSize.height;
-                }
-
-                // Restore layers
-                const layerPromises = data.layers.map(layerData => {
-                    return new Promise((resolve) => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = this.canvas.width;
-                        canvas.height = this.canvas.height;
-                        const ctx = canvas.getContext('2d');
-
-                        const img = new Image();
-                        img.onload = () => {
-                            ctx.drawImage(img, 0, 0);
-                            resolve({
-                                ...layerData,
-                                canvas: canvas
-                            });
-                        };
-                        img.onerror = () => {
-                            // Create empty layer if image fails to load
-                            resolve({
-                                ...layerData,
-                                canvas: canvas
-                            });
-                        };
-                        img.src = layerData.canvas;
-                    });
-                });
-
-                Promise.all(layerPromises).then(layers => {
-                    this.state.layers = layers;
-                    this.state.currentLayerId = data.currentLayerId;
-                    this.state.brushSettings = { ...this.state.brushSettings, ...data.brushSettings };
-                    this.state.colors = { ...this.state.colors, ...data.colors };
-                    
-                    if (data.objects) {
-                        this.restoreObjects(data.objects);
+            
+            // ================= Autosave =================
+            setupAutosave() {
+                // Autosave every 30 seconds
+                this.autosaveInterval = setInterval(() => {
+                    // Only save if there's an active project
+                    if (this.state.currentProjectId) {
+                        this.saveCurrentProject();
                     }
+                }, 30000);
 
-                    this.updateLayersUI();
-                    this.updateUI();
-                    this.redrawCanvas();
-                    this.saveToHistory('Load Project');
+                // Save on window beforeunload
+                window.addEventListener('beforeunload', () => {
+                    if (this.state.currentProjectId) {
+                        this.saveCurrentProject();
+                    }
                 });
             }
 
-            generateThumbnail() {
-                const thumbnailCanvas = document.createElement('canvas');
-                thumbnailCanvas.width = 200;
-                thumbnailCanvas.height = 150;
-                const ctx = thumbnailCanvas.getContext('2d');
-                
-                // Fill with white background
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-                
-                // Draw scaled version of main canvas
-                ctx.drawImage(this.canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
-                
-                return thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+            // ================= Recent Projects Modal (DEPRECATED, REPLACED BY HOME) =================
+            showRecentProjectsModal() {
+                // This function is now redirected to show the Home Screen
+                this.showHomeScreen();
             }
+            closeRecentProjectsModal() {
+                 // This function is now redirected to show the Home Screen
+                this.showHomeScreen();
+            }
+            updateRecentProjectsModal() {
+                 // This function is now redirected to show the Home Screen
+                this.loadAndRenderProjects();
+            }
+            loadRecentProject(projectId) {
+                // This function is now redirected
+                this.loadDraftFromHome(projectId);
+            }
+            deleteRecentProject(projectId) {
+                // This function is now redirected
+                this.deleteProject(projectId);
+            }
+            // ================= (Original functions continue below) =================
 
             // ================= Tab Management =================
-            createNewTab(name = 'Untitled Project') {
+            createNewTab(name = 'Untitled Project', createNewDoc = true) {
                 const tabId = `tab-${Date.now()}`;
                 const tab = {
                     id: tabId,
@@ -1429,7 +1724,9 @@
                 this.state.currentProjectId = null;
 
                 this.updateTabsUI();
-                this.newDocument();
+                if (createNewDoc) {
+                    this.newDocument(); // This creates the initial layer and history
+                }
                 return tab;
             }
 
@@ -1463,9 +1760,9 @@
 
                 this.state.openTabs.splice(tabIndex, 1);
 
-                // If no tabs left, create a new one
+                // If no tabs left, go back to home screen
                 if (this.state.openTabs.length === 0) {
-                    this.createNewTab();
+                    this.showHomeScreen();
                 } else {
                     this.updateTabsUI();
                 }
@@ -1488,11 +1785,11 @@
                 }
             }
 
-            loadTabState(tab) {
+            async loadTabState(tab) {
                 if (tab.state) {
                     this.deserializeProject(tab.state);
                 } else if (tab.projectId) {
-                    const project = this.recentProjects.find(p => p.id === tab.projectId);
+                    const project = await this.loadProjectData(tab.projectId);
                     if (project) {
                         this.loadProject(project);
                     }
@@ -1539,111 +1836,8 @@
                 if (tabToggleBtn) {
                     tabToggleBtn.addEventListener('click', () => this.toggleTabs());
                 }
-
-                // Close modal when clicking outside
-                const modal = document.getElementById('recent-projects-modal');
-                if (modal) {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            this.closeRecentProjectsModal();
-                        }
-                    });
-                }
             }
 
-            // ================= Autosave =================
-            setupAutosave() {
-                // Autosave every 30 seconds
-                this.autosaveInterval = setInterval(() => {
-                    if (this.state.currentProjectId) {
-                        this.saveCurrentProject();
-                    }
-                }, 30000);
-
-                // Save on window beforeunload
-                window.addEventListener('beforeunload', () => {
-                    if (this.state.currentProjectId) {
-                        this.saveCurrentProject();
-                    }
-                });
-            }
-
-            // ================= Recent Projects Modal =================
-            showRecentProjectsModal() {
-                const modal = document.getElementById('recent-projects-modal');
-                if (modal) {
-                    modal.classList.add('show');
-                    this.updateRecentProjectsModal();
-                }
-            }
-
-            closeRecentProjectsModal() {
-                const modal = document.getElementById('recent-projects-modal');
-                if (modal) {
-                    modal.classList.remove('show');
-                }
-            }
-
-            updateRecentProjectsModal() {
-                const content = document.getElementById('recent-projects-content');
-                if (!content) return;
-
-                if (this.recentProjects.length === 0) {
-                    content.innerHTML = `
-                        <div class="empty-projects">
-                            <div class="icon">📁</div>
-                            <p>No recent projects found</p>
-                            <p>Create a new project or open an existing one to get started.</p>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const projectsHTML = this.recentProjects.map(project => {
-                    const date = new Date(project.lastModified).toLocaleDateString();
-                    return `
-                        <div class="project-card" onclick="editor.loadRecentProject('${project.id}')">
-                            <div class="project-thumbnail">
-                                ${project.thumbnail ? `<img src="${project.thumbnail}" alt="${project.name}">` : 'No preview'}
-                            </div>
-                            <div class="project-name">${project.name}</div>
-                            <div class="project-date">Modified: ${date}</div>
-                            <div class="project-actions">
-                                <button class="project-action-btn" onclick="event.stopPropagation(); editor.loadRecentProject('${project.id}')">Open</button>
-                                <button class="project-action-btn" onclick="event.stopPropagation(); editor.openProjectInNewTab('${project.id}')">New Tab</button>
-                                <button class="project-action-btn delete" onclick="event.stopPropagation(); editor.deleteRecentProject('${project.id}')">Delete</button>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-
-                content.innerHTML = `<div class="recent-projects-grid">${projectsHTML}</div>`;
-            }
-
-            loadRecentProject(projectId) {
-                const project = this.recentProjects.find(p => p.id === projectId);
-                if (project) {
-                    this.loadProject(project);
-                    this.closeRecentProjectsModal();
-                }
-            }
-
-            openProjectInNewTab(projectId) {
-                const project = this.recentProjects.find(p => p.id === projectId);
-                if (project) {
-                    const tab = this.createNewTab(project.name);
-                    tab.projectId = project.id;
-                    tab.saved = true;
-                    this.loadProject(project);
-                    this.closeRecentProjectsModal();
-                }
-            }
-
-            deleteRecentProject(projectId) {
-                if (confirm('Are you sure you want to remove this project from recent projects?')) {
-                    this.removeFromRecentProjects(projectId);
-                }
-            }
 
             // ================= Enhanced File Operations =================
             saveAsProject() {
@@ -1654,35 +1848,8 @@
                 }
             }
 
-            initializeEditor() {
-                this.createInitialLayer();
-                this.initializeEventListeners();
-                this.initializeKeyboardShortcuts();
-                this.attachObjectUIControls();
-                this.setupMenuBar();
-                this.updateUI();
-                this.updateLayersUI();
-                this.updateHistoryUI();
-                this.redrawCanvas();
-                this.saveToHistory('New Document');
-
-                // Initialize tabs system
-                this.createNewTab();
-                this.setupTabEventListeners();
-                this.setupAutosave();
-
-                // Attempt to initialize the WASM engine (non-blocking)
-                if (window.WasmEngine && typeof WasmEngine.init === 'function') {
-                    WasmEngine.init(this.canvas.width, this.canvas.height)
-                        .then(() => {
-                            this.useWasm = true;
-                            this.showToast('WASM engine enabled');
-                        })
-                        .catch(() => {
-                            this.useWasm = false;
-                        });
-                }
-            }
+            // This function is now called by finishEditorInitialization
+            // initializeEditor() { ... } 
 
             createInitialLayer() {
                 const canvas = document.createElement('canvas');
@@ -1879,6 +2046,11 @@
 
             initializeKeyboardShortcuts() {
                 document.addEventListener('keydown', (e) => {
+                    // Stop shortcuts if home is active
+                    if (document.getElementById('app-container').classList.contains('home-active')) {
+                        return;
+                    }
+
                     const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
                     const isEditing = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
                     if (isEditing) return;
@@ -2531,6 +2703,9 @@
                 if (this.state.currentTool === 'select' && this.state.selection) {
                     this.showToast(`Selection: ${Math.round(this.state.selection.width)}x${Math.round(this.state.selection.height)}`);
                 }
+                if (this.state.currentTool === 'transform' && this.draggingObject) {
+                    this.draggingObject = false; this.activeHandle = null; this.transformStart = null; this.saveToHistory('Transform Object');
+                }
             }
 
             // Layer management
@@ -2963,6 +3138,11 @@
 
             // History management
             saveToHistory(action) {
+                // Don't save history if editor isn't active
+                if (document.getElementById('app-container').classList.contains('home-active')) {
+                    return;
+                }
+
                 const currentLayer = this.getCurrentLayer();
                 if (!currentLayer) return;
 
@@ -3389,17 +3569,7 @@
                     obj.x = newX; obj.y = newY; obj.width = newW; obj.height = newH;
                 }
             }
-            finishStroke() {
-                // End any active WASM stroke session
-                this.wasmStrokeActive = false;
-                if (this.state.currentTool === 'select' && this.state.selection) {
-                    this.showToast(`Selection: ${Math.round(this.state.selection.width)}x${Math.round(this.state.selection.height)}`);
-                }
-                if (this.state.currentTool === 'transform' && this.draggingObject) {
-                    this.draggingObject = false; this.activeHandle = null; this.transformStart = null; this.saveToHistory('Transform Object');
-                }
-            }
-
+            
             // Insertions
             insertImage() {
                 const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
@@ -3508,6 +3678,98 @@
             copySelected() { const obj=this.getActiveObject(); if (obj) this.state.objectClipboard = this.serializeObject(obj); }
             pasteSelected() { const clip=this.state.objectClipboard; if (!clip) return; const obj=this.deserializeObject(clip); obj.id=`obj-${Date.now()}`; obj.x+=30; obj.y+=30; this.state.objects.push(obj); this.setActiveObject(obj.id); this.saveToHistory('Paste Object'); }
 
+            // ================= Serialization (Project Data) =================
+            serializeProject() {
+                return JSON.stringify({ // Stringify for cookie storage
+                    layers: this.state.layers.map(layer => ({
+                        ...layer,
+                        canvas: layer.canvas.toDataURL('image/png')
+                    })),
+                    objects: this.cloneObjects(),
+                    canvasSize: {
+                        width: this.canvas.width,
+                        height: this.canvas.height
+                    },
+                    currentLayerId: this.state.currentLayerId,
+                    brushSettings: { ...this.state.brushSettings },
+                    colors: { ...this.state.colors }
+                });
+            }
+
+            deserializeProject(data) {
+                // Clear current state
+                this.state.layers = [];
+                this.state.objects = [];
+                this.state.history = [];
+                this.state.historyIndex = -1;
+
+                // Restore canvas size
+                if (data.canvasSize) {
+                    this.canvas.width = data.canvasSize.width;
+                    this.canvas.height = data.canvasSize.height;
+                }
+
+                // Restore layers
+                const layerPromises = data.layers.map(layerData => {
+                    return new Promise((resolve) => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = this.canvas.width;
+                        canvas.height = this.canvas.height;
+                        const ctx = canvas.getContext('2d');
+
+                        const img = new Image();
+                        img.onload = () => {
+                            ctx.drawImage(img, 0, 0);
+                            resolve({
+                                ...layerData,
+                                canvas: canvas
+                            });
+                        };
+                        img.onerror = () => {
+                            // Create empty layer if image fails to load
+                            resolve({
+                                ...layerData,
+                                canvas: canvas
+                            });
+                        };
+                        img.src = layerData.canvas;
+                    });
+                });
+
+                Promise.all(layerPromises).then(layers => {
+                    this.state.layers = layers;
+                    this.state.currentLayerId = data.currentLayerId;
+                    this.state.brushSettings = { ...this.state.brushSettings, ...data.brushSettings };
+                    this.state.colors = { ...this.state.colors, ...data.colors };
+                    
+                    if (data.objects) {
+                        this.restoreObjects(data.objects);
+                    }
+
+                    this.updateLayersUI();
+                    this.updateUI();
+                    this.redrawCanvas();
+                    this.saveToHistory('Load Project');
+                });
+            }
+
+            generateThumbnail() {
+                const thumbnailCanvas = document.createElement('canvas');
+                thumbnailCanvas.width = 200;
+                thumbnailCanvas.height = 150;
+                const ctx = thumbnailCanvas.getContext('2d');
+                
+                // Fill with white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+                
+                // Draw scaled version of main canvas
+                ctx.drawImage(this.canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+                
+                return thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+            }
+
+            // ================= Serialization (Objects) =================
             serializeObject(obj) {
                 const base = { ...obj };
                 if (base.type === 'image') {
@@ -3611,7 +3873,7 @@
                 switch (action) {
                     case 'file-new': this.newDocument(); break;
                     case 'file-open': this.openFile(); break;
-                    case 'file-recent': this.showRecentProjectsModal(); break;
+                    case 'file-recent': this.showHomeScreen(); break;
                     case 'file-save': this.saveCurrentProject(); break;
                     case 'file-save-as': this.saveAsProject(); break;
                     case 'edit-undo': this.undo(); break;
