@@ -365,6 +365,11 @@
             transition: background 0.15s;
         }
         .inline-btn:hover { background: var(--hover-color); }
+        .inline-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--bg-tertiary);
+        }
 
         /* Right Panel - Layers */
         .right-panel {
@@ -561,6 +566,9 @@
             border-radius: 4px;
             color: var(--text-primary);
             font-size: 11px;
+        }
+        .blend-select:disabled {
+            opacity: 0.5;
         }
 
         /* History Panel */
@@ -784,19 +792,63 @@
             padding: 12px 24px;
         }
         
-        .drafts-header {
+        .section-header {
             font-size: 20px;
             font-weight: 600;
             color: var(--text-primary);
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
             padding-bottom: 10px;
-        }
-
-        #drafts-list-container {
             width: 100%;
             max-width: 1000px;
-            margin: 0 auto;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #drafts-list-container,
+        #template-list-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto 40px auto;
+        }
+
+        /* Template Styles */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .template-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            background: var(--hover-color);
+            border-color: var(--border-light);
+        }
+
+        .template-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .template-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .template-dims {
+            font-size: 11px;
+            color: var(--text-muted);
         }
 
         /* Re-use project card styles from modal */
@@ -964,7 +1016,14 @@
                 <button class="home-btn primary" id="home-create-new">Create New Project</button>
             </div>
 
-            <h3 class="drafts-header" id="drafts-header">Projects</h3>
+            <!-- Templates Section -->
+            <h3 class="section-header" id="templates-header">Start from a Template</h3>
+            <div id="template-list-container">
+                <!-- Templates will be loaded here by renderTemplatesUI() -->
+            </div>
+
+            <!-- Drafts/Projects Section -->
+            <h3 class="section-header" id="drafts-header">Projects</h3>
             <div id="drafts-list-container">
                 <!-- Drafts/Projects will be loaded here -->
             </div>
@@ -1248,6 +1307,16 @@
     <script src="dist/brushes_wasm.js"></script>
     <script src="js/wasm_adapter.js"></script>
     <script>
+        // Define templates
+        const TEMPLATES = {
+            'default_hd': { name: 'Full HD', width: 1920, height: 1080, icon: '🖥️' },
+            'instagram_post': { name: 'Instagram Post', width: 1080, height: 1080, icon: '📱' },
+            'instagram_story': { name: 'Instagram Story', width: 1080, height: 1920, icon: '📖' },
+            'youtube_thumbnail': { name: 'YouTube Thumbnail', width: 1280, height: 720, icon: '📺' },
+            'twitter_post': { name: 'Twitter Post', width: 1200, height: 675, icon: '🐦' },
+            'facebook_cover': { name: 'Facebook Cover', width: 851, height: 315, icon: '👍' }
+        };
+
         class BrushesEditor {
             constructor() {
                 this.state = {
@@ -1364,13 +1433,36 @@
                     this.setupDraftsUI(null);
                 }
 
+                // Render templates
+                this.renderTemplatesUI();
+
                 // Load and show projects/drafts
                 this.loadAndRenderProjects();
 
                 // Attach home screen listeners
                 document.getElementById('draft-yes').addEventListener('click', () => this.handleDraftPermission(true));
                 document.getElementById('draft-no').addEventListener('click', () => this.handleDraftPermission(false));
-                document.getElementById('home-create-new').addEventListener('click', () => this.createNewFromHome());
+                // Update "Create New" button to use a default template
+                document.getElementById('home-create-new').addEventListener('click', () => this.newFromTemplate('default_hd'));
+            }
+            
+            renderTemplatesUI() {
+                const container = document.getElementById('template-list-container');
+                if (!container) return;
+                
+                let gridHtml = '<div class="template-grid">';
+                for (const templateId in TEMPLATES) {
+                    const t = TEMPLATES[templateId];
+                    gridHtml += `
+                        <div class="template-card" onclick="editor.newFromTemplate('${templateId}')">
+                            <div class="template-icon">${t.icon}</div>
+                            <div class="template-name">${t.name}</div>
+                            <div class="template-dims">${t.width} x ${t.height} px</div>
+                        </div>
+                    `;
+                }
+                gridHtml += '</div>';
+                container.innerHTML = gridHtml;
             }
 
             setupDraftsUI(state) {
@@ -1399,37 +1491,53 @@
             }
 
             createNewFromHome() {
+                // This is now handled by newFromTemplate('default_hd')
+                this.newFromTemplate('default_hd');
+            }
+
+            newFromTemplate(templateId) {
+                const templateData = TEMPLATES[templateId];
+                if (!templateData) {
+                    console.error('Unknown template ID:', templateId);
+                    this.showToast('Unknown template', 'error');
+                    return;
+                }
+                
                 document.getElementById('app-container').classList.remove('home-active');
-                // Pass null to signal a new project
-                this.finishEditorInitialization(null);
+                // Pass template data to finishEditorInitialization
+                this.finishEditorInitialization(null, templateData);
             }
 
             loadDraftFromHome(projectId) {
                 document.getElementById('app-container').classList.remove('home-active');
-                // Pass the ID to load
-                this.finishEditorInitialization(projectId);
+                // Pass the ID to load, no template data
+                this.finishEditorInitialization(projectId, null);
             }
 
             /**
              * Finishes initializing the main editor UI.
              * This is called *after* the user leaves the home screen.
-             * @param {string | null} projectIdToLoad - If provided, loads this project. Otherwise, creates a new one.
+             * @param {string | null} projectIdToLoad - If provided, loads this project.
+             * @param {object | null} templateData - If provided, starts a new project with these settings.
              */
-            async finishEditorInitialization(projectIdToLoad = null) {
+            async finishEditorInitialization(projectIdToLoad = null, templateData = null) {
                 if (projectIdToLoad) {
                     const projectData = await this.loadProjectData(projectIdToLoad);
                     if (projectData) {
-                        const tab = this.createNewTab(projectData.name, false); // Don't create new doc
+                        const tab = this.createNewTab(projectData.name, false, null); // Don't create new doc
                         tab.projectId = projectData.id;
                         tab.saved = true;
                         this.loadProject(projectData); // This will deserialize
                     } else {
-                        // Fallback: couldn't load, create new
-                        this.createNewTab('Untitled Project', true);
+                        // Fallback: couldn't load, create new with default template
+                        this.createNewTab('Untitled Project', true, TEMPLATES['default_hd']);
                     }
+                } else if (templateData) {
+                    // Create a new tab and document based on the template
+                    this.createNewTab(templateData.name, true, templateData);
                 } else {
-                    // Create a new tab and a new document
-                    this.createNewTab('Untitled Project', true);
+                    // Default fallback: create new with default template
+                    this.createNewTab('Untitled Project', true, TEMPLATES['default_hd']);
                 }
 
                 // Setup all editor event listeners
@@ -1709,30 +1817,33 @@
             // ================= (Original functions continue below) =================
 
             // ================= Tab Management =================
-            createNewTab(name = 'Untitled Project', createNewDoc = true) {
+            createNewTab(name = 'Untitled Project', createNewDoc = true, templateData = null) {
                 const tabId = `tab-${Date.now()}`;
+                const tabName = templateData ? templateData.name : name;
+
                 const tab = {
                     id: tabId,
-                    name: name,
+                    name: tabName,
                     projectId: null,
-                    saved: false
+                    saved: false,
+                    state: null // For caching state when switching tabs
                 };
 
                 this.state.openTabs.push(tab);
                 this.state.activeTabId = tabId;
-                this.state.projectName = name;
+                this.state.projectName = tabName;
                 this.state.currentProjectId = null;
 
                 this.updateTabsUI();
                 if (createNewDoc) {
-                    this.newDocument(); // This creates the initial layer and history
+                    this.newDocument(templateData); // Pass template data to newDocument
                 }
                 return tab;
             }
 
             switchToTab(tabId) {
                 const tab = this.state.openTabs.find(t => t.id === tabId);
-                if (!tab) return;
+                if (!tab || tab.id === this.state.activeTabId) return;
 
                 // Save current tab state if needed
                 this.saveCurrentTabState();
@@ -1744,6 +1855,10 @@
                 // Load tab state
                 this.loadTabState(tab);
                 this.updateTabsUI();
+                this.updateStatusBar();
+                this.updateLayersUI();
+                this.updateHistoryUI();
+                this.redrawCanvas();
             }
 
             closeTab(tabId) {
@@ -1787,14 +1902,15 @@
 
             async loadTabState(tab) {
                 if (tab.state) {
-                    this.deserializeProject(tab.state);
+                    this.deserializeProject(JSON.parse(tab.state));
                 } else if (tab.projectId) {
                     const project = await this.loadProjectData(tab.projectId);
                     if (project) {
                         this.loadProject(project);
                     }
                 } else {
-                    this.newDocument();
+                    // Fallback for tabs created before state saving
+                    this.newDocument(TEMPLATES['default_hd']);
                 }
             }
 
@@ -1851,10 +1967,10 @@
             // This function is now called by finishEditorInitialization
             // initializeEditor() { ... } 
 
-            createInitialLayer() {
+            createInitialLayer(width, height) {
                 const canvas = document.createElement('canvas');
-                canvas.width = this.canvas.width;
-                canvas.height = this.canvas.height;
+                canvas.width = width;
+                canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -2060,7 +2176,7 @@
                                 e.preventDefault();
                                 if (e.shiftKey) this.redo(); else this.undo();
                                 break;
-                            case 'n': e.preventDefault(); this.newDocument(); break;
+                            case 'n': e.preventDefault(); this.newDocument(TEMPLATES['default_hd']); break; // Use default
                             case 'o': e.preventDefault(); this.openFile(); break;
                             case 's': e.preventDefault(); this.saveFile(); break;
                             case 'c':
@@ -3038,21 +3154,33 @@
             }
 
             // File operations
-            newDocument() {
+            newDocument(templateData = null) {
+                // Determine width and height
+                const defaultTemplate = TEMPLATES['default_hd'] || { width: 1920, height: 1080, name: 'Untitled Project' };
+                const width = templateData ? templateData.width : defaultTemplate.width;
+                const height = templateData ? templateData.height : defaultTemplate.height;
+                const name = templateData ? templateData.name : defaultTemplate.name;
+
+                // Set canvas size
+                this.canvas.width = width;
+                this.canvas.height = height;
+
+                // Reset state
                 this.state.layers = [];
                 this.state.objects = [];
                 this.state.history = [];
                 this.state.historyIndex = -1;
                 this.state.currentProjectId = null;
-                this.state.projectName = 'Untitled Project';
+                this.state.projectName = name;
                 
-                this.createInitialLayer();
+                this.createInitialLayer(width, height);
                 this.updateLayersUI();
                 this.updateHistoryUI();
                 this.updateActiveTab();
+                this.updateStatusBar();
                 this.redrawCanvas();
                 this.saveToHistory('New Document');
-                this.showToast('New document created');
+                this.showToast(`New document created: ${name}`);
             }
 
             openFile() {
@@ -3067,36 +3195,26 @@
                     reader.onload = (event) => {
                         const img = new Image();
                         img.onload = () => {
-                            this.canvas.width = img.width;
-                            this.canvas.height = img.height;
-
-                            const canvas = document.createElement('canvas');
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0);
-
-                            const layer = {
-                                id: `loaded-${Date.now()}`,
-                                name: file.name.split('.')[0],
-                                visible: true,
-                                opacity: 100,
-                                blendMode: 'normal',
-                                canvas: canvas,
-                                locked: false
-                            };
-
-                            this.state.layers = [layer];
-                            this.state.currentLayerId = layer.id;
+                            const fileName = file.name.split('.')[0] || 'Loaded Image';
                             
-                            this.updateLayersUI();
-                            this.updateStatusBar();
-                            this.redrawCanvas();
-                            this.saveToHistory('Open File');
-                            this.showToast('Image loaded successfully');
-                            // Resize WASM engine to new canvas size
-                            if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
-                                WasmEngine.resize(this.canvas.width, this.canvas.height);
+                            // Create a new tab for the opened image
+                            const templateData = { name: fileName, width: img.width, height: img.height };
+                            this.createNewTab(fileName, true, templateData);
+                            
+                            // The newDocument call inside createNewTab creates a blank layer.
+                            // We need to draw the image onto that layer.
+                            const currentLayer = this.getCurrentLayer();
+                            if (currentLayer) {
+                                const ctx = currentLayer.canvas.getContext('2d');
+                                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear white bg
+                                ctx.drawImage(img, 0, 0);
+                                this.saveToHistory('Open File');
+                                this.redrawCanvas();
+                                this.showToast('Image loaded successfully');
+                                // Resize WASM engine to new canvas size
+                                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                                    WasmEngine.resize(this.canvas.width, this.canvas.height);
+                                }
                             }
                         };
                         img.src = event.target.result;
@@ -3108,7 +3226,7 @@
 
             saveFile() {
                 const link = document.createElement('a');
-                link.download = 'brushes-artwork.png';
+                link.download = `${this.state.projectName.replace(/ /g, '_')}.png`;
                 link.href = this.canvas.toDataURL('image/png');
                 link.click();
                 this.showToast('Image saved');
@@ -3231,7 +3349,7 @@
                 if (hardness === 1) {
                     preview.style.background = `radial-gradient(circle, ${this.state.colors.foreground} 0%, ${this.state.colors.foreground} ${size}px, transparent ${size + 1}px)`;
                 } else {
-                    preview.style.background = `radial-gradient(circle, ${this.state.colors.foreground} 0%, ${this.state.colors.foreground}80 ${size * hardness}px, transparent ${size}px)`;
+                    preview.style.background = `radial-gradient(circle, ${this.state.colors.foreground}80 ${size * hardness}px, transparent ${size}px)`;
                 }
                 
                 preview.style.width = `${size * 2}px`;
@@ -3708,11 +3826,13 @@
                     this.canvas.width = data.canvasSize.width;
                     this.canvas.height = data.canvasSize.height;
                 }
+                this.updateStatusBar();
 
                 // Restore layers
                 const layerPromises = data.layers.map(layerData => {
                     return new Promise((resolve) => {
                         const canvas = document.createElement('canvas');
+                        // Ensure layer canvas matches main canvas size
                         canvas.width = this.canvas.width;
                         canvas.height = this.canvas.height;
                         const ctx = canvas.getContext('2d');
@@ -3871,7 +3991,7 @@
 
             handleMenuAction(action) {
                 switch (action) {
-                    case 'file-new': this.newDocument(); break;
+                    case 'file-new': this.newDocument(TEMPLATES['default_hd']); break; // Use default
                     case 'file-open': this.openFile(); break;
                     case 'file-recent': this.showHomeScreen(); break;
                     case 'file-save': this.saveCurrentProject(); break;
