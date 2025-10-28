@@ -16,22 +16,9 @@
 - **"I can't resize images and text with the grab bars?"**  
   Ensure you are in resize mode by selecting the resize (↔️) button.
 
-## Q&A
-
-**Q: How do I use the text editor?**  
-A: Click on the text area, type your content, and use the formatting options in the sidebar to adjust font, size, and alignment.
-
-**Q: Can I save my project?**  
-A: Yes, you can save your image in various formats such as PNG, JPEG, and SVG. Simply click the "Save" button in the top-right corner.
-
-**Q: Is there an undo/redo feature?**  
-A: Yes! You can undo or redo any changes by using the respective buttons in the toolbar.
-
-**Q: Can I add multiple layers to my image?**  
-A: Absolutely! You can add multiple layers of text, images, and shapes and manage their visibility and order through the layers panel.
 
 ## Documentation
-Comprehensive documentation is available for all features and tools. Refer to the docs for more details.
+Comprehensive documentation is available for all features and tools. Refer to the docs, availiable at [https://ilovelasagne.github.io/brushes/docs.html](https://ilovelasagne.github.io/brushes/docs.html) for more details.
 
 ## Contributing
 Feel free to fork this repository and contribute improvements. Pull requests are always welcome!
