@@ -952,7 +952,213 @@
             opacity: 0.5;
         }
 
-    </style>
+    
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.2s cubic-bezier(.32,.72,.54,.95);
+        }
+        .settings-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        .settings-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            transform: translateY(32px) scale(0.98);
+            transition: transform 0.24s cubic-bezier(.32,.72,.54,.95);
+        }
+        .settings-overlay.visible .settings-panel {
+            transform: translateY(0) scale(1);
+        }
+        .settings-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .settings-close-btn {
+            width: 24px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.15s;
+        }
+        .settings-close-btn:hover {
+            background: var(--hover-color);
+        }
+        .settings-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .settings-group {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .settings-group label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            flex: 1;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .settings-input {
+            width: 80px;
+            padding: 6px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+        }
+        .settings-separator {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            transition: .2s;
+            border-radius: 20px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-muted);
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+            background-color: white;
+        }
+        /* Shortcuts List */
+        .shortcuts-list {
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+        .shortcut-item:last-child {
+            border-bottom: none;
+        }
+        .shortcut-item:hover {
+            background: var(--hover-color);
+        }
+        .shortcut-name {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        .shortcut-key {
+            display: flex;
+            gap: 4px;
+        }
+        .key {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: var(--text-primary);
+            min-width: 20px;
+            text-align: center;
+        }
+        .settings-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .settings-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .settings-footer-right {
+            display: flex;
+            gap: 8px;
+        }
+        .inline-btn.primary {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+        .inline-btn.primary:hover {
+            background: #0086e9;
+        }
+        .inline-btn.secondary {
+            background: var(--bg-tertiary);
+        }
+        
+</style>
 </head>
 <body>
     <div class="app-container" id="app-container">
@@ -992,7 +1198,8 @@
             </div>
             <div class="menu-item" data-menu="help">Help
                 <div class="menu-dropdown">
-                    <button class="menu-action" data-action="help-about">About</button>
+                    <button class="menu-action" data-action="help-settings">Settings…</button>
+<button class="menu-action" data-action="help-about">About</button>
                 </div>
             </div>
         </div>
@@ -4028,5 +4235,101 @@
             editor = new BrushesEditor();
         });
     </script>
+
+    <div class="settings-overlay" id="settings-overlay">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <div class="section-title">Settings</div>
+                <button class="settings-close-btn" onclick="editor.closeSettingsPanel()">×</button>
+            </div>
+            <div class="settings-content">
+                <!-- General -->
+                <div class="property-section">
+                    <div class="section-title">General</div>
+                    <div class="settings-group">
+                        <label>Theme</label>
+                        <select class="blend-select" id="setting-theme">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label>Auto-save</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-autosave">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-group">
+                        <label>Language</label>
+                        <select class="blend-select" id="setting-language">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Canvas & Performance -->
+                <div class="property-section">
+                    <div class="section-title">Canvas & Performance</div>
+                    <div class="settings-group">
+                        <label>Default Canvas Size</label>
+                        <div class="settings-row">
+                            <input type="number" class="settings-input" id="setting-canvas-width" placeholder="Width">
+                            <span class="settings-separator">×</span>
+                            <input type="number" class="settings-input" id="setting-canvas-height" placeholder="Height">
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <label>High-quality Rendering</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-high-quality">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-group">
+                        <label>GPU Acceleration</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-gpu">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <!-- Shortcuts -->
+                <div class="property-section">
+                    <div class="section-title">Shortcuts</div>
+                    <div class="shortcuts-list" id="shortcuts-list">
+                        <!-- Shortcuts will be populated by JS -->
+                    </div>
+                    <button class="inline-btn" onclick="editor.resetShortcuts()">Reset to Defaults</button>
+                </div>
+                <!-- Privacy & Storage -->
+                <div class="property-section">
+                    <div class="section-title">Privacy & Storage</div>
+                    <div class="settings-group">
+                        <label>Enable Cookies</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-cookies">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="inline-btn" onclick="editor.clearDrafts()">Clear Drafts</button>
+                        <button class="inline-btn" onclick="editor.clearRecentProjects()">Clear Recent Projects</button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-footer">
+                <button class="inline-btn secondary" onclick="editor.resetSettingsDefaults()">Reset to Defaults</button>
+                <div class="settings-footer-right">
+                    <button class="inline-btn" onclick="editor.closeSettingsPanel()">Cancel</button>
+                    <button class="inline-btn primary" onclick="editor.saveSettings()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </body>
 </html>
