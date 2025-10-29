@@ -1,0 +1,4429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brushes - Professional Photo Editor</title>
+    <meta name="description" content="Professional photo editing suite with 50+ tools including advanced brushes, selections, masks, and effects">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;600;700;800;900&family=Open+Sans:wght@300;400;500;600;700;800&family=Roboto:wght@200;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Photoshop-inspired dark theme */
+            --bg-primary: #2b2b2b;
+            --bg-secondary: #393939;
+            --bg-tertiary: #4a4a4a;
+            --bg-dark: #1f1f1f;
+            --text-primary: #f0f0f0;
+            --text-secondary: #b8b8b8;
+            --text-muted: #8a8a8a;
+            --accent-blue: #0078d4;
+            --accent-orange: #ff6b35;
+            --border-color: #5a5a5a;
+            --border-light: #6a6a6a;
+            --hover-color: #505050;
+            --selection-color: #0078d4;
+            --canvas-bg: repeating-conic-gradient(#ddd 0% 25%, #eee 0% 50%) 50% / 16px 16px;
+        }
+
+        body {
+            font-family: 'Roboto', 'Open Sans', 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg-primary);
+            color: var(---text-primary);
+            overflow: hidden;
+            font-size: 12px;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Menu Bar */
+        .menu-bar {
+            height: 28px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 24px;
+        }
+        .menu-bar, .tool-bar, .status-bar { flex-shrink: 0; }
+
+        .logo {
+            font-weight: 600;
+            color: var(--accent-orange);
+            font-size: 14px;
+        }
+
+        .menu-item {
+            padding: 4px 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .menu-item:hover {
+            background: var(--hover-color);
+        }
+
+        /* Dropdown menus */
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            min-width: 180px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+            padding: 6px 0;
+            z-index: 2000;
+        }
+        .menu-item.open > .menu-dropdown { display: block; }
+        .menu-action {
+            width: 100%;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            text-align: left;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .menu-action:hover { background: var(--hover-color); }
+        .menu-sep {
+            height: 0;
+            border: 0;
+            border-top: 1px solid var(--border-color);
+            margin: 6px 0;
+        }
+
+        /* Tool Bar */
+        .tool-bar {
+            height: 48px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 8px;
+        }
+
+        .tool-group {
+            display: flex;
+            gap: 4px;
+            padding-right: 8px;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .tool-btn {
+            width: 32px;
+            height: 32px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-size: 16px;
+        }
+
+        .tool-btn:hover {
+            background: var(--hover-color);
+            border-color: var(--border-light);
+        }
+
+        .tool-btn.active {
+            background: var(--selection-color);
+            border-color: var(--selection-color);
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+        }
+
+        /* Main Workspace */
+        .workspace {
+            flex: 1;
+            display: flex;
+            background: var(--bg-primary);
+            min-height: 0;
+        }
+
+        /* Left Panel - Tools */
+        .left-panel {
+            width: 64px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            gap: 4px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .toolbox-btn {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            font-size: 20px;
+        }
+
+        .toolbox-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .toolbox-btn.active {
+            background: var(--selection-color);
+            box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.3);
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .property-section {
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Brush Panel */
+        .brush-preview {
+            width: 100%;
+            height: 80px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .brush-circle {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--text-secondary);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 70%, transparent 100%);
+        }
+
+        /* Color Section */
+        .color-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .color-squares {
+            position: relative;
+        }
+
+        .color-square {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .color-square.bg {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 24px;
+            height: 24px;
+        }
+
+        .color-swap {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 24px;
+            height: 24px;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 12px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 4px;
+            background: var(--bg-dark);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            background: var(--canvas-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: auto;
+            min-height: 0;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            border-radius: 4px;
+            overflow: hidden;
+            transform-origin: top left;
+            will-change: transform;
+        }
+
+        #main-canvas {
+            background: white;
+            cursor: crosshair;
+            display: block;
+        }
+
+        /* Transform handles overlay style (drawn on canvas) */
+        .canvas-area.grabbing,
+        #main-canvas.grabbing {
+            cursor: grabbing !important;
+        }
+
+        /* Minimal button style for inline controls in properties panel */
+        .inline-btn {
+            padding: 6px 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .inline-btn:hover { background: var(--hover-color); }
+        .inline-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--bg-tertiary);
+        }
+
+        /* Right Panel - Layers */
+        .right-panel {
+            width: 280px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Layers Panel */
+        .layers-section {
+            flex: 1;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .layer-item:hover {
+            background: var(--hover-color);
+        }
+
+        .layer-item.active {
+            background: var(--selection-color);
+            border-color: var(--selection-color);
+        }
+
+        .layer-visibility {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer-name {
+            flex: 1;
+            font-size: 11px;
+            color: var(--text-primary);
+        }
+
+        .layer-controls {
+            display: flex;
+            gap: 4px;
+            margin-top: 12px;
+        }
+
+        .layer-btn {
+            flex: 1;
+            padding: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .layer-btn:hover {
+            background: var(--hover-color);
+        }
+
+        /* Effects Panel */
+        .effects-section {
+            flex: 1;
+            padding: 16px;
+        }
+
+        .effect-category {
+            margin-bottom: 16px;
+        }
+
+        .category-header {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .effect-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+        }
+
+        .effect-btn {
+            padding: 6px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+
+        .effect-btn:hover {
+            background: var(--hover-color);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            height: 24px;
+            background: var(--bg-dark);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .zoom-btn {
+            width: 20px;
+            height: 20px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        .toast.success {
+            border-left: 3px solid #22c55e;
+        }
+
+        .toast.error {
+            border-left: 3px solid #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Blend Modes */
+        .blend-select {
+            width: 100%;
+            padding: 6px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+        }
+        .blend-select:disabled {
+            opacity: 0.5;
+        }
+
+        /* History Panel */
+        .history-section {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .history-item {
+            padding: 4px 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            border-radius: 3px;
+            cursor: pointer;
+            margin-bottom: 2px;
+        }
+
+        .history-item:hover {
+            background: var(--hover-color);
+        }
+
+        .history-item.current {
+            background: var(--selection-color);
+            color: var(--text-primary);
+        }
+
+        /* Tabs System */
+        .tabs-container {
+            height: 36px;
+            background: var(--bg-dark);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .tabs-container.hidden {
+            display: none;
+        }
+
+        .tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            min-width: 120px;
+            max-width: 200px;
+            transition: all 0.15s;
+        }
+
+        .tab:hover {
+            background: var(--hover-color);
+        }
+
+        .tab.active {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-orange);
+        }
+
+        .tab-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tab-close {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.15s;
+        }
+
+        .tab-close:hover {
+            background: var(--hover-color);
+            color: var(--text-primary);
+        }
+
+        .tab-toggle-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            z-index: 1001;
+            transition: all 0.15s;
+        }
+
+        .tab-toggle-btn:hover {
+            background: var(--hover-color);
+        }
+
+        /* Recent Projects Modal (No longer used, replaced by Home) */
+        .modal-overlay {
+            display: none; /* Replaced by Home Screen */
+        }
+
+        /* --- Home Screen Styles --- */
+        .home-screen {
+            flex: 1;
+            display: none; /* Hidden by default */
+            flex-direction: column;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .app-container.home-active .home-screen {
+            display: flex;
+        }
+
+        /* Hide editor UI when home is active */
+        .app-container.home-active .tool-bar,
+        .app-container.home-active .workspace,
+        .app-container.home-active .status-bar,
+        .app-container.home-active .tabs-container {
+            display: none;
+        }
+
+        .home-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .home-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .home-header p {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        #draft-permission-prompt {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            margin: 0 auto 32px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        #draft-permission-prompt p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        #draft-permission-prompt .permission-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .home-btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .home-btn.primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+        .home-btn.primary:hover {
+            background: #008cff;
+        }
+        
+        .home-btn.secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        .home-btn.secondary:hover {
+            background: var(--hover-color);
+        }
+
+        #home-actions {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        #home-create-new {
+            font-size: 16px;
+            padding: 12px 24px;
+        }
+        
+        .section-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            width: 100%;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #drafts-list-container,
+        #template-list-container {
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto 40px auto;
+        }
+
+        /* Template Styles */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 16px;
+        }
+
+        .template-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+
+        .template-card:hover {
+            background: var(--hover-color);
+            border-color: var(--border-light);
+        }
+
+        .template-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .template-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .template-dims {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Re-use project card styles from modal */
+        .recent-projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .project-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .project-card:hover {
+            background: var(--hover-color);
+            border-color: var(--border-light);
+        }
+
+        .project-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            overflow: hidden;
+        }
+
+        .project-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .project-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .project-date {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .project-action-btn {
+            flex: 1;
+            padding: 6px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .project-action-btn:hover {
+            background: var(--hover-color);
+        }
+
+        .project-action-btn.delete {
+            color: #ef4444;
+        }
+
+        .project-action-btn.delete:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+        .empty-projects {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 20px;
+        }
+
+        .empty-projects .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+    
+        
+        .settings-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .settings-overlay.visible 
+        .settings-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .settings-close-btn {
+            width: 24px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.15s;
+        }
+        .settings-close-btn:hover {
+            background: var(--hover-color);
+        }
+        .settings-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .settings-group {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .settings-group label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            flex: 1;
+        }
+        .settings-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .settings-input {
+            width: 80px;
+            padding: 6px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-size: 11px;
+        }
+        .settings-separator {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            transition: .2s;
+            border-radius: 20px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 2px;
+            bottom: 2px;
+            background-color: var(--text-muted);
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-slider {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+            background-color: white;
+        }
+        /* Shortcuts List */
+        .shortcuts-list {
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .shortcut-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-tertiary);
+        }
+        .shortcut-item:last-child {
+            border-bottom: none;
+        }
+        .shortcut-item:hover {
+            background: var(--hover-color);
+        }
+        .shortcut-name {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        .shortcut-key {
+            display: flex;
+            gap: 4px;
+        }
+        .key {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 11px;
+            color: var(--text-primary);
+            min-width: 20px;
+            text-align: center;
+        }
+        .settings-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .settings-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .settings-footer-right {
+            display: flex;
+            gap: 8px;
+        }
+        .inline-btn.primary {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: white;
+        }
+        .inline-btn.primary:hover {
+            background: #0086e9;
+        }
+        .inline-btn.secondary {
+            background: var(--bg-tertiary);
+        }
+        
+
+/* Full-page Settings Panel (replaced) */
+.settings-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: stretch;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: none;
+    opacity: 0;
+    transition: opacity 0.24s ease, transform 0.24s ease;
+}
+.settings-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+.settings-panel {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    margin: 0;
+    background: var(--bg-primary);
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    transform: translateY(12px);
+}
+.settings-overlay.visible .settings-panel {
+    transform: translateY(0);
+}
+.settings-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+}
+.settings-close-btn {
+    font-size: 22px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+.settings-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+.settings-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(0deg, rgba(255,255,255,0.01), transparent);
+}
+/* Hide main app chrome when settings page is active */
+.app-container.settings-active .tool-bar,
+.app-container.settings-active .workspace,
+.app-container.settings-active .status-bar,
+.app-container.settings-active .tabs-container,
+.app-container.settings-active .left-panel,
+.app-container.settings-active .properties-panel,
+.app-container.settings-active .right-panel,
+.app-container.settings-active .home-screen {
+    display: none !important;
+}
+
+</style>
+</head>
+<body>
+    <div class="app-container" id="app-container">
+        <!-- Menu Bar -->
+        <div class="menu-bar">
+            <div class="logo">Brushes</div>
+            <div class="menu-item" data-menu="file">File
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="file-new">New…</button>
+                    <button class="menu-action" data-action="file-open">Open…</button>
+                    <button class="menu-action" data-action="file-recent">Open Home…</button>
+                    <hr class="menu-sep"/>
+                    <button class="menu-action" data-action="file-save">Save</button>
+                    <button class="menu-action" data-action="file-save-as">Save As…</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="edit">Edit
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="edit-undo">Undo</button>
+                    <button class="menu-action" data-action="edit-redo">Redo</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="insert">Insert
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="insert-image">Image…</button>
+                    <button class="menu-action" data-action="insert-text">Text</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="view">View
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="view-fit">Fit to Screen</button>
+                    <button class="menu-action" data-action="view-actual">Actual Size (100%)</button>
+                    <hr class="menu-sep"/>
+                    <button class="menu-action" data-action="view-grid">Toggle Grid</button>
+                    <button class="menu-action" data-action="view-tabs">Toggle Tabs</button>
+                </div>
+            </div>
+            <div class="menu-item" data-menu="help">Help
+                <div class="menu-dropdown">
+                    <button class="menu-action" data-action="help-settings">Settings…</button>
+<button class="menu-action" data-action="help-about">About</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div class="home-screen" id="home-screen">
+            <div class="home-header">
+                <h1>Welcome to Brushes</h1>
+                <p>Your professional open-source photo editor.</p>
+            </div>
+
+            <div id="draft-permission-prompt" style="display: none;">
+                <p>Enable auto-saving drafts to your computer? <br/> This uses cookies to store your work automatically so you don't lose progress.</p>
+                <div class="permission-buttons">
+                    <button class="home-btn primary" id="draft-yes">Yes, enable auto-save</button>
+                    <button class="home-btn secondary" id="draft-no">No, not right now</button>
+                </div>
+            </div>
+
+            <div id="home-actions">
+                <button class="home-btn primary" id="home-create-new">Create New Project</button>
+            </div>
+
+            <!-- Templates Section -->
+            <h3 class="section-header" id="templates-header">Start from a Template</h3>
+            <div id="template-list-container">
+                <!-- Templates will be loaded here by renderTemplatesUI() -->
+            </div>
+
+            <!-- Drafts/Projects Section -->
+            <h3 class="section-header" id="drafts-header">Projects</h3>
+            <div id="drafts-list-container">
+                <!-- Drafts/Projects will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Tabs Container -->
+        <div class="tabs-container" id="tabs-container">
+            <!-- Tabs will be dynamically added here -->
+        </div>
+
+        <!-- Tab Toggle Button -->
+        <button class="tab-toggle-btn" id="tab-toggle-btn" title="Toggle Tabs">⇅</button>
+
+        <!-- Tool Bar -->
+        <div class="tool-bar">
+            <div class="tool-group">
+                <button class="tool-btn" onclick="editor.newDocument()" title="New">📄</button>
+                <button class="tool-btn" onclick="editor.openFile()" title="Open">📁</button>
+                <button class="tool-btn" onclick="editor.saveFile()" title="Save">💾</button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn" onclick="editor.undo()" title="Undo">↶</button>
+                <button class="tool-btn" onclick="editor.redo()" title="Redo">↷</button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn" onclick="editor.insertImage()" title="Insert Image">🖼️</button>
+                <button class="tool-btn" onclick="editor.insertText()" title="Insert Text">🔤</button>
+            </div>
+            <div class="tool-group">
+                <button class="tool-btn" onclick="editor.fitToScreen()" title="Fit to Screen">⤧</button>
+                <button class="tool-btn" onclick="editor.setZoom(1)" title="Actual Size (100%)">100%</button>
+                <button class="tool-btn" onclick="editor.toggleGrid()" title="Toggle Grid">#</button>
+            </div>
+        </div>
+
+        <!-- Main Workspace -->
+        <div class="workspace">
+            <!-- Left Panel - Toolbox -->
+            <div class="left-panel">
+                <button class="toolbox-btn active" data-tool="brush" title="Brush Tool (B)">🖌️</button>
+                <button class="toolbox-btn" data-tool="pencil" title="Pencil Tool (N)">✏️</button>
+                <button class="toolbox-btn" data-tool="eraser" title="Eraser Tool (E)">🧹</button>
+                <button class="toolbox-btn" data-tool="select" title="Select Tool (M)">⬚</button>
+                <button class="toolbox-btn" data-tool="eyedropper" title="Eyedropper (I)">💧</button>
+                <button class="toolbox-btn" data-tool="transform" title="Transform Tool (V)">⤡</button>
+                <button class="toolbox-btn" data-tool="crop" title="Crop Tool (C)">✂️</button>
+                <button class="toolbox-btn" data-tool="clone" title="Clone Tool (S)">📋</button>
+                <button class="toolbox-btn" data-tool="healing" title="Healing Tool (J)">🩹</button>
+                <button class="toolbox-btn" data-tool="blur" title="Blur Tool">🌫️</button>
+                <button class="toolbox-btn" data-tool="sharpen" title="Sharpen Tool">🎯</button>
+                <button class="toolbox-btn" data-tool="dodge" title="Dodge Tool (O)">☀️</button>
+                <button class="toolbox-btn" data-tool="burn" title="Burn Tool">🌙</button>
+                <button class="toolbox-btn" data-tool="text" title="Text Tool (T)">T</button>
+            </div>
+
+            <!-- Properties Panel -->
+            <div class="properties-panel">
+                <!-- Brush Settings -->
+                <div class="property-section">
+                    <div class="section-title">Brush</div>
+                    <div class="brush-preview">
+                        <div class="brush-circle" id="brush-preview"></div>
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Size</span>
+                            <span id="size-value">20</span>
+                        </div>
+                        <input type="range" class="slider" id="brush-size" min="1" max="300" value="20">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Hardness</span>
+                            <span id="hardness-value">100%</span>
+                        </div>
+                        <input type="range" class="slider" id="brush-hardness" min="0" max="100" value="100">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Opacity</span>
+                            <span id="opacity-value">100%</span>
+                        </div>
+                        <input type="range" class="slider" id="brush-opacity" min="1" max="100" value="100">
+                    </div>
+                    
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Flow</span>
+                            <span id="flow-value">100%</span>
+                        </div>
+                        <input type="range" class="slider" id="brush-flow" min="1" max="100" value="100">
+                    </div>
+                </div>
+
+                <!-- Colors -->
+                <div class="property-section">
+                    <div class="section-title">Colors</div>
+                    <div class="color-section">
+                        <div class="color-squares">
+                            <div class="color-square" id="fg-color" style="background: #000000;"></div>
+                            <div class="color-square bg" id="bg-color" style="background: #ffffff;"></div>
+                        </div>
+                        <div class="color-swap" onclick="editor.swapColors()" title="Swap Colors">⇄</div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px; font-size: 10px;">
+                        <div>FG: <span id="fg-hex">#000000</span></div>
+                        <div>BG: <span id="bg-hex">#ffffff</span></div>
+                    </div>
+                </div>
+
+                <!-- Blend Modes -->
+                <div class="property-section">
+                    <div class="section-title">Blending</div>
+                    <select class="blend-select" id="blend-mode">
+                        <option value="source-over">Normal</option>
+                        <option value="multiply">Multiply</option>
+                        <option value="screen">Screen</option>
+                        <option value="overlay">Overlay</option>
+                        <option value="soft-light">Soft Light</option>
+                        <option value="hard-light">Hard Light</option>
+                    </select>
+                </div>
+
+                <!-- Object Properties -->
+                <div class="property-section" id="object-section">
+                    <div class="section-title">Object</div>
+                    <div id="object-info" style="font-size:11px; color: var(--text-secondary);">No object selected</div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="inline-btn" onclick="editor.bringForward()" title="Bring Forward">⬆️</button>
+                        <button class="inline-btn" onclick="editor.sendBackward()" title="Send Backward">⬇️</button>
+                        <button class="inline-btn" onclick="editor.duplicateSelected()" title="Duplicate">⧉</button>
+                        <button class="inline-btn" onclick="editor.deleteSelected()" title="Delete">🗑️</button>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <button class="inline-btn" onclick="editor.flipSelected('h')" title="Flip Horizontal">⇋</button>
+                        <button class="inline-btn" onclick="editor.flipSelected('v')" title="Flip Vertical">⇵</button>
+                        <button class="inline-btn" onclick="editor.exportSelected()" title="Export Selection">📤</button>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center; margin-top:10px;">
+                        <label style="font-size:11px; color:var(--text-secondary);">Rotate</label>
+                        <input id="rotate-input" type="number" min="-180" max="180" value="0" style="flex:1; background:var(--bg-dark); color:var(--text-primary); border:1px solid var(--border-color); border-radius:4px; padding:4px; font-size:11px;"/>
+                        <label style="font-size:11px; color:var(--text-secondary); display:flex; align-items:center; gap:6px;">
+                            <input id="snap-grid-toggle" type="checkbox"/> Snap
+                        </label>
+                    </div>
+                </div>
+                <!-- Text Properties -->
+                <div class="property-section" id="text-section">
+                    <div class="section-title">Text</div>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:10px;">
+                        <button class="inline-btn" id="text-edit-btn" title="Edit Text">Edit</button>
+                        <input id="text-color" type="color" style="width:32px; height:32px; background:var(--bg-dark); border:1px solid var(--border-color); border-radius:4px; padding:0;"/>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:6px;">
+                        <select id="text-font-family" class="blend-select" style="flex:1;">
+                            <option value="Arial">Arial</option>
+                            <option value="Helvetica">Helvetica</option>
+                            <option value="Times New Roman">Times New Roman</option>
+                            <option value="Georgia">Georgia</option>
+                            <option value="Courier New">Courier New</option>
+                            <option value="Verdana">Verdana</option>
+                            <option value="Roboto">Roboto</option>
+                            <option value="Montserrat">Montserrat</option>
+                            <option value="Open Sans">Open Sans</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+                        <label style="font-size:11px; color:var(--text-secondary);">Size</label>
+                        <input id="text-font-size" type="number" min="6" max="300" value="32" style="width:70px; background:var(--bg-dark); color:var(--text-primary); border:1px solid var(--border-color); border-radius:4px; padding:4px; font-size:11px;"/>
+                        <label style="font-size:11px; color:var(--text-secondary);">Weight</label>
+                        <select id="text-font-weight" class="blend-select" style="width:90px;">
+                            <option value="200">200</option>
+                            <option value="300">300</option>
+                            <option value_a="400" selected>400</option>
+                            <option value="500">500</option>
+                            <option value="600">600</option>
+                            <option value="700">700</option>
+                            <option value="800">800</option>
+                            <option value="900">900</option>
+                        </select>
+                        <div style="display:flex; gap:4px; margin-left:auto;">
+                            <button class="inline-btn" id="text-align-left" title="Align Left">L</button>
+                            <button class="inline-btn" id="text-align-center" title="Align Center">C</button>
+                            <button class="inline-btn" id="text-align-right" title="Align Right">R</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <div class="canvas-wrapper">
+                    <canvas id="main-canvas" width="800" height="600"></canvas>
+                    <textarea id="text-editor" style="position:absolute; display:none; min-width:60px; min-height:24px; background: transparent; color:#000; border: 1px dashed var(--selection-color); outline: none; resize: none; padding: 2px; line-height:1.2;"></textarea>
+                </div>
+            </div>
+
+            <!-- Right Panel -->
+            <div class="right-panel">
+                <!-- History -->
+                <div class="history-section">
+                    <div class="section-title">History</div>
+                    <div id="history-list">
+                        <div class="history-item current">New Document</div>
+                    </div>
+                </div>
+
+                <!-- Layers -->
+                <div class="layers-section">
+                    <div class="section-title">Layers</div>
+                    <div id="layers-list">
+                        <!-- Layers will be populated here -->
+                    </div>
+                    <div class="layer-controls">
+                        <button class="layer-btn" onclick="editor.addLayer()">Add</button>
+                        <button class="layer-btn" onclick="editor.duplicateLayer()">Duplicate</button>
+                        <button class="layer-btn" onclick="editor.moveLayerUp()">Up</button>
+                        <button class="layer-btn" onclick="editor.moveLayerDown()">Down</button>
+                        <button class="layer-btn" onclick="editor.toggleLayerLock()">Lock</button>
+                        <button class="layer-btn" onclick="editor.deleteLayer()">Delete</button>
+                    </div>
+                </div>
+
+                <!-- Effects -->
+                <div class="effects-section">
+                    <div class="section-title">Effects</div>
+                    
+                    <div class="effect-category">
+                        <div class="category-header">Blur</div>
+                        <div class="effect-grid">
+                            <button class="effect-btn" onclick="editor.applyFilter('gaussian-blur')">Gaussian</button>
+                            <button class="effect-btn" onclick="editor.applyFilter('motion-blur')">Motion</button>
+                        </div>
+                    </div>
+
+                    <div class="effect-category">
+                        <div class="category-header">Artistic</div>
+                        <div class="effect-grid">
+                            <button class="effect-btn" onclick="editor.applyFilter('oil-painting')">Oil Paint</button>
+                            <button class="effect-btn" onclick="editor.applyFilter('watercolor')">Watercolor</button>
+                            <button class="effect-btn" onclick="editor.applyFilter('pencil-sketch')">Pencil</button>
+                            <button class="effect-btn" onclick="editor.applyFilter('sketch')">Sketch</button>
+                        </div>
+                    </div>
+
+                    <div class="effect-category">
+                        <div class="category-header">Noise</div>
+                        <div class="effect-grid">
+                            <button class="effect-btn" onclick="editor.applyFilter('add-noise')">Add Noise</button>
+                            <button class="effect-btn" onclick="editor.applyFilter('reduce-noise')">Reduce</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div id="canvas-info">800 x 600 px</div>
+            <div id="tool-info">Brush Tool</div>
+            <div id="layer-info">Background</div>
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="editor.zoomOut()">-</button>
+                <span id="zoom-level">100%</span>
+                <button class="zoom-btn" onclick="editor.zoomIn()">+</button>
+                <button class="zoom-btn" onclick="editor.fitToScreen()" title="Fit">F</button>
+                <button class="zoom-btn" onclick="editor.setZoom(1)" title="100%">1:1</button>
+                <button class="zoom-btn" onclick="editor.toggleGrid()" title="Grid">#</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for "Recent Projects" - no longer used -->
+    <div class="modal-overlay" id="recent-projects-modal">
+    </div>
+
+    <script src="dist/brushes_wasm.js"></script>
+    <script src="js/wasm_adapter.js"></script>
+    <script>
+        // Define templates
+        const TEMPLATES = {
+            'default_hd': { name: 'Full HD', width: 1920, height: 1080, icon: '🖥️' },
+            'instagram_post': { name: 'Instagram Post', width: 1080, height: 1080, icon: '📱' },
+            'instagram_story': { name: 'Instagram Story', width: 1080, height: 1920, icon: '📖' },
+            'youtube_thumbnail': { name: 'YouTube Thumbnail', width: 1280, height: 720, icon: '📺' },
+            'twitter_post': { name: 'Twitter Post', width: 1200, height: 675, icon: '🐦' },
+            'facebook_cover': { name: 'Facebook Cover', width: 851, height: 315, icon: '👍' }
+        };
+
+        class BrushesEditor {
+            constructor() {
+                this.state = {
+                    currentTool: 'brush',
+                    brushSettings: {
+                        size: 20,
+                        hardness: 100,
+                        opacity: 100,
+                        flow: 100
+                    },
+                    colors: {
+                        foreground: '#000000',
+                        background: '#ffffff'
+                    },
+                    zoom: 1,
+                    layers: [],
+                    currentLayerId: null,
+                    isDrawing: false,
+                    lastPoint: null,
+                    selection: null,
+                    history: [],
+                    historyIndex: -1,
+                    blendMode: 'source-over',
+                    clipboard: null,
+                    // Object system
+                    objects: [],
+                    activeObjectId: null,
+                    showGrid: false,
+                    snapToGrid: false,
+                    objectClipboard: null,
+                    // Project management
+                    currentProjectId: null,
+                    projectName: 'Untitled Project',
+                    openTabs: [],
+                    activeTabId: null,
+                    tabsVisible: true,
+                    // Drafts
+                    draftsEnabled: null, // null = not set, true, false
+                };
+
+                // Storage
+                this.recentProjects = []; // Used for localStorage
+                this.cookieDraftsIndex = []; // Used for cookie drafts
+                this.autosaveInterval = null;
+
+                this.canvas = document.getElementById('main-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.textEditor = document.getElementById('text-editor');
+                this.canvasArea = document.querySelector('.canvas-area');
+                this.wrapper = document.querySelector('.canvas-wrapper');
+                this.isDrawing = false;
+                this.lastPoint = null;
+                this.isPanning = false;
+                this.isSpacePressed = false;
+                this.activeHandle = null;
+                this.draggingObject = false;
+                this.transformStart = null;
+                this.useWasm = false;
+                this.wasmStrokeActive = false;
+
+                // Improve image quality when viewing
+                this.ctx.imageSmoothingEnabled = true;
+                this.ctx.imageSmoothingQuality = 'high';
+                
+                this.initializeHomeScreen();
+            }
+
+            // ================= Cookie Helpers =================
+            setCookie(name, value, days) {
+                let expires = "";
+                if (days) {
+                    const date = new Date();
+                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                    expires = "; expires=" + date.toUTCString();
+                }
+                // Use encodeURIComponent for value, but not for name
+                document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/; SameSite=Lax";
+            }
+
+            getCookie(name) {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) == 0) {
+                        return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                    }
+                }
+                return null;
+            }
+            
+            deleteCookie(name) {   
+                document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax';
+            }
+
+
+            // ================= Home Screen & Initialization =================
+
+            initializeHomeScreen() {
+                // Show home screen first
+                document.getElementById('app-container').classList.add('home-active');
+
+                // Check draft permission
+                const permission = this.getCookie('brushes_drafts_enabled');
+                if (permission === 'true') {
+                    this.state.draftsEnabled = true;
+                    this.setupDraftsUI(true);
+                } else if (permission === 'false') {
+                    this.state.draftsEnabled = false;
+                    this.setupDraftsUI(false);
+                } else {
+                    this.state.draftsEnabled = null;
+                    this.setupDraftsUI(null);
+                }
+
+                // Render templates
+                this.renderTemplatesUI();
+
+                // Load and show projects/drafts
+                this.loadAndRenderProjects();
+
+                // Attach home screen listeners
+                document.getElementById('draft-yes').addEventListener('click', () => this.handleDraftPermission(true));
+                document.getElementById('draft-no').addEventListener('click', () => this.handleDraftPermission(false));
+                // Update "Create New" button to use a default template
+                document.getElementById('home-create-new').addEventListener('click', () => this.newFromTemplate('default_hd'));
+            }
+            
+            renderTemplatesUI() {
+                const container = document.getElementById('template-list-container');
+                if (!container) return;
+                
+                let gridHtml = '<div class="template-grid">';
+                for (const templateId in TEMPLATES) {
+                    const t = TEMPLATES[templateId];
+                    gridHtml += `
+                        <div class="template-card" onclick="editor.newFromTemplate('${templateId}')">
+                            <div class="template-icon">${t.icon}</div>
+                            <div class="template-name">${t.name}</div>
+                            <div class="template-dims">${t.width} x ${t.height} px</div>
+                        </div>
+                    `;
+                }
+                gridHtml += '</div>';
+                container.innerHTML = gridHtml;
+            }
+
+            setupDraftsUI(state) {
+                const prompt = document.getElementById('draft-permission-prompt');
+                const header = document.getElementById('drafts-header');
+                
+                if (state === null) {
+                    prompt.style.display = 'block';
+                    header.textContent = 'Projects';
+                } else if (state === true) {
+                    prompt.style.display = 'none';
+                    header.textContent = 'Auto-Saved Drafts';
+                } else {
+                    prompt.style.display = 'none';
+                    header.textContent = 'Recent Projects (Local Storage)';
+                }
+            }
+
+            handleDraftPermission(enable) {
+                this.setCookie('brushes_drafts_enabled', enable ? 'true' : 'false', 365);
+                this.state.draftsEnabled = enable;
+                this.setupDraftsUI(enable);
+                // Re-load and render the list based on the new setting
+                this.loadAndRenderProjects();
+                this.showToast(enable ? 'Auto-save drafts enabled' : 'Auto-save drafts disabled');
+            }
+
+            createNewFromHome() {
+                // This is now handled by newFromTemplate('default_hd')
+                this.newFromTemplate('default_hd');
+            }
+
+            newFromTemplate(templateId) {
+                const templateData = TEMPLATES[templateId];
+                if (!templateData) {
+                    console.error('Unknown template ID:', templateId);
+                    this.showToast('Unknown template', 'error');
+                    return;
+                }
+                
+                document.getElementById('app-container').classList.remove('home-active');
+                // Pass template data to finishEditorInitialization
+                this.finishEditorInitialization(null, templateData);
+            }
+
+            loadDraftFromHome(projectId) {
+                document.getElementById('app-container').classList.remove('home-active');
+                // Pass the ID to load, no template data
+                this.finishEditorInitialization(projectId, null);
+            }
+
+            /**
+             * Finishes initializing the main editor UI.
+             * This is called *after* the user leaves the home screen.
+             * @param {string | null} projectIdToLoad - If provided, loads this project.
+             * @param {object | null} templateData - If provided, starts a new project with these settings.
+             */
+            async finishEditorInitialization(projectIdToLoad = null, templateData = null) {
+                if (projectIdToLoad) {
+                    const projectData = await this.loadProjectData(projectIdToLoad);
+                    if (projectData) {
+                        const tab = this.createNewTab(projectData.name, false, null); // Don't create new doc
+                        tab.projectId = projectData.id;
+                        tab.saved = true;
+                        this.loadProject(projectData); // This will deserialize
+                    } else {
+                        // Fallback: couldn't load, create new with default template
+                        this.createNewTab('Untitled Project', true, TEMPLATES['default_hd']);
+                    }
+                } else if (templateData) {
+                    // Create a new tab and document based on the template
+                    this.createNewTab(templateData.name, true, templateData);
+                } else {
+                    // Default fallback: create new with default template
+                    this.createNewTab('Untitled Project', true, TEMPLATES['default_hd']);
+                }
+
+                // Setup all editor event listeners
+                this.initializeEventListeners();
+                this.initializeKeyboardShortcuts();
+                this.attachObjectUIControls();
+                this.setupMenuBar();
+                this.updateUI();
+                this.updateLayersUI();
+                this.updateHistoryUI();
+                this.redrawCanvas();
+                
+                this.setupTabEventListeners();
+                this.setupAutosave();
+
+                // Attempt to initialize the WASM engine (non-blocking)
+                if (window.WasmEngine && typeof WasmEngine.init === 'function') {
+                    WasmEngine.init(this.canvas.width, this.canvas.height)
+                        .then(() => {
+                            this.useWasm = true;
+                            this.showToast('WASM engine enabled');
+                        })
+                        .catch(() => {
+                            this.useWasm = false;
+                        });
+                }
+            }
+
+            // ================= Project Storage (Unified) =================
+            
+            /** Loads the index of projects/drafts based on user setting */
+            loadProjectsIndex() {
+                if (this.state.draftsEnabled) {
+                    // Load from Cookie
+                    try {
+                        const indexCookie = this.getCookie('brushes_drafts_index');
+                        this.cookieDraftsIndex = indexCookie ? JSON.parse(indexCookie) : [];
+                        return this.cookieDraftsIndex;
+                    } catch (e) {
+                        console.warn('Failed to load cookie draft index:', e);
+                        this.cookieDraftsIndex = [];
+                        return [];
+                    }
+                } else {
+                    // Load from LocalStorage
+                    try {
+                        const projects = localStorage.getItem('brushes-recent-projects');
+                        this.recentProjects = projects ? JSON.parse(projects) : [];
+                        return this.recentProjects;
+                    } catch (e) {
+                        console.warn('Failed to load recent projects from localStorage:', e);
+                        this.recentProjects = [];
+                        return [];
+                    }
+                }
+            }
+
+            /** Loads the full data for a single project */
+            async loadProjectData(projectId) {
+                let projectIndex = this.state.draftsEnabled ? this.cookieDraftsIndex : this.recentProjects;
+                const projectInfo = projectIndex.find(p => p.id === projectId);
+                if (!projectInfo) return null;
+
+                if (this.state.draftsEnabled) {
+                    // Load data from its own cookie
+                    const dataCookie = this.getCookie('brushes_draft_' + projectId);
+                    if (dataCookie) {
+                        return { ...projectInfo, data: dataCookie };
+                    }
+                } else {
+                    // Data is already in the `recentProjects` array from localStorage
+                    return projectInfo;
+                }
+                return null;
+            }
+
+            /** Saves the current project state (to cookie or localStorage) */
+            saveCurrentProject(name = null) {
+                if (name) {
+                    this.state.projectName = name;
+                }
+
+                const projectData = {
+                    id: this.state.currentProjectId || `project-${Date.now()}`,
+                    name: this.state.projectName,
+                    thumbnail: this.generateThumbnail(),
+                    data: this.serializeProject(), // This is the heavy data
+                    lastModified: Date.now()
+                };
+
+                if (!this.state.currentProjectId) {
+                    this.state.currentProjectId = projectData.id;
+                }
+
+                if (this.state.draftsEnabled) {
+                    this.saveProjectToCookie(projectData);
+                    this.showToast(`Draft "${this.state.projectName}" auto-saved`);
+                } else {
+                    this.saveProjectToLocalStorage(projectData);
+                    this.showToast(`Project "${this.state.projectName}" saved to Recents`);
+                }
+                this.updateActiveTab();
+            }
+
+            saveProjectToCookie(projectData) {
+                // Update index
+                this.cookieDraftsIndex = this.cookieDraftsIndex.filter(p => p.id !== projectData.id);
+                // Add simplified info to index
+                this.cookieDraftsIndex.unshift({
+                    id: projectData.id,
+                    name: projectData.name,
+                    lastModified: projectData.lastModified,
+                    thumbnail: projectData.thumbnail
+                });
+                this.cookieDraftsIndex = this.cookieDraftsIndex.slice(0, 20); // Limit index size
+
+                try {
+                    // Save index
+                    this.setCookie('brushes_drafts_index', JSON.stringify(this.cookieDraftsIndex), 365);
+                    // Save full project data in its own cookie
+                    this.setCookie('brushes_draft_' + projectData.id, projectData.data, 365);
+                } catch (e) {
+                    console.error("Failed to save draft to cookie (might be too large):", e);
+                    this.showToast('Failed to save draft. Cookie might be full.', 'error');
+                }
+            }
+
+            saveProjectToLocalStorage(projectData) {
+                // This is the old `addToRecentProjects`
+                const existingIndex = this.recentProjects.findIndex(p => p.id === projectData.id);
+                if (existingIndex >= 0) {
+                    this.recentProjects.splice(existingIndex, 1);
+                }
+                
+                // Full data is stored in the index for localStorage
+                this.recentProjects.unshift(projectData);
+
+                if (this.recentProjects.length > 20) {
+                    this.recentProjects = this.recentProjects.slice(0, 20);
+                }
+                this.saveProjectsIndexToLocalStorage();
+            }
+
+            saveProjectsIndexToLocalStorage() {
+                try {
+                    localStorage.setItem('brushes-recent-projects', JSON.stringify(this.recentProjects));
+                } catch (e) {
+                    console.warn('Failed to save recent projects to localStorage:', e);
+                }
+            }
+
+            deleteProject(projectId) {
+                if (!confirm('Are you sure you want to remove this project? This cannot be undone.')) {
+                    return;
+                }
+
+                if (this.state.draftsEnabled) {
+                    // Delete from cookies
+                    this.cookieDraftsIndex = this.cookieDraftsIndex.filter(p => p.id !== projectId);
+                    this.setCookie('brushes_drafts_index', JSON.stringify(this.cookieDraftsIndex), 365);
+                    this.deleteCookie('brushes_draft_' + projectId);
+                } else {
+                    // Delete from localStorage
+                    this.recentProjects = this.recentProjects.filter(p => p.id !== projectId);
+                    this.saveProjectsIndexToLocalStorage();
+                }
+                this.loadAndRenderProjects(); // Refresh home screen list
+                this.showToast('Project deleted');
+            }
+            
+            // ================= Home Screen UI (was Modal UI) =================
+            
+            showHomeScreen() {
+                document.getElementById('app-container').classList.add('home-active');
+                this.loadAndRenderProjects();
+            }
+
+            /** Renders the project list on the home screen */
+            loadAndRenderProjects() {
+                const projects = this.loadProjectsIndex(); // Gets index from cookie or localStorage
+                const content = document.getElementById('drafts-list-container');
+                if (!content) return;
+
+                if (projects.length === 0) {
+                    const emptyMsg = this.state.draftsEnabled ? 'No auto-saved drafts found' : 'No recent projects found';
+                    content.innerHTML = `
+                        <div class="empty-projects">
+                            <div class="icon">📁</div>
+                            <p>${emptyMsg}</p>
+                            <p>Create a new project to get started.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const projectsHTML = projects.map(project => {
+                    const date = new Date(project.lastModified).toLocaleDateString();
+                    // Use a unique function name for the new home screen load
+                    return `
+                        <div class="project-card" onclick="editor.loadDraftFromHome('${project.id}')">
+                            <div class="project-thumbnail">
+                                ${project.thumbnail ? `<img src="${project.thumbnail}" alt="${project.name}">` : 'No preview'}
+                            </div>
+                            <div class="project-name">${project.name}</div>
+                            <div class="project-date">Modified: ${date}</div>
+                            <div class="project-actions">
+                                <button class="project-action-btn" onclick="event.stopPropagation(); editor.loadDraftFromHome('${project.id}')">Open</button>
+                                <button class="project-action-btn delete" onclick="event.stopPropagation(); editor.deleteProject('${project.id}')">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                content.innerHTML = `<div class="recent-projects-grid">${projectsHTML}</div>`;
+            }
+
+            // ================= Project Loading =================
+
+            /**
+             * Loads project data into the editor state.
+             * Assumes projectData.data is the serialized string.
+             */
+            loadProject(projectData) {
+                try {
+                    // Check if data is a string (from cookie) or object (from localStorage)
+                    const dataToDeserialize = typeof projectData.data === 'string' ? JSON.parse(projectData.data) : projectData.data;
+                    this.deserializeProject(dataToDeserialize);
+                    this.state.currentProjectId = projectData.id;
+                    this.state.projectName = projectData.name;
+                    this.updateActiveTab();
+                    this.showToast(`Project "${projectData.name}" loaded`);
+                } catch (e) {
+                    console.error('Failed to load project:', e);
+                    this.showToast('Failed to load project data', 'error');
+                }
+            }
+            
+            // ================= Autosave =================
+            setupAutosave() {
+                // Autosave every 30 seconds
+                this.autosaveInterval = setInterval(() => {
+                    // Only save if there's an active project
+                    if (this.state.currentProjectId) {
+                        this.saveCurrentProject();
+                    }
+                }, 30000);
+
+                // Save on window beforeunload
+                window.addEventListener('beforeunload', () => {
+                    if (this.state.currentProjectId) {
+                        this.saveCurrentProject();
+                    }
+                });
+            }
+
+            // ================= Recent Projects Modal (DEPRECATED, REPLACED BY HOME) =================
+            showRecentProjectsModal() {
+                // This function is now redirected to show the Home Screen
+                this.showHomeScreen();
+            }
+            closeRecentProjectsModal() {
+                 // This function is now redirected to show the Home Screen
+                this.showHomeScreen();
+            }
+            updateRecentProjectsModal() {
+                 // This function is now redirected to show the Home Screen
+                this.loadAndRenderProjects();
+            }
+            loadRecentProject(projectId) {
+                // This function is now redirected
+                this.loadDraftFromHome(projectId);
+            }
+            deleteRecentProject(projectId) {
+                // This function is now redirected
+                this.deleteProject(projectId);
+            }
+            // ================= (Original functions continue below) =================
+
+            // ================= Tab Management =================
+            createNewTab(name = 'Untitled Project', createNewDoc = true, templateData = null) {
+                const tabId = `tab-${Date.now()}`;
+                const tabName = templateData ? templateData.name : name;
+
+                const tab = {
+                    id: tabId,
+                    name: tabName,
+                    projectId: null,
+                    saved: false,
+                    state: null // For caching state when switching tabs
+                };
+
+                this.state.openTabs.push(tab);
+                this.state.activeTabId = tabId;
+                this.state.projectName = tabName;
+                this.state.currentProjectId = null;
+
+                this.updateTabsUI();
+                if (createNewDoc) {
+                    this.newDocument(templateData); // Pass template data to newDocument
+                }
+                return tab;
+            }
+
+            switchToTab(tabId) {
+                const tab = this.state.openTabs.find(t => t.id === tabId);
+                if (!tab || tab.id === this.state.activeTabId) return;
+
+                // Save current tab state if needed
+                this.saveCurrentTabState();
+
+                this.state.activeTabId = tabId;
+                this.state.projectName = tab.name;
+                this.state.currentProjectId = tab.projectId;
+
+                // Load tab state
+                this.loadTabState(tab);
+                this.updateTabsUI();
+                this.updateStatusBar();
+                this.updateLayersUI();
+                this.updateHistoryUI();
+                this.redrawCanvas();
+            }
+
+            closeTab(tabId) {
+                const tabIndex = this.state.openTabs.findIndex(t => t.id === tabId);
+                if (tabIndex === -1) return;
+
+                const tab = this.state.openTabs[tabIndex];
+                
+                // If it's the active tab and there are other tabs, switch to another
+                if (tab.id === this.state.activeTabId && this.state.openTabs.length > 1) {
+                    const newActiveIndex = tabIndex > 0 ? tabIndex - 1 : tabIndex + 1;
+                    this.switchToTab(this.state.openTabs[newActiveIndex].id);
+                }
+
+                this.state.openTabs.splice(tabIndex, 1);
+
+                // If no tabs left, go back to home screen
+                if (this.state.openTabs.length === 0) {
+                    this.showHomeScreen();
+                } else {
+                    this.updateTabsUI();
+                }
+            }
+
+            updateActiveTab() {
+                const activeTab = this.state.openTabs.find(t => t.id === this.state.activeTabId);
+                if (activeTab) {
+                    activeTab.name = this.state.projectName;
+                    activeTab.projectId = this.state.currentProjectId;
+                    activeTab.saved = !!this.state.currentProjectId;
+                    this.updateTabsUI();
+                }
+            }
+
+            saveCurrentTabState() {
+                const activeTab = this.state.openTabs.find(t => t.id === this.state.activeTabId);
+                if (activeTab) {
+                    activeTab.state = this.serializeProject();
+                }
+            }
+
+            async loadTabState(tab) {
+                if (tab.state) {
+                    this.deserializeProject(JSON.parse(tab.state));
+                } else if (tab.projectId) {
+                    const project = await this.loadProjectData(tab.projectId);
+                    if (project) {
+                        this.loadProject(project);
+                    }
+                } else {
+                    // Fallback for tabs created before state saving
+                    this.newDocument(TEMPLATES['default_hd']);
+                }
+            }
+
+            updateTabsUI() {
+                const tabsContainer = document.getElementById('tabs-container');
+                if (!tabsContainer) return;
+
+                tabsContainer.innerHTML = '';
+
+                this.state.openTabs.forEach(tab => {
+                    const tabElement = document.createElement('div');
+                    tabElement.className = `tab ${tab.id === this.state.activeTabId ? 'active' : ''}`;
+                    tabElement.innerHTML = `
+                        <span class="tab-name">${tab.name}${tab.saved ? '' : '*'}</span>
+                        <button class="tab-close" onclick="editor.closeTab('${tab.id}')" title="Close tab">×</button>
+                    `;
+                    
+                    tabElement.addEventListener('click', (e) => {
+                        if (!e.target.classList.contains('tab-close')) {
+                            this.switchToTab(tab.id);
+                        }
+                    });
+
+                    tabsContainer.appendChild(tabElement);
+                });
+            }
+
+            toggleTabs() {
+                this.state.tabsVisible = !this.state.tabsVisible;
+                const tabsContainer = document.getElementById('tabs-container');
+                if (tabsContainer) {
+                    tabsContainer.classList.toggle('hidden', !this.state.tabsVisible);
+                }
+                this.showToast(this.state.tabsVisible ? 'Tabs shown' : 'Tabs hidden');
+            }
+
+            setupTabEventListeners() {
+                const tabToggleBtn = document.getElementById('tab-toggle-btn');
+                if (tabToggleBtn) {
+                    tabToggleBtn.addEventListener('click', () => this.toggleTabs());
+                }
+            }
+
+
+            // ================= Enhanced File Operations =================
+            saveAsProject() {
+                const name = prompt('Enter project name:', this.state.projectName);
+                if (name && name.trim()) {
+                    this.state.currentProjectId = null; // Force new ID
+                    this.saveCurrentProject(name.trim());
+                }
+            }
+
+            // This function is now called by finishEditorInitialization
+            // initializeEditor() { ... } 
+
+            createInitialLayer(width, height) {
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const layer = {
+                    id: 'background',
+                    name: 'Background',
+                    visible: true,
+                    opacity: 100,
+                    blendMode: 'normal',
+                    canvas: canvas,
+                    locked: false
+                };
+
+                this.state.layers.push(layer);
+                this.state.currentLayerId = layer.id;
+            }
+
+            initializeEventListeners() {
+                // Canvas events
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mousemove', (e) => this.handleMouseMove(e));
+                this.canvas.addEventListener('mouseup', () => this.handleMouseUp());
+                this.canvas.addEventListener('mouseleave', () => this.handleMouseUp());
+                this.canvas.addEventListener('dblclick', (e) => this.handleDoubleClick(e));
+
+                // Zoom at cursor with Ctrl/Cmd + wheel
+                this.canvasArea.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        const factor = e.deltaY > 0 ? 0.9 : 1.1;
+                        this.setZoom(this.state.zoom * factor, { clientX: e.clientX, clientY: e.clientY });
+                    }
+                }, { passive: false });
+
+                // Tool selection
+                document.querySelectorAll('.toolbox-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (btn.dataset.tool) {
+                            this.selectTool(btn.dataset.tool);
+                        }
+                    });
+                });
+
+                // Color events
+                document.getElementById('fg-color').addEventListener('click', () => this.pickColor('foreground'));
+                document.getElementById('bg-color').addEventListener('click', () => this.pickColor('background'));
+
+                // Brush settings
+                this.setupSliderEvents();
+
+                // Blend mode
+                document.getElementById('blend-mode').addEventListener('change', (e) => {
+                    this.state.blendMode = e.target.value;
+                });
+            }
+
+            attachObjectUIControls() {
+                const rotateInput = document.getElementById('rotate-input');
+                const snapToggle = document.getElementById('snap-grid-toggle');
+                if (rotateInput) {
+                    rotateInput.addEventListener('input', () => {
+                        const obj = this.getActiveObject();
+                        if (obj) {
+                            obj.rotation = (parseFloat(rotateInput.value) || 0) * Math.PI / 180;
+                            this.redrawCanvas();
+                            this.saveToHistory('Rotate Object');
+                        }
+                    });
+                }
+                if (snapToggle) {
+                    snapToggle.addEventListener('change', (e) => {
+                        this.state.snapToGrid = !!e.target.checked;
+                    });
+                }
+                if (this.textEditor) {
+                    this.textEditor.addEventListener('blur', () => this.commitTextEditor());
+                    this.textEditor.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            this.commitTextEditor();
+                        }
+                    });
+                }
+                // Text controls
+                const editBtn = document.getElementById('text-edit-btn');
+                const colorInput = document.getElementById('text-color');
+                const ffSelect = document.getElementById('text-font-family');
+                const fsInput = document.getElementById('text-font-size');
+                const fwSelect = document.getElementById('text-font-weight');
+                const alignL = document.getElementById('text-align-left');
+                const alignC = document.getElementById('text-align-center');
+                const alignR = document.getElementById('text-align-right');
+
+                if (editBtn) {
+                    editBtn.addEventListener('click', () => {
+                        const obj = this.getActiveObject();
+                        if (obj && obj.type === 'text') {
+                            this.showTextEditorForObject(obj);
+                        } else {
+                            this.showToast('Select a text object first', 'error');
+                        }
+                    });
+                }
+                if (colorInput) {
+                    colorInput.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        obj.fill = e.target.value;
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.color = obj.fill;
+                        }
+                        this.redrawCanvas();
+                        this.saveToHistory('Text Color');
+                    });
+                }
+                if (ffSelect) {
+                    ffSelect.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        obj.fontFamily = e.target.value;
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily}`;
+                        }
+                        this.ensureFontLoaded(obj.fontFamily, obj.fontWeight || '400', obj.fontSize || 32).then(() => {
+                            this.updateTextMetrics(obj);
+                            this.redrawCanvas();
+                            this.saveToHistory('Text Font Family');
+                        });
+                    });
+                }
+                if (fsInput) {
+                    fsInput.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        const sz = parseInt(e.target.value, 10) || 12;
+                        obj.fontSize = Math.max(6, Math.min(300, sz));
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize}px ${obj.fontFamily||'Arial'}`;
+                        }
+                        this.ensureFontLoaded(obj.fontFamily || 'Arial', obj.fontWeight || '400', obj.fontSize).then(() => {
+                            this.updateTextMetrics(obj);
+                            this.redrawCanvas();
+                            this.saveToHistory('Text Size');
+                        });
+                    });
+                }
+                if (fwSelect) {
+                    fwSelect.addEventListener('change', (e) => {
+                        const obj = this.getActiveObject();
+                        if (!obj || obj.type !== 'text') return;
+                        obj.fontWeight = e.target.value;
+                        if (this.textEditor && this.textEditor.style.display !== 'none') {
+                            this.textEditor.style.font = `${obj.fontWeight} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                        }
+                        this.ensureFontLoaded(obj.fontFamily || 'Arial', obj.fontWeight, obj.fontSize || 32).then(() => {
+                            this.updateTextMetrics(obj);
+                            this.redrawCanvas();
+                            this.saveToHistory('Text Weight');
+                        });
+                    });
+                }
+                if (alignL) alignL.addEventListener('click', () => this.setTextAlign('left'));
+                if (alignC) alignC.addEventListener('click', () => this.setTextAlign('center'));
+                if (alignR) alignR.addEventListener('click', () => this.setTextAlign('right'));
+
+                // Initial controls state
+                this.updateTextControlsUI();
+            }
+
+            setupSliderEvents() {
+                const sliders = [
+                    { id: 'brush-size', property: 'size' },
+                    { id: 'brush-hardness', property: 'hardness' },
+                    { id: 'brush-opacity', property: 'opacity' },
+                    { id: 'brush-flow', property: 'flow' }
+                ];
+
+                sliders.forEach(({ id, property }) => {
+                    const slider = document.getElementById(id);
+                    if (slider) {
+                        slider.addEventListener('input', (e) => {
+                            this.state.brushSettings[property] = parseInt(e.target.value);
+                            this.updateUI();
+                        });
+                    }
+                });
+            }
+
+            initializeKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    // Stop shortcuts if home is active
+                    if (document.getElementById('app-container').classList.contains('home-active')) {
+                        return;
+                    }
+
+                    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+                    const isEditing = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
+                    if (isEditing) return;
+                    if (e.ctrlKey || e.metaKey) {
+                        switch (e.key.toLowerCase()) {
+                            case 'z':
+                                e.preventDefault();
+                                if (e.shiftKey) this.redo(); else this.undo();
+                                break;
+                            case 'n': e.preventDefault(); this.newDocument(TEMPLATES['default_hd']); break; // Use default
+                            case 'o': e.preventDefault(); this.openFile(); break;
+                            case 's': e.preventDefault(); this.saveFile(); break;
+                            case 'c':
+                                if (this.getActiveObject()) { e.preventDefault(); this.copySelected(); }
+                                break;
+                            case 'v':
+                                if (this.state.objectClipboard) { e.preventDefault(); this.pasteSelected(); }
+                                break;
+                            case '+':
+                            case '=': e.preventDefault(); this.zoomIn(); break;
+                            case '-': e.preventDefault(); this.zoomOut(); break;
+                        }
+                    } else {
+                        switch (e.key.toLowerCase()) {
+                            case 'b': this.selectTool('brush'); break;
+                            case 'e': this.selectTool('eraser'); break;
+                            case 'i': this.selectTool('eyedropper'); break;
+                            case 'v': this.selectTool('transform'); break;
+                            case 'm': this.selectTool('select'); break;
+                            case 'c': this.selectTool('crop'); break;
+                            case 's': this.selectTool('clone'); break;
+                            case 'j': this.selectTool('healing'); break;
+                            case 'o': this.selectTool('dodge'); break;
+                            case 't': this.selectTool('text'); break;
+                            case 'g': this.toggleGrid(); break;
+                            case 'f': this.fitToScreen(); break;
+                            case 'delete':
+                            case 'backspace':
+                                if (this.getActiveObject()) { e.preventDefault(); this.deleteSelected(); }
+                                break;
+                            case 'arrowup':
+                            case 'arrowdown':
+                            case 'arrowleft':
+                            case 'arrowright':
+                                if (this.getActiveObject()) {
+                                    e.preventDefault();
+                                    const step = e.shiftKey ? 10 : 1;
+                                    this.nudgeSelected(e.key.toLowerCase(), step);
+                                }
+                                break;
+                            case ' ': // Space for panning
+                                if (!this.isSpacePressed) {
+                                    e.preventDefault();
+                                    this.isSpacePressed = true;
+                                    this.canvasArea.classList.add('grabbing');
+                                    this.canvas.classList.add('grabbing');
+                                }
+                                break;
+                        }
+                    }
+                });
+                document.addEventListener('keyup', (e) => {
+                    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+                    const isEditing = tag === 'input' || tag === 'textarea' || (e.target && e.target.isContentEditable);
+                    if (isEditing) return;
+                    if (e.key === ' ') {
+                        this.isSpacePressed = false;
+                        this.canvasArea.classList.remove('grabbing');
+                        this.canvas.classList.remove('grabbing');
+                    }
+                });
+            }
+
+            selectTool(tool) {
+                this.state.currentTool = tool;
+                
+                // Update toolbox UI
+                document.querySelectorAll('.toolbox-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                const selectedBtn = document.querySelector(`[data-tool="${tool}"]`);
+                if (selectedBtn) {
+                    selectedBtn.classList.add('active');
+                }
+
+                // Update status
+                document.getElementById('tool-info').textContent = this.getToolDisplayName(tool);
+                this.updateCanvasCursor();
+                // Hide/commit any active text editor when switching tools
+                if (this.textEditor && this.textEditor.style.display !== 'none') {
+                    this.commitTextEditor();
+                }
+                this.showToast(`${this.getToolDisplayName(tool)} selected`);
+            }
+
+            getToolDisplayName(tool) {
+                const names = {
+                    'brush': 'Brush Tool',
+                    'pencil': 'Pencil Tool',
+                    'eraser': 'Eraser Tool',
+                    'select': 'Select Tool',
+                    'eyedropper': 'Eyedropper',
+                    'transform': 'Transform Tool',
+                    'crop': 'Crop Tool',
+                    'clone': 'Clone Tool',
+                    'healing': 'Healing Tool',
+                    'blur': 'Blur Tool',
+                    'sharpen': 'Sharpen Tool',
+                    'dodge': 'Dodge Tool',
+                    'burn': 'Burn Tool',
+                    'text': 'Text Tool'
+                };
+                return names[tool] || tool;
+            }
+
+            updateCanvasCursor() {
+                const cursors = {
+                    'brush': 'crosshair',
+                    'pencil': 'crosshair',
+                    'eraser': 'crosshair',
+                    'select': 'crosshair',
+                    'eyedropper': 'crosshair',
+                    'transform': 'default',
+                    'crop': 'crosshair',
+                    'clone': 'crosshair',
+                    'healing': 'crosshair',
+                    'blur': 'crosshair',
+                    'sharpen': 'crosshair',
+                    'dodge': 'crosshair',
+                    'burn': 'crosshair',
+                    'text': 'text'
+                };
+                this.canvas.style.cursor = cursors[this.state.currentTool] || 'default';
+            }
+
+            getMousePos(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                };
+            }
+
+            handleMouseDown(e) {
+                const point = this.getMousePos(e);
+                this.isDrawing = true;
+                this.lastPoint = point;
+
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer || currentLayer.locked) {
+                    if (currentLayer?.locked) {
+                        this.showToast('Layer is locked', 'error');
+                    }
+                    return;
+                }
+
+                // Space-drag panning or middle-click
+                if (this.isSpacePressed || e.button === 1) {
+                    this.startPan(e);
+                    return;
+                }
+
+                this.saveToHistory(`${this.getToolDisplayName(this.state.currentTool)} action`);
+
+                switch (this.state.currentTool) {
+                    case 'brush':
+                    case 'pencil':
+                        this.startPaintStroke(point);
+                        break;
+                    case 'eraser':
+                        this.startEraseStroke(point);
+                        break;
+                    case 'eyedropper':
+                        this.pickColorFromCanvas(point);
+                        break;
+                    case 'clone':
+                        this.handleCloneStamp(point);
+                        break;
+                    case 'healing':
+                        this.handleHealing(point);
+                        break;
+                    case 'dodge':
+                    case 'burn':
+                        this.handleDodgeBurn(point);
+                        break;
+                    case 'blur':
+                    case 'sharpen':
+                        this.handleBlurSharpen(point);
+                        break;
+                    case 'select':
+                        this.startSelection(point);
+                        break;
+                    case 'transform':
+                        this.startTransform(point);
+                        break;
+                    case 'text':
+                        this.handleTextToolDown(point);
+                        break;
+                }
+
+                this.redrawCanvas();
+            }
+
+            handleMouseMove(e) {
+                if (this.isPanning) { this.updatePan(e); return; }
+                if (!this.isDrawing) return;
+
+                const point = this.getMousePos(e);
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer || currentLayer.locked) return;
+
+                switch (this.state.currentTool) {
+                    case 'brush':
+                    case 'pencil':
+                        this.continuePaintStroke(point);
+                        break;
+                    case 'eraser':
+                        this.continueEraseStroke(point);
+                        break;
+                    case 'dodge':
+                    case 'burn':
+                        this.handleDodgeBurn(point);
+                        break;
+                    case 'blur':
+                    case 'sharpen':
+                        this.handleBlurSharpen(point);
+                        break;
+                    case 'select':
+                        this.updateSelection(point);
+                        break;
+                    case 'transform':
+                        this.updateTransform(point);
+                        break;
+                }
+
+                this.lastPoint = point;
+                this.redrawCanvas();
+            }
+
+            handleMouseUp() {
+                if (this.isPanning) { this.endPan(); return; }
+                if (this.isDrawing) {
+                    this.finishStroke();
+                    this.isDrawing = false;
+                    this.lastPoint = null;
+                }
+            }
+
+            // Tool implementations
+            startPaintStroke(point) {
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                const canUseWasm = this.useWasm && window.WasmEngine && WasmEngine.ready() && (this.state.blendMode === 'source-over');
+                if (canUseWasm) {
+                    // Sync, configure and dab via WASM
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    const { r, g, b } = this.parseHexToRgb(this.state.colors.foreground);
+                    WasmEngine.setColor(r, g, b, 255);
+                    WasmEngine.brushDab(point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    this.wasmStrokeActive = true;
+                } else {
+                    ctx.globalCompositeOperation = this.state.blendMode;
+                    ctx.globalAlpha = this.state.brushSettings.opacity / 100;
+                    ctx.strokeStyle = this.state.colors.foreground;
+                    ctx.fillStyle = this.state.colors.foreground;
+                    ctx.lineWidth = this.state.brushSettings.size;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    this.drawBrushDab(ctx, point);
+                }
+            }
+
+            continuePaintStroke(point) {
+                if (!this.lastPoint) return;
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                const canUseWasm = this.useWasm && window.WasmEngine && WasmEngine.ready() && (this.state.blendMode === 'source-over');
+                if (canUseWasm && this.wasmStrokeActive) {
+                    // No need to resync from canvas on every move; engine has latest pixels
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    const { r, g, b } = this.parseHexToRgb(this.state.colors.foreground);
+                    WasmEngine.setColor(r, g, b, 255);
+                    WasmEngine.brushLine(this.lastPoint.x, this.lastPoint.y, point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    this.drawBrushLine(ctx, this.lastPoint, point);
+                }
+            }
+
+            drawBrushDab(ctx, point) {
+                const size = this.state.brushSettings.size;
+                const hardness = this.state.brushSettings.hardness / 100;
+                
+                if (hardness === 1) {
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    const gradient = ctx.createRadialGradient(
+                        point.x, point.y, 0,
+                        point.x, point.y, size / 2
+                    );
+                    
+                    const color = this.hexToRgba(this.state.colors.foreground, this.state.brushSettings.opacity / 100);
+                    gradient.addColorStop(0, color);
+                    gradient.addColorStop(hardness, color);
+                    gradient.addColorStop(1, 'transparent');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            drawBrushLine(ctx, from, to) {
+                const distance = Math.sqrt(
+                    Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2)
+                );
+                
+                if (distance > 2) {
+                    const steps = Math.floor(distance / 2);
+                    for (let i = 1; i <= steps; i++) {
+                        const t = i / steps;
+                        const x = from.x + (to.x - from.x) * t;
+                        const y = from.y + (to.y - from.y) * t;
+                        this.drawBrushDab(ctx, { x, y });
+                    }
+                }
+            }
+
+            startEraseStroke(point) {
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    WasmEngine.eraserDab(point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    this.wasmStrokeActive = true;
+                } else {
+                    ctx.globalCompositeOperation = 'destination-out';
+                    ctx.globalAlpha = this.state.brushSettings.opacity / 100;
+                    ctx.lineWidth = this.state.brushSettings.size;
+                    ctx.lineCap = 'round';
+                    ctx.beginPath();
+                    ctx.arc(point.x, point.y, this.state.brushSettings.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            continueEraseStroke(point) {
+                if (!this.lastPoint) return;
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready() && this.wasmStrokeActive) {
+                    WasmEngine.setBrush(this.state.brushSettings.size, this.state.brushSettings.hardness / 100, this.state.brushSettings.opacity / 100);
+                    WasmEngine.eraserLine(this.lastPoint.x, this.lastPoint.y, point.x, point.y);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    ctx.beginPath();
+                    ctx.moveTo(this.lastPoint.x, this.lastPoint.y);
+                    ctx.lineTo(point.x, point.y);
+                    ctx.stroke();
+                }
+            }
+
+            pickColorFromCanvas(point) {
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer) return;
+                
+                const ctx = currentLayer.canvas.getContext('2d');
+                const pixelData = ctx.getImageData(point.x, point.y, 1, 1).data;
+                const color = this.rgbaToHex(pixelData[0], pixelData[1], pixelData[2]);
+                
+                this.state.colors.foreground = color;
+                this.updateUI();
+                this.showToast(`Color picked: ${color}`);
+            }
+
+            handleCloneStamp(point) {
+                if (!this.cloneSource) {
+                    this.cloneSource = point;
+                    this.showToast('Clone source set. Click to clone.');
+                    return;
+                }
+                
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                const size = this.state.brushSettings.size;
+                
+                try {
+                    const sourceData = ctx.getImageData(
+                        this.cloneSource.x - size/2, 
+                        this.cloneSource.y - size/2, 
+                        size, 
+                        size
+                    );
+                    ctx.putImageData(sourceData, point.x - size/2, point.y - size/2);
+                } catch (e) {
+                    this.showToast('Cannot clone from outside canvas', 'error');
+                }
+            }
+
+             handleHealing(point) {
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                const size = this.state.brushSettings.size;
+                
+                // Set healing source if not already set
+                if (!this.healingSource && !this.altKeyPressed) {
+                    this.healingSource = point;
+                    this.showToast('Healing source set. Hold Alt and click to set new source.');
+                    return;
+                }
+                
+                // Allow setting new source with Alt+click
+                if (this.altKeyPressed) {
+                    this.healingSource = point;
+                    this.showToast('New healing source set');
+                    return;
+                }
+                
+                if (!this.healingSource) return;
+                
+                // Calculate offset from source
+                const offsetX = point.x - this.healingSource.x;
+                const offsetY = point.y - this.healingSource.y;
+                
+                // Sample from source area around the healing source point
+                const sampleRadius = size;
+                const sampleX = Math.max(0, Math.min(ctx.canvas.width - sampleRadius, this.healingSource.x - sampleRadius/2));
+                const sampleY = Math.max(0, Math.min(ctx.canvas.height - sampleRadius, this.healingSource.y - sampleRadius/2));
+                
+                try {
+                    const sourceData = ctx.getImageData(sampleX, sampleY, sampleRadius, sampleRadius);
+                    
+                    // Create a temporary canvas for blending
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = size;
+                    tempCanvas.height = size;
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Draw the source data
+                    tempCtx.putImageData(sourceData, 0, 0);
+                    
+                    // Apply healing with soft edges
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'source-over';
+                    ctx.globalAlpha = this.state.brushSettings.opacity / 100;
+                    
+                    // Create circular mask for soft healing
+                    const gradient = ctx.createRadialGradient(
+                        point.x, point.y, 0,
+                        point.x, point.y, size / 2
+                    );
+                    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+                    gradient.addColorStop(0.7, 'rgba(255,255,255,0.8)');
+                    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+                    
+                    // Create mask
+                    const maskCanvas = document.createElement('canvas');
+                    maskCanvas.width = size;
+                    maskCanvas.height = size;
+                    const maskCtx = maskCanvas.getContext('2d');
+                    maskCtx.fillStyle = gradient;
+                    maskCtx.fillRect(0, 0, size, size);
+                    
+                    // Apply the healing with mask
+                    ctx.drawImage(tempCanvas, point.x - size/2, point.y - size/2);
+                    ctx.globalCompositeOperation = 'destination-in';
+                    ctx.drawImage(maskCanvas, point.x - size/2, point.y - size/2);
+                    
+                    ctx.restore();
+                    
+                } catch (e) {
+                    this.showToast('Cannot heal from this area', 'error');
+                }
+            }
+
+            handleDodgeBurn(point) {
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                const size = this.state.brushSettings.size;
+                const x = Math.max(0, Math.floor(point.x - size/2));
+                const y = Math.max(0, Math.floor(point.y - size/2));
+                const width = Math.min(size, ctx.canvas.width - x);
+                const height = Math.min(size, ctx.canvas.height - y);
+                if (width <= 0 || height <= 0) return;
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    const dodge = this.state.currentTool === 'dodge';
+                    const strength = this.state.brushSettings.opacity / 100 * 0.1;
+                    WasmEngine.dodgeBurn(x, y, Math.floor(width), Math.floor(height), dodge, strength);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(x, y, width, height);
+                    const strength = this.state.brushSettings.opacity / 100 * 0.1;
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        if (this.state.currentTool === 'dodge') {
+                            imageData.data[i] = Math.min(255, imageData.data[i] * (1 + strength));
+                            imageData.data[i + 1] = Math.min(255, imageData.data[i + 1] * (1 + strength));
+                            imageData.data[i + 2] = Math.min(255, imageData.data[i + 2] * (1 + strength));
+                        } else {
+                            imageData.data[i] = Math.max(0, imageData.data[i] * (1 - strength));
+                            imageData.data[i + 1] = Math.max(0, imageData.data[i + 1] * (1 - strength));
+                            imageData.data[i + 2] = Math.max(0, imageData.data[i + 2] * (1 - strength));
+                        }
+                    }
+                    ctx.putImageData(imageData, x, y);
+                }
+            }
+
+            handleBlurSharpen(point) {
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                const size = this.state.brushSettings.size;
+                const x = Math.max(0, Math.floor(point.x - size/2));
+                const y = Math.max(0, Math.floor(point.y - size/2));
+                const width = Math.min(size, ctx.canvas.width - x);
+                const height = Math.min(size, ctx.canvas.height - y);
+                if (width <= 0 || height <= 0) return;
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    if (this.state.currentTool === 'blur') {
+                        WasmEngine.blurRegion(x, y, Math.floor(width), Math.floor(height));
+                    } else {
+                        WasmEngine.sharpenRegion(x, y, Math.floor(width), Math.floor(height));
+                    }
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    if (this.state.currentTool === 'blur') {
+                        this.applyBlurEffect(ctx, x, y, width, height);
+                    } else {
+                        this.applySharpenEffect(ctx, x, y, width, height);
+                    }
+                }
+            }
+
+            applyBlurEffect(ctx, x, y, width, height) {
+                const imageData = ctx.getImageData(x, y, width, height);
+                const output = new Uint8ClampedArray(imageData.data);
+                
+                for (let py = 1; py < height - 1; py++) {
+                    for (let px = 1; px < width - 1; px++) {
+                        let r = 0, g = 0, b = 0, count = 0;
+                        
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                const idx = ((py + dy) * width + (px + dx)) * 4;
+                                r += imageData.data[idx];
+                                g += imageData.data[idx + 1];
+                                b += imageData.data[idx + 2];
+                                count++;
+                            }
+                        }
+                        
+                        const idx = (py * width + px) * 4;
+                        output[idx] = r / count;
+                        output[idx + 1] = g / count;
+                        output[idx + 2] = b / count;
+                    }
+                }
+                
+                const blurredData = new ImageData(output, width, height);
+                ctx.putImageData(blurredData, x, y);
+            }
+
+            applySharpenEffect(ctx, x, y, width, height) {
+                const imageData = ctx.getImageData(x, y, width, height);
+                const output = new Uint8ClampedArray(imageData.data);
+                
+                const kernel = [0, -1, 0, -1, 5, -1, 0, -1, 0];
+                
+                for (let py = 1; py < height - 1; py++) {
+                    for (let px = 1; px < width - 1; px++) {
+                        let r = 0, g = 0, b = 0;
+                        
+                        for (let ky = -1; ky <= 1; ky++) {
+                            for (let kx = -1; kx <= 1; kx++) {
+                                const idx = ((py + ky) * width + (px + kx)) * 4;
+                                const kernelVal = kernel[(ky + 1) * 3 + (kx + 1)];
+                                
+                                r += imageData.data[idx] * kernelVal;
+                                g += imageData.data[idx + 1] * kernelVal;
+                                b += imageData.data[idx + 2] * kernelVal;
+                            }
+                        }
+                        
+                        const idx = (py * width + px) * 4;
+                        output[idx] = Math.max(0, Math.min(255, r));
+                        output[idx + 1] = Math.max(0, Math.min(255, g));
+                        output[idx + 2] = Math.max(0, Math.min(255, b));
+                    }
+                }
+                
+                const sharpenedData = new ImageData(output, width, height);
+                ctx.putImageData(sharpenedData, x, y);
+            }
+
+            // Selection tools
+            startSelection(point) {
+                this.selectionStart = point;
+                this.state.selection = null;
+            }
+
+            updateSelection(point) {
+                if (!this.selectionStart) return;
+                
+                this.state.selection = {
+                    x: Math.min(this.selectionStart.x, point.x),
+                    y: Math.min(this.selectionStart.y, point.y),
+                    width: Math.abs(point.x - this.selectionStart.x),
+                    height: Math.abs(point.y - this.selectionStart.y)
+                };
+            }
+
+            // Move tool
+            startMove(point) {
+                this.moveStart = point;
+                this.originalLayerData = this.getCurrentLayer()?.canvas.getContext('2d')
+                    .getImageData(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            updateMove(point) {
+                if (!this.moveStart || !this.originalLayerData) return;
+                
+                const dx = point.x - this.moveStart.x;
+                const dy = point.y - this.moveStart.y;
+                
+                const currentLayer = this.getCurrentLayer();
+                const ctx = currentLayer.canvas.getContext('2d');
+                
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                ctx.putImageData(this.originalLayerData, dx, dy);
+            }
+
+            finishStroke() {
+                // End any active WASM stroke session
+                this.wasmStrokeActive = false;
+                if (this.state.currentTool === 'select' && this.state.selection) {
+                    this.showToast(`Selection: ${Math.round(this.state.selection.width)}x${Math.round(this.state.selection.height)}`);
+                }
+                if (this.state.currentTool === 'transform' && this.draggingObject) {
+                    this.draggingObject = false; this.activeHandle = null; this.transformStart = null; this.saveToHistory('Transform Object');
+                }
+            }
+
+            // Layer management
+            getCurrentLayer() {
+                return this.state.layers.find(l => l.id === this.state.currentLayerId);
+            }
+
+            addLayer() {
+                const canvas = document.createElement('canvas');
+                canvas.width = this.canvas.width;
+                canvas.height = this.canvas.height;
+                
+                const newLayer = {
+                    id: `layer-${Date.now()}`,
+                    name: `Layer ${this.state.layers.length}`,
+                    visible: true,
+                    opacity: 100,
+                    blendMode: 'normal',
+                    canvas: canvas,
+                    locked: false
+                };
+
+                this.state.layers.push(newLayer);
+                this.state.currentLayerId = newLayer.id;
+                this.updateLayersUI();
+                this.saveToHistory('Add Layer');
+                this.showToast('New layer added');
+            }
+
+            duplicateLayer() {
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer) return;
+
+                const canvas = document.createElement('canvas');
+                canvas.width = this.canvas.width;
+                canvas.height = this.canvas.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(currentLayer.canvas, 0, 0);
+
+                const duplicatedLayer = {
+                    id: `layer-${Date.now()}`,
+                    name: `${currentLayer.name} copy`,
+                    visible: true,
+                    opacity: currentLayer.opacity,
+                    blendMode: currentLayer.blendMode,
+                    canvas: canvas,
+                    locked: false
+                };
+
+                const currentIndex = this.state.layers.findIndex(l => l.id === this.state.currentLayerId);
+                this.state.layers.splice(currentIndex + 1, 0, duplicatedLayer);
+                this.state.currentLayerId = duplicatedLayer.id;
+                this.updateLayersUI();
+                this.saveToHistory('Duplicate Layer');
+                this.showToast('Layer duplicated');
+            }
+
+            deleteLayer() {
+                if (this.state.layers.length <= 1) {
+                    this.showToast('Cannot delete the last layer', 'error');
+                    return;
+                }
+
+                this.state.layers = this.state.layers.filter(l => l.id !== this.state.currentLayerId);
+                this.state.currentLayerId = this.state.layers[this.state.layers.length - 1].id;
+                this.updateLayersUI();
+                this.redrawCanvas();
+                this.saveToHistory('Delete Layer');
+                this.showToast('Layer deleted');
+            }
+
+            moveLayerUp() {
+                const idx = this.state.layers.findIndex(l => l.id === this.state.currentLayerId);
+                if (idx < 0 || idx === this.state.layers.length - 1) return;
+                const tmp = this.state.layers[idx];
+                this.state.layers[idx] = this.state.layers[idx + 1];
+                this.state.layers[idx + 1] = tmp;
+                this.updateLayersUI();
+                this.redrawCanvas();
+                this.saveToHistory('Move Layer Up');
+            }
+
+            moveLayerDown() {
+                const idx = this.state.layers.findIndex(l => l.id === this.state.currentLayerId);
+                if (idx <= 0) return;
+                const tmp = this.state.layers[idx];
+                this.state.layers[idx] = this.state.layers[idx - 1];
+                this.state.layers[idx - 1] = tmp;
+                this.updateLayersUI();
+                this.redrawCanvas();
+                this.saveToHistory('Move Layer Down');
+            }
+
+            toggleLayerLock() {
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer) return;
+                currentLayer.locked = !currentLayer.locked;
+                this.updateLayersUI();
+                this.showToast(currentLayer.locked ? 'Layer locked' : 'Layer unlocked');
+            }
+
+            // Filter effects
+            applyFilter(filterName) {
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer) return;
+
+                this.saveToHistory(`Apply ${filterName}`);
+                const ctx = currentLayer.canvas.getContext('2d');
+                
+                switch (filterName) {
+                    case 'gaussian-blur':
+                        this.applyGaussianBlur(ctx);
+                        break;
+                    case 'motion-blur':
+                        this.applyMotionBlur(ctx);
+                        break;
+                    case 'oil-painting':
+                        this.applyOilPainting(ctx);
+                        break;
+                    case 'watercolor':
+                        this.applyWatercolor(ctx);
+                        break;
+                    case 'pencil-sketch':
+                        this.applyPencilSketch(ctx);
+                        break;
+                    case 'sketch':
+                        this.applySketch(ctx);
+                        break;
+                    case 'add-noise':
+                        this.applyNoise(ctx);
+                        break;
+                    case 'reduce-noise':
+                        this.applyNoiseReduction(ctx);
+                        break;
+                    default:
+                        this.showToast(`Filter ${filterName} not implemented yet`, 'error');
+                        return;
+                }
+
+                this.redrawCanvas();
+                this.showToast(`${filterName} applied`);
+            }
+
+            applyGaussianBlur(ctx) {
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.gaussianBlur(3);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const output = new Uint8ClampedArray(imageData.data);
+                    const radius = 3;
+                    for (let y = radius; y < ctx.canvas.height - radius; y++) {
+                        for (let x = radius; x < ctx.canvas.width - radius; x++) {
+                            let r = 0, g = 0, b = 0, count = 0;
+                            for (let dy = -radius; dy <= radius; dy++) {
+                                for (let dx = -radius; dx <= radius; dx++) {
+                                    const weight = Math.exp(-(dx*dx + dy*dy) / (2 * radius * radius));
+                                    const idx = ((y + dy) * ctx.canvas.width + (x + dx)) * 4;
+                                    r += imageData.data[idx] * weight;
+                                    g += imageData.data[idx + 1] * weight;
+                                    b += imageData.data[idx + 2] * weight;
+                                    count += weight;
+                                }
+                            }
+                            const idx = (y * ctx.canvas.width + x) * 4;
+                            output[idx] = r / count;
+                            output[idx + 1] = g / count;
+                            output[idx + 2] = b / count;
+                        }
+                    }
+                    ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
+                }
+            }
+
+            applyMotionBlur(ctx) {
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.motionBlur(10);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const output = new Uint8ClampedArray(imageData.data);
+                    const distance = 10;
+                    for (let y = 0; y < ctx.canvas.height; y++) {
+                        for (let x = 0; x < ctx.canvas.width; x++) {
+                            let r = 0, g = 0, b = 0, count = 0;
+                            for (let i = -distance; i <= distance; i++) {
+                                const nx = x + i;
+                                if (nx >= 0 && nx < ctx.canvas.width) {
+                                    const idx = (y * ctx.canvas.width + nx) * 4;
+                                    r += imageData.data[idx];
+                                    g += imageData.data[idx + 1];
+                                    b += imageData.data[idx + 2];
+                                    count++;
+                                }
+                            }
+                            const idx = (y * ctx.canvas.width + x) * 4;
+                            output[idx] = r / count;
+                            output[idx + 1] = g / count;
+                            output[idx + 2] = b / count;
+                        }
+                    }
+                    ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
+                }
+            }
+
+            applyOilPainting(ctx) {
+                // Simple posterization + slight blur as an approximation
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.gaussianBlur(2);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                }
+                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                const levels = 8;
+                const step = 255 / (levels - 1);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i]   = Math.round(imageData.data[i]   / step) * step;
+                    imageData.data[i+1] = Math.round(imageData.data[i+1] / step) * step;
+                    imageData.data[i+2] = Math.round(imageData.data[i+2] / step) * step;
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            applyWatercolor(ctx) {
+                // Strong blur + posterize for watercolor-like look
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.gaussianBlur(4);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    this.applyGaussianBlur(ctx);
+                }
+                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                const levels = 10;
+                const step = 255 / (levels - 1);
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i]   = Math.round(imageData.data[i]   / step) * step;
+                    imageData.data[i+1] = Math.round(imageData.data[i+1] / step) * step;
+                    imageData.data[i+2] = Math.round(imageData.data[i+2] / step) * step;
+                }
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            applyPencilSketch(ctx) {
+                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const gray = imageData.data[i] * 0.299 + imageData.data[i + 1] * 0.587 + imageData.data[i + 2] * 0.114;
+                    const inverted = 255 - gray;
+                    
+                    imageData.data[i] = inverted;
+                    imageData.data[i + 1] = inverted;
+                    imageData.data[i + 2] = inverted;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            applySketch(ctx) {
+                const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    const gray = imageData.data[i] * 0.299 + imageData.data[i + 1] * 0.587 + imageData.data[i + 2] * 0.114;
+                    
+                    imageData.data[i] = gray;
+                    imageData.data[i + 1] = gray;
+                    imageData.data[i + 2] = gray;
+                }
+
+                ctx.putImageData(imageData, 0, 0);
+            }
+
+            applyNoise(ctx) {
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.addNoise(50);
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const intensity = 50;
+                    for (let i = 0; i < imageData.data.length; i += 4) {
+                        const noise = (Math.random() - 0.5) * intensity;
+                        imageData.data[i] = Math.max(0, Math.min(255, imageData.data[i] + noise));
+                        imageData.data[i + 1] = Math.max(0, Math.min(255, imageData.data[i + 1] + noise));
+                        imageData.data[i + 2] = Math.max(0, Math.min(255, imageData.data[i + 2] + noise));
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                }
+            }
+
+            applyNoiseReduction(ctx) {
+                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                    WasmEngine.resize(ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.syncFromCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                    WasmEngine.reduceNoise();
+                    WasmEngine.syncToCanvas(ctx, ctx.canvas.width, ctx.canvas.height);
+                } else {
+                    const imageData = ctx.getImageData(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const output = new Uint8ClampedArray(imageData.data);
+                    for (let y = 1; y < ctx.canvas.height - 1; y++) {
+                        for (let x = 1; x < ctx.canvas.width - 1; x++) {
+                            const pixels = [];
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    const idx = ((y + dy) * ctx.canvas.width + (x + dx)) * 4;
+                                    pixels.push([
+                                        imageData.data[idx],
+                                        imageData.data[idx + 1],
+                                        imageData.data[idx + 2]
+                                    ]);
+                                }
+                            }
+                            pixels.sort((a, b) => (a[0] + a[1] + a[2]) - (b[0] + b[1] + b[2]));
+                            const median = pixels[4];
+                            const idx = (y * ctx.canvas.width + x) * 4;
+                            output[idx] = median[0];
+                            output[idx + 1] = median[1];
+                            output[idx + 2] = median[2];
+                        }
+                    }
+                    ctx.putImageData(new ImageData(output, ctx.canvas.width, ctx.canvas.height), 0, 0);
+                }
+            }
+
+            // File operations
+            newDocument(templateData = null) {
+                // Determine width and height
+                const defaultTemplate = TEMPLATES['default_hd'] || { width: 1920, height: 1080, name: 'Untitled Project' };
+                const width = templateData ? templateData.width : defaultTemplate.width;
+                const height = templateData ? templateData.height : defaultTemplate.height;
+                const name = templateData ? templateData.name : defaultTemplate.name;
+
+                // Set canvas size
+                this.canvas.width = width;
+                this.canvas.height = height;
+
+                // Reset state
+                this.state.layers = [];
+                this.state.objects = [];
+                this.state.history = [];
+                this.state.historyIndex = -1;
+                this.state.currentProjectId = null;
+                this.state.projectName = name;
+                
+                this.createInitialLayer(width, height);
+                this.updateLayersUI();
+                this.updateHistoryUI();
+                this.updateActiveTab();
+                this.updateStatusBar();
+                this.redrawCanvas();
+                this.saveToHistory('New Document');
+                this.showToast(`New document created: ${name}`);
+            }
+
+            openFile() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const fileName = file.name.split('.')[0] || 'Loaded Image';
+                            
+                            // Create a new tab for the opened image
+                            const templateData = { name: fileName, width: img.width, height: img.height };
+                            this.createNewTab(fileName, true, templateData);
+                            
+                            // The newDocument call inside createNewTab creates a blank layer.
+                            // We need to draw the image onto that layer.
+                            const currentLayer = this.getCurrentLayer();
+                            if (currentLayer) {
+                                const ctx = currentLayer.canvas.getContext('2d');
+                                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height); // Clear white bg
+                                ctx.drawImage(img, 0, 0);
+                                this.saveToHistory('Open File');
+                                this.redrawCanvas();
+                                this.showToast('Image loaded successfully');
+                                // Resize WASM engine to new canvas size
+                                if (this.useWasm && window.WasmEngine && WasmEngine.ready()) {
+                                    WasmEngine.resize(this.canvas.width, this.canvas.height);
+                                }
+                            }
+                        };
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            }
+
+            saveFile() {
+                const link = document.createElement('a');
+                link.download = `${this.state.projectName.replace(/ /g, '_')}.png`;
+                link.href = this.canvas.toDataURL('image/png');
+                link.click();
+                this.showToast('Image saved');
+            }
+
+            // Color operations
+            pickColor(type) {
+                const input = document.createElement('input');
+                input.type = 'color';
+                input.value = this.state.colors[type];
+                input.onchange = (e) => {
+                    this.state.colors[type] = e.target.value;
+                    this.updateUI();
+                };
+                input.click();
+            }
+
+            swapColors() {
+                const temp = this.state.colors.foreground;
+                this.state.colors.foreground = this.state.colors.background;
+                this.state.colors.background = temp;
+                this.updateUI();
+                this.showToast('Colors swapped');
+            }
+
+            // Zoom operations moved below with focal-point support
+
+            // History management
+            saveToHistory(action) {
+                // Don't save history if editor isn't active
+                if (document.getElementById('app-container').classList.contains('home-active')) {
+                    return;
+                }
+
+                const currentLayer = this.getCurrentLayer();
+                if (!currentLayer) return;
+
+                const imageData = currentLayer.canvas.getContext('2d')
+                    .getImageData(0, 0, currentLayer.canvas.width, currentLayer.canvas.height);
+
+                this.state.history = this.state.history.slice(0, this.state.historyIndex + 1);
+                this.state.history.push({
+                    action: action,
+                    layerId: this.state.currentLayerId,
+                    imageData: imageData,
+                    objects: this.cloneObjects(),
+                    timestamp: Date.now()
+                });
+
+                if (this.state.history.length > 100) {
+                    this.state.history.shift();
+                }
+                
+                this.state.historyIndex = this.state.history.length - 1;
+                this.updateHistoryUI();
+            }
+
+            undo() {
+                if (this.state.historyIndex > 0) {
+                    this.state.historyIndex--;
+                    const historyEntry = this.state.history[this.state.historyIndex];
+                    const layer = this.state.layers.find(l => l.id === historyEntry.layerId);
+
+                    if (layer) {
+                        const ctx = layer.canvas.getContext('2d');
+                        ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
+                        ctx.putImageData(historyEntry.imageData, 0, 0);
+                        if (historyEntry.objects) { this.restoreObjects(historyEntry.objects); }
+                        this.redrawCanvas();
+                        this.updateHistoryUI();
+                        this.showToast(`Undo: ${historyEntry.action}`);
+                    }
+                } else {
+                    this.showToast('Nothing to undo', 'error');
+                }
+            }
+
+            redo() {
+                if (this.state.historyIndex < this.state.history.length - 1) {
+                    this.state.historyIndex++;
+                    const historyEntry = this.state.history[this.state.historyIndex];
+                    const layer = this.state.layers.find(l => l.id === historyEntry.layerId);
+
+                    if (layer) {
+                        const ctx = layer.canvas.getContext('2d');
+                        ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
+                        ctx.putImageData(historyEntry.imageData, 0, 0);
+                        if (historyEntry.objects) { this.restoreObjects(historyEntry.objects); }
+                        this.redrawCanvas();
+                        this.updateHistoryUI();
+                        this.showToast(`Redo: ${historyEntry.action}`);
+                    }
+                } else {
+                    this.showToast('Nothing to redo', 'error');
+                }
+            }
+
+            // UI Updates
+            updateUI() {
+                document.getElementById('fg-color').style.backgroundColor = this.state.colors.foreground;
+                document.getElementById('bg-color').style.backgroundColor = this.state.colors.background;
+                document.getElementById('fg-hex').textContent = this.state.colors.foreground;
+                document.getElementById('bg-hex').textContent = this.state.colors.background;
+
+                document.getElementById('size-value').textContent = this.state.brushSettings.size;
+                document.getElementById('hardness-value').textContent = this.state.brushSettings.hardness + '%';
+                document.getElementById('opacity-value').textContent = this.state.brushSettings.opacity + '%';
+                document.getElementById('flow-value').textContent = this.state.brushSettings.flow + '%';
+
+                this.updateBrushPreview();
+            }
+
+            updateBrushPreview() {
+                const preview = document.getElementById('brush-preview');
+                if (!preview) return;
+
+                const size = Math.min(40, this.state.brushSettings.size);
+                const hardness = this.state.brushSettings.hardness / 100;
+                
+                if (hardness === 1) {
+                    preview.style.background = `radial-gradient(circle, ${this.state.colors.foreground} 0%, ${this.state.colors.foreground} ${size}px, transparent ${size + 1}px)`;
+                } else {
+                    preview.style.background = `radial-gradient(circle, ${this.state.colors.foreground}80 ${size * hardness}px, transparent ${size}px)`;
+                }
+                
+                preview.style.width = `${size * 2}px`;
+                preview.style.height = `${size * 2}px`;
+            }
+
+            updateLayersUI() {
+                const layersList = document.getElementById('layers-list');
+                layersList.innerHTML = '';
+
+                this.state.layers.slice().reverse().forEach(layer => {
+                    const layerElement = document.createElement('div');
+                    layerElement.className = `layer-item ${layer.id === this.state.currentLayerId ? 'active' : ''}`;
+                    layerElement.innerHTML = `
+                        <div class="layer-visibility">${layer.visible ? '👁️' : '🚫'}</div>
+                        <div class="layer-name">${layer.name}${layer.locked ? ' 🔒' : ''}</div>
+                    `;
+
+                    layerElement.addEventListener('click', () => {
+                        this.state.currentLayerId = layer.id;
+                        this.updateLayersUI();
+                        this.updateStatusBar();
+                    });
+
+                    layerElement.querySelector('.layer-visibility').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        layer.visible = !layer.visible;
+                        this.updateLayersUI();
+                        this.redrawCanvas();
+                    });
+
+                    layersList.appendChild(layerElement);
+                });
+            }
+
+            updateHistoryUI() {
+                const historyList = document.getElementById('history-list');
+                historyList.innerHTML = '';
+
+                this.state.history.forEach((entry, index) => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = `history-item ${index === this.state.historyIndex ? 'current' : ''}`;
+                    historyItem.textContent = entry.action;
+                    
+                    historyItem.addEventListener('click', () => {
+                        this.state.historyIndex = index;
+                        const layer = this.state.layers.find(l => l.id === entry.layerId);
+                        if (layer) {
+                            const ctx = layer.canvas.getContext('2d');
+                            ctx.clearRect(0, 0, layer.canvas.width, layer.canvas.height);
+                            ctx.putImageData(entry.imageData, 0, 0);
+                            if (entry.objects) { this.restoreObjects(entry.objects); }
+                            this.redrawCanvas();
+                            this.updateHistoryUI();
+                        }
+                    });
+
+                    historyList.appendChild(historyItem);
+                });
+
+                const currentItem = historyList.querySelector('.current');
+                if (currentItem) {
+                    currentItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+
+            updateStatusBar() {
+                document.getElementById('canvas-info').textContent = `${this.canvas.width} x ${this.canvas.height} px`;
+                document.getElementById('zoom-level').textContent = `${Math.round(this.state.zoom * 100)}%`;
+                
+                const currentLayer = this.getCurrentLayer();
+                if (currentLayer) {
+                    document.getElementById('layer-info').textContent = currentLayer.name;
+                }
+            }
+
+            redrawCanvas() {
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (this.state.showGrid) this.drawGrid(ctx);
+
+                // Draw layers
+                this.state.layers.forEach(layer => {
+                    if (layer.visible) {
+                        ctx.save();
+                        ctx.globalAlpha = layer.opacity / 100;
+                        ctx.globalCompositeOperation = this.getBlendMode(layer.blendMode);
+                        ctx.drawImage(layer.canvas, 0, 0);
+                        ctx.restore();
+                    }
+                });
+
+                // Draw objects
+                for (const obj of this.state.objects) {
+                    if (obj.visible === false) continue;
+                    this.drawObject(ctx, obj);
+                }
+
+                // Selection marquee
+                if (this.state.selection) {
+                    ctx.save();
+                    ctx.strokeStyle = '#000';
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeRect(
+                        this.state.selection.x,
+                        this.state.selection.y,
+                        this.state.selection.width,
+                        this.state.selection.height
+                    );
+                    ctx.restore();
+                }
+
+                // Active transform overlay
+                const active = this.getActiveObject();
+                if (active) this.drawTransformBox(ctx, active);
+            }
+
+            // ================= View helpers =================
+            toggleGrid() { this.state.showGrid = !this.state.showGrid; this.redrawCanvas(); }
+            drawGrid(ctx) {
+                const step = 32;
+                ctx.save();
+                ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < this.canvas.width; x += step) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height); ctx.stroke();
+                }
+                for (let y = 0; y < this.canvas.height; y += step) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y); ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            setZoom(zoom, focal) {
+                const prevZoom = this.state.zoom;
+                this.state.zoom = Math.max(0.1, Math.min(10, zoom));
+                const wrapper = this.wrapper;
+                const area = this.canvasArea;
+                if (!wrapper || !area) return;
+
+                const rect = wrapper.getBoundingClientRect();
+                const areaRect = area.getBoundingClientRect();
+
+                let sx = area.scrollLeft; let sy = area.scrollTop;
+                let cx = 0; let cy = 0;
+                if (focal) {
+                    cx = focal.clientX - rect.left + area.scrollLeft - areaRect.left;
+                    cy = focal.clientY - rect.top + area.scrollTop - areaRect.top;
+                }
+
+                wrapper.style.transform = `scale(${this.state.zoom})`;
+                this.updateStatusBar();
+
+                if (focal) {
+                    const scale = this.state.zoom / prevZoom;
+                    area.scrollLeft = (sx + cx) * scale - cx;
+                    area.scrollTop  = (sy + cy) * scale - cy;
+                }
+            }
+            zoomIn() { this.setZoom(this.state.zoom + 0.1); }
+            zoomOut() { this.setZoom(this.state.zoom - 0.1); }
+            fitToScreen() {
+                const area = this.canvasArea; const wrapper = this.wrapper;
+                if (!area || !wrapper) return;
+                const margin = 40;
+                const scaleX = (area.clientWidth - margin) / this.canvas.width;
+                const scaleY = (area.clientHeight - margin) / this.canvas.height;
+                this.setZoom(Math.max(0.1, Math.min(scaleX, scaleY)));
+            }
+            startPan(e) {
+                this.isPanning = true;
+                this.panStart = { x: e.clientX, y: e.clientY, sx: this.canvasArea.scrollLeft, sy: this.canvasArea.scrollTop };
+            }
+            updatePan(e) {
+                if (!this.isPanning) return;
+                const dx = this.panStart.x - e.clientX;
+                const dy = this.panStart.y - e.clientY;
+                this.canvasArea.scrollLeft = this.panStart.sx + dx;
+                this.canvasArea.scrollTop  = this.panStart.sy + dy;
+            }
+            endPan() { this.isPanning = false; }
+
+            // ================= Objects =================
+            createImageObject(img, x, y, w, h) {
+                return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'image', img, x, y, width: w, height: h, rotation: 0, scaleX: 1, scaleY: 1, flipX: false, flipY: false, visible: true, opacity: 1 };
+            }
+            createTextObject(text, x, y) {
+                return { id: `obj-${Date.now()}-${Math.random().toString(36).slice(2,7)}`, type: 'text', text: text || 'Text', x, y, fontFamily: 'Roboto', fontSize: 32, fontWeight: '400', fill: '#000000', width: 160, height: 40, rotation: 0, scaleX: 1, scaleY: 1, align: 'left' };
+            }
+            getActiveObject() { return this.state.objects.find(o => o.id === this.state.activeObjectId) || null; }
+            setActiveObject(id) { this.state.activeObjectId = id; this.updateObjectInfoUI(); this.redrawCanvas(); }
+            updateObjectInfoUI() {
+                const info = document.getElementById('object-info'); const rotateInput = document.getElementById('rotate-input');
+                const obj = this.getActiveObject();
+                if (!info || !rotateInput) return;
+                if (!obj) { info.textContent = 'No object selected'; rotateInput.value = 0; return; }
+                const deg = Math.round((obj.rotation || 0) * 180 / Math.PI);
+                rotateInput.value = deg;
+                info.textContent = `${obj.type} @ (${Math.round(obj.x)}, ${Math.round(obj.y)}) ${Math.round(obj.width)}x${Math.round(obj.height)}`;
+                this.updateTextControlsUI();
+            }
+            updateTextControlsUI() {
+                const obj = this.getActiveObject();
+                const enabled = !!obj && obj.type === 'text';
+                const ids = ['text-edit-btn','text-color','text-font-family','text-font-size','text-font-weight','text-align-left','text-align-center','text-align-right'];
+                ids.forEach(id => { const el = document.getElementById(id); if (el) el.disabled = !enabled; });
+                if (enabled) {
+                    const colorInput = document.getElementById('text-color'); if (colorInput) colorInput.value = obj.fill || '#000000';
+                    const ff = document.getElementById('text-font-family'); if (ff) ff.value = obj.fontFamily || 'Arial';
+                    const fs = document.getElementById('text-font-size'); if (fs) fs.value = obj.fontSize || 32;
+                    const fw = document.getElementById('text-font-weight'); if (fw) fw.value = obj.fontWeight || '400';
+                }
+            }
+            setTextAlign(align) {
+                const obj = this.getActiveObject();
+                if (!obj || obj.type !== 'text') return;
+                obj.align = align;
+                this.redrawCanvas();
+                this.saveToHistory('Text Align');
+            }
+            drawObject(ctx, obj) {
+                ctx.save();
+                const cx = obj.x + obj.width/2; const cy = obj.y + obj.height/2;
+                ctx.translate(cx, cy); ctx.rotate(obj.rotation || 0); ctx.scale((obj.flipX?-1:1) * (obj.scaleX||1), (obj.flipY?-1:1) * (obj.scaleY||1));
+                ctx.globalAlpha = obj.opacity ?? 1;
+                if (obj.type === 'image') {
+                    ctx.drawImage(obj.img, -obj.width/2, -obj.height/2, obj.width, obj.height);
+                } else if (obj.type === 'text') {
+                    ctx.fillStyle = obj.fill || '#000';
+                    ctx.textBaseline = 'top';
+                    const align = (obj.align||'left');
+                    ctx.textAlign = align;
+                    ctx.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                    const lines = (obj.text||'').split('\n');
+                    const lineHeight = (obj.fontSize||32) * 1.2;
+                    const anchorX = align === 'center' ? 0 : (align === 'right' ? obj.width/2 : -obj.width/2);
+                    lines.forEach((line, i) => {
+                        ctx.fillText(line, anchorX, -obj.height/2 + i*lineHeight, obj.width);
+                    });
+                }
+                ctx.restore();
+            }
+            getObjectCorners(obj) {
+                const pts = [ {x:0,y:0}, {x:obj.width,y:0}, {x:obj.width,y:obj.height}, {x:0,y:obj.height} ];
+                const angle = obj.rotation||0; const cos=Math.cos(angle), sin=Math.sin(angle);
+                const cx = obj.x + obj.width/2; const cy = obj.y + obj.height/2;
+                return pts.map(p=>{ const dx=p.x-obj.width/2, dy=p.y-obj.height/2; return { x: cx + dx*cos - dy*sin, y: cy + dx*sin + dy*cos }; });
+            }
+            getHandlePoints(corners) {
+                const mid = (a,b)=>({ x:(a.x+b.x)/2, y:(a.y+b.y)/2 });
+                const [tl,tr,br,bl] = [corners[0], corners[1], corners[2], corners[3]];
+                const handles = [
+                    {key:'tl', x:tl.x, y:tl.y}, {key:'tm', ...mid(tl,tr)}, {key:'tr', x:tr.x, y:tr.y},
+                    {key:'rm', ...mid(tr,br)}, {key:'br', x:br.x, y:br.y}, {key:'bm', ...mid(bl,br)},
+                    {key:'bl', x:bl.x, y:bl.y}, {key:'lm', ...mid(tl,bl)}
+                ];
+                // rotation handle above top mid
+                const tm = mid(tl,tr); const nx = tm.x + (tm.x - mid(bl,br).x) * 0.1; const ny = tm.y + (tm.y - mid(bl,br).y) * 0.1;
+                handles.push({key:'rotate', x:nx, y:ny});
+                return handles;
+            }
+            drawTransformBox(ctx, obj) {
+                const corners = this.getObjectCorners(obj);
+                const hs = 8 / this.state.zoom; // handle size scales with zoom
+                ctx.save();
+                ctx.strokeStyle = '#4da3ff'; ctx.lineWidth = 1/this.state.zoom; ctx.setLineDash([4/this.state.zoom, 4/this.state.zoom]);
+                ctx.beginPath(); ctx.moveTo(corners[0].x, corners[0].y); for (let i=1;i<corners.length;i++) ctx.lineTo(corners[i].x, corners[i].y); ctx.closePath(); ctx.stroke();
+                ctx.setLineDash([]); ctx.fillStyle = '#fff'; ctx.strokeStyle = '#0078d4';
+                const handles = this.getHandlePoints(corners);
+                for (const h of handles) { ctx.beginPath(); ctx.rect(h.x-hs/2, h.y-hs/2, hs, hs); ctx.fill(); ctx.stroke(); }
+                // rotation handle line
+                const tm = this.getHandlePoints(corners).find(h=>h.key==='tm'); const rot = this.getHandlePoints(corners).find(h=>h.key==='rotate');
+                if (tm && rot) { ctx.beginPath(); ctx.moveTo(tm.x, tm.y); ctx.lineTo(rot.x, rot.y); ctx.stroke(); }
+                ctx.restore();
+            }
+            hitTestObject(obj, pt) {
+                // Transform point into object local space
+                const cx = obj.x + obj.width/2, cy = obj.y + obj.height/2;
+                const dx = pt.x - cx, dy = pt.y - cy; const ang = -(obj.rotation||0);
+                const lx = dx*Math.cos(ang) - dy*Math.sin(ang); const ly = dx*Math.sin(ang) + dy*Math.cos(ang);
+                return Math.abs(lx) <= obj.width/2 && Math.abs(ly) <= obj.height/2;
+            }
+            hitTestHandles(obj, pt) {
+                const hs = 8 / this.state.zoom; const handles = this.getHandlePoints(this.getObjectCorners(obj));
+                for (const h of handles) { if (Math.abs(pt.x - h.x) <= hs/2 && Math.abs(pt.y - h.y) <= hs/2) return h.key; }
+                return null;
+            }
+            startTransform(point) {
+                // Select topmost object under cursor
+                let target = null; let handle = null;
+                for (let i=this.state.objects.length-1; i>=0; i--) {
+                    const obj = this.state.objects[i];
+                    const h = this.hitTestHandles(obj, point);
+                    if (h) { target = obj; handle = h; break; }
+                    if (this.hitTestObject(obj, point)) { target = obj; break; }
+                }
+                if (target) {
+                    this.setActiveObject(target.id);
+                    this.activeHandle = handle || 'move';
+                    this.transformStart = { x: point.x, y: point.y, snapshot: { ...target } };
+                    this.draggingObject = true;
+                } else {
+                    this.setActiveObject(null);
+                    this.draggingObject = false;
+                }
+            }
+            updateTransform(point) {
+                const obj = this.getActiveObject(); if (!obj || !this.draggingObject || !this.transformStart) return;
+                const dx = point.x - this.transformStart.x; const dy = point.y - this.transformStart.y;
+                const snap = this.state.snapToGrid ? 8 : 1;
+                if (this.activeHandle === 'move') {
+                    obj.x = this.transformStart.snapshot.x + Math.round(dx / snap) * snap;
+                    obj.y = this.transformStart.snapshot.y + Math.round(dy / snap) * snap;
+                } else if (this.activeHandle === 'rotate') {
+                    const cx = obj.x + obj.width/2; const cy = obj.y + obj.height/2;
+                    obj.rotation = Math.atan2(point.y - cy, point.x - cx) + Math.PI/2; // relative orientation
+                } else {
+                    // Resize based on handle; operate in object space ignoring rotation for simplicity
+                    const start = this.transformStart.snapshot;
+                    let newX = start.x, newY = start.y, newW = start.width, newH = start.height;
+                    const minSize = 10;
+                    switch (this.activeHandle) {
+                        case 'tl': newX = start.x + dx; newY = start.y + dy; newW = start.width - dx; newH = start.height - dy; break;
+                        case 'tr': newY = start.y + dy; newW = start.width + dx; newH = start.height - dy; break;
+                        case 'br': newW = start.width + dx; newH = start.height + dy; break;
+                        case 'bl': newX = start.x + dx; newW = start.width - dx; newH = start.height + dy; break;
+                        case 'tm': newY = start.y + dy; newH = start.height - dy; break;
+                        case 'bm': newH = start.height + dy; break;
+                        case 'lm': newX = start.x + dx; newW = start.width - dx; break;
+                        case 'rm': newW = start.width + dx; break;
+                    }
+                    newW = Math.max(minSize, newW); newH = Math.max(minSize, newH);
+                    if (this.state.snapToGrid) { newX = Math.round(newX / snap) * snap; newY = Math.round(newY / snap) * snap; newW = Math.round(newW / snap) * snap; newH = Math.round(newH / snap) * snap; }
+                    obj.x = newX; obj.y = newY; obj.width = newW; obj.height = newH;
+                }
+            }
+            
+            // Insertions
+            insertImage() {
+                const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0]; if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { const img = new Image(); img.onload = () => {
+                        const maxW = Math.min(this.canvas.width * 0.6, img.width);
+                        const scale = maxW / img.width; const w = img.width * scale; const h = img.height * scale;
+                        const x = (this.canvas.width - w)/2; const y = (this.canvas.height - h)/2;
+                        const obj = this.createImageObject(img, x, y, w, h);
+                        this.state.objects.push(obj); this.setActiveObject(obj.id); this.selectTool('transform'); this.saveToHistory('Insert Image'); this.redrawCanvas(); };
+                        img.src = ev.target.result; };
+                    reader.readAsDataURL(file);
+                };
+                input.click();
+            }
+            insertText() { this.selectTool('text'); this.showToast('Click on canvas to place text'); }
+            handleTextToolDown(point) {
+                // If clicking on existing text, edit it
+                for (let i = this.state.objects.length - 1; i >= 0; i--) {
+                    const o = this.state.objects[i];
+                    if (o.type === 'text' && this.hitTestObject(o, point)) {
+                        this.setActiveObject(o.id);
+                        this.showTextEditorForObject(o);
+                        return;
+                    }
+                }
+                // Create a new, empty text object so typing doesn't append to the word "Text"
+                const obj = this.createTextObject('', point.x, point.y);
+                this.state.objects.push(obj); this.setActiveObject(obj.id);
+                this.showTextEditorForObject(obj);
+            }
+            showTextEditorForObject(obj) {
+                if (!this.textEditor) return;
+                const rect = this.wrapper.getBoundingClientRect();
+                this.textEditor.style.left = `${obj.x}px`; this.textEditor.style.top = `${obj.y}px`;
+                this.textEditor.style.width = `${obj.width}px`; this.textEditor.style.height = `${obj.height}px`;
+                this.textEditor.style.display = 'block';
+                // If the object still has the default label, start with an empty editor but show a placeholder
+                const isDefault = (obj.text === 'Text');
+                this.textEditor.value = isDefault ? '' : (obj.text || '');
+                this.textEditor.placeholder = 'Text';
+                this.textEditor.style.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                this.textEditor.style.color = obj.fill || '#000';
+                this.textEditor.style.textAlign = obj.align || 'left';
+                this.textEditor.focus();
+                // Select all text so new typing replaces existing content
+                try { this.textEditor.setSelectionRange(0, this.textEditor.value.length); } catch(e) {}
+            }
+            commitTextEditor() {
+                if (!this.textEditor || this.textEditor.style.display === 'none') return;
+                const obj = this.getActiveObject();
+                const finalize = () => {
+                    this.textEditor.style.display = 'none';
+                    this.saveToHistory('Edit Text');
+                    this.redrawCanvas();
+                };
+                if (obj && obj.type === 'text') {
+                    obj.text = this.textEditor.value;
+                    this.ensureFontLoaded(obj.fontFamily || 'Roboto', obj.fontWeight || '400', obj.fontSize || 32)
+                        .then(() => { this.updateTextMetrics(obj); })
+                        .finally(finalize);
+                } else {
+                    finalize();
+                }
+            }
+
+            handleDoubleClick(e) {
+                const point = this.getMousePos(e);
+                // Edit topmost text object under cursor
+                for (let i = this.state.objects.length - 1; i >= 0; i--) {
+                    const obj = this.state.objects[i];
+                    if (obj.type === 'text' && this.hitTestObject(obj, point)) {
+                        this.setActiveObject(obj.id);
+                        this.showTextEditorForObject(obj);
+                        return;
+                    }
+                }
+            }
+
+            updateTextMetrics(obj) {
+                if (!obj || obj.type !== 'text') return;
+                const lines = (obj.text || '').split('\n');
+                const lineHeight = (obj.fontSize || 32) * 1.2;
+                obj.height = Math.max(lineHeight, lines.length * lineHeight);
+                const c = this.ctx;
+                c.save();
+                c.font = `${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`;
+                let maxWidth = 1;
+                for (const line of lines) {
+                    maxWidth = Math.max(maxWidth, c.measureText(line).width);
+                }
+                c.restore();
+                obj.width = Math.max(60, Math.min(this.canvas.width, maxWidth) + 10);
+            }
+
+            // Object ops
+            bringForward() { const i=this.state.objects.findIndex(o=>o.id===this.state.activeObjectId); if (i>=0 && i<this.state.objects.length-1){ const [o]=this.state.objects.splice(i,1); this.state.objects.splice(i+1,0,o); this.redrawCanvas(); } }
+            sendBackward() { const i=this.state.objects.findIndex(o=>o.id===this.state.activeObjectId); if (i>0){ const [o]=this.state.objects.splice(i,1); this.state.objects.splice(i-1,0,o); this.redrawCanvas(); } }
+            duplicateSelected() { const obj=this.getActiveObject(); if (!obj) return; const copy=this.deserializeObject(this.serializeObject(obj)); copy.id=`obj-${Date.now()}`; copy.x+=20; copy.y+=20; this.state.objects.push(copy); this.setActiveObject(copy.id); this.saveToHistory('Duplicate Object'); }
+            deleteSelected() { const id=this.state.activeObjectId; if (!id) return; this.state.objects = this.state.objects.filter(o=>o.id!==id); this.state.activeObjectId=null; this.updateObjectInfoUI(); this.saveToHistory('Delete Object'); this.redrawCanvas(); }
+            flipSelected(axis) { const obj=this.getActiveObject(); if (!obj) return; if (axis==='h') obj.flipX=!obj.flipX; if (axis==='v') obj.flipY=!obj.flipY; this.saveToHistory('Flip Object'); this.redrawCanvas(); }
+            exportSelected() { const obj=this.getActiveObject(); if (!obj) return; const c=document.createElement('canvas'); c.width=obj.width; c.height=obj.height; const cx=c.getContext('2d'); cx.imageSmoothingQuality='high'; cx.save(); cx.translate(obj.width/2,obj.height/2); cx.rotate(obj.rotation||0); cx.scale((obj.flipX?-1:1)*(obj.scaleX||1),(obj.flipY?-1:1)*(obj.scaleY||1)); if (obj.type==='image'){cx.drawImage(obj.img,-obj.width/2,-obj.height/2,obj.width,obj.height);} else {cx.fillStyle=obj.fill||'#000'; const align=(obj.align||'left'); cx.textAlign=align; cx.font=`${obj.fontWeight||'400'} ${obj.fontSize||32}px ${obj.fontFamily||'Arial'}`; const lines=(obj.text||'').split('\n'); const lh=(obj.fontSize||32)*1.2; const anchorX = align==='center'?0:(align==='right'?obj.width/2:-obj.width/2); lines.forEach((line,i)=>cx.fillText(line,anchorX,-obj.height/2+i*lh,obj.width));} cx.restore(); const link=document.createElement('a'); link.download='selection.png'; link.href=c.toDataURL('image/png'); link.click(); }
+            nudgeSelected(dir, step) { const obj=this.getActiveObject(); if (!obj) return; if (dir==='arrowup') obj.y-=step; if (dir==='arrowdown') obj.y+=step; if (dir==='arrowleft') obj.x-=step; if (dir==='arrowright') obj.x+=step; this.redrawCanvas(); this.saveToHistory('Nudge Object'); }
+            copySelected() { const obj=this.getActiveObject(); if (obj) this.state.objectClipboard = this.serializeObject(obj); }
+            pasteSelected() { const clip=this.state.objectClipboard; if (!clip) return; const obj=this.deserializeObject(clip); obj.id=`obj-${Date.now()}`; obj.x+=30; obj.y+=30; this.state.objects.push(obj); this.setActiveObject(obj.id); this.saveToHistory('Paste Object'); }
+
+            // ================= Serialization (Project Data) =================
+            serializeProject() {
+                return JSON.stringify({ // Stringify for cookie storage
+                    layers: this.state.layers.map(layer => ({
+                        ...layer,
+                        canvas: layer.canvas.toDataURL('image/png')
+                    })),
+                    objects: this.cloneObjects(),
+                    canvasSize: {
+                        width: this.canvas.width,
+                        height: this.canvas.height
+                    },
+                    currentLayerId: this.state.currentLayerId,
+                    brushSettings: { ...this.state.brushSettings },
+                    colors: { ...this.state.colors }
+                });
+            }
+
+            deserializeProject(data) {
+                // Clear current state
+                this.state.layers = [];
+                this.state.objects = [];
+                this.state.history = [];
+                this.state.historyIndex = -1;
+
+                // Restore canvas size
+                if (data.canvasSize) {
+                    this.canvas.width = data.canvasSize.width;
+                    this.canvas.height = data.canvasSize.height;
+                }
+                this.updateStatusBar();
+
+                // Restore layers
+                const layerPromises = data.layers.map(layerData => {
+                    return new Promise((resolve) => {
+                        const canvas = document.createElement('canvas');
+                        // Ensure layer canvas matches main canvas size
+                        canvas.width = this.canvas.width;
+                        canvas.height = this.canvas.height;
+                        const ctx = canvas.getContext('2d');
+
+                        const img = new Image();
+                        img.onload = () => {
+                            ctx.drawImage(img, 0, 0);
+                            resolve({
+                                ...layerData,
+                                canvas: canvas
+                            });
+                        };
+                        img.onerror = () => {
+                            // Create empty layer if image fails to load
+                            resolve({
+                                ...layerData,
+                                canvas: canvas
+                            });
+                        };
+                        img.src = layerData.canvas;
+                    });
+                });
+
+                Promise.all(layerPromises).then(layers => {
+                    this.state.layers = layers;
+                    this.state.currentLayerId = data.currentLayerId;
+                    this.state.brushSettings = { ...this.state.brushSettings, ...data.brushSettings };
+                    this.state.colors = { ...this.state.colors, ...data.colors };
+                    
+                    if (data.objects) {
+                        this.restoreObjects(data.objects);
+                    }
+
+                    this.updateLayersUI();
+                    this.updateUI();
+                    this.redrawCanvas();
+                    this.saveToHistory('Load Project');
+                });
+            }
+
+            generateThumbnail() {
+                const thumbnailCanvas = document.createElement('canvas');
+                thumbnailCanvas.width = 200;
+                thumbnailCanvas.height = 150;
+                const ctx = thumbnailCanvas.getContext('2d');
+                
+                // Fill with white background
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+                
+                // Draw scaled version of main canvas
+                ctx.drawImage(this.canvas, 0, 0, thumbnailCanvas.width, thumbnailCanvas.height);
+                
+                return thumbnailCanvas.toDataURL('image/jpeg', 0.8);
+            }
+
+            // ================= Serialization (Objects) =================
+            serializeObject(obj) {
+                const base = { ...obj };
+                if (base.type === 'image') {
+                    base.imgSrc = obj.img?.src || obj.imgSrc || '';
+                    delete base.img;
+                }
+                return JSON.parse(JSON.stringify(base));
+            }
+            deserializeObject(serialized) {
+                const obj = JSON.parse(JSON.stringify(serialized));
+                if (obj.type === 'image') {
+                    const img = new Image();
+                    if (obj.imgSrc) img.src = obj.imgSrc;
+                    obj.img = img;
+                }
+                return obj;
+            }
+            cloneObjects() { return this.state.objects.map(o => this.serializeObject(o)); }
+            restoreObjects(objs) { this.state.objects = (objs||[]).map(o => this.deserializeObject(o)); this.setActiveObject(null); }
+
+            getBlendMode(mode) {
+                const modes = {
+                    'normal': 'source-over',
+                    'multiply': 'multiply',
+                    'screen': 'screen',
+                    'overlay': 'overlay',
+                    'soft-light': 'soft-light',
+                    'hard-light': 'hard-light'
+                };
+                return modes[mode] || 'source-over';
+            }
+
+            // Utility functions
+            hexToRgba(hex, alpha = 1) {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+
+            parseHexToRgb(hex) {
+                const r = parseInt(hex.slice(1, 3), 16) || 0;
+                const g = parseInt(hex.slice(3, 5), 16) || 0;
+                const b = parseInt(hex.slice(5, 7), 16) || 0;
+                return { r, g, b };
+            }
+
+            rgbaToHex(r, g, b) {
+                return '#' + [r, g, b].map(x => {
+                    const hex = x.toString(16);
+                    return hex.length === 1 ? '0' + hex : hex;
+                }).join('');
+            }
+
+            ensureFontLoaded(family, weight = '400', size = 32) {
+                try {
+                    if (document.fonts && document.fonts.load) {
+                        const desc = `${weight} ${size}px ${family}`;
+                        return document.fonts.load(desc, ' ');
+                    }
+                } catch (e) { /* no-op */ }
+                return Promise.resolve();
+            }
+
+            // =============== Menu bar ===============
+            setupMenuBar() {
+                const menuItems = document.querySelectorAll('.menu-bar .menu-item');
+                menuItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        // Toggle this menu; close others
+                        const isOpen = item.classList.contains('open');
+                        this.closeAllMenus();
+                        if (!isOpen) item.classList.add('open');
+                        e.stopPropagation();
+                    });
+                });
+
+                // Menu actions
+                document.querySelectorAll('.menu-action').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const action = btn.getAttribute('data-action');
+                        this.handleMenuAction(action);
+                        this.closeAllMenus();
+                        e.stopPropagation();
+                    });
+                });
+
+                // Click outside to close
+                document.addEventListener('click', () => this.closeAllMenus());
+                // Escape closes menus
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') this.closeAllMenus();
+                });
+            }
+
+            closeAllMenus() {
+                document.querySelectorAll('.menu-bar .menu-item.open').forEach(el => el.classList.remove('open'));
+            }
+
+            handleMenuAction(action) {
+                switch (action) {
+                    case 'file-new': this.newDocument(TEMPLATES['default_hd']); break; // Use default
+                    case 'file-open': this.openFile(); break;
+                    case 'file-recent': this.showHomeScreen(); break;
+                    case 'file-save': this.saveCurrentProject(); break;
+                    case 'file-save-as': this.saveAsProject(); break;
+                    case 'edit-undo': this.undo(); break;
+                    case 'edit-redo': this.redo(); break;
+                    case 'insert-image': this.insertImage(); break;
+                    case 'insert-text': this.insertText(); break;
+                    case 'view-fit': this.fitToScreen(); break;
+                    case 'view-actual': this.setZoom(1); break;
+                    case 'view-grid': this.toggleGrid(); break;
+                    case 'view-tabs': this.toggleTabs(); break;
+                    case 'help-about':
+                        window.open('docs.html', '_blank');
+                        break;
+                }
+            }
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.textContent = message;
+                document.body.appendChild(toast);
+
+                setTimeout(() => {
+                    toast.remove();
+                }, 3000);
+            }
+        }
+
+        // Initialize the editor when the page loads
+        let editor;
+        window.addEventListener('DOMContentLoaded', () => {
+            editor = new BrushesEditor();
+        });
+    </script>
+
+    <div class="settings-overlay" id="settings-overlay">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <div class="section-title">Settings</div>
+                <button class="settings-close-btn" onclick="editor.closeSettingsPanel()">×</button>
+            </div>
+            <div class="settings-content">
+                <!-- General -->
+                <div class="property-section">
+                    <div class="section-title">General</div>
+                    <div class="settings-group">
+                        <label>Theme</label>
+                        <select class="blend-select" id="setting-theme">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                        </select>
+                    </div>
+                    <div class="settings-group">
+                        <label>Auto-save</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-autosave">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-group">
+                        <label>Language</label>
+                        <select class="blend-select" id="setting-language">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="ja">日本語</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Canvas & Performance -->
+                <div class="property-section">
+                    <div class="section-title">Canvas & Performance</div>
+                    <div class="settings-group">
+                        <label>Default Canvas Size</label>
+                        <div class="settings-row">
+                            <input type="number" class="settings-input" id="setting-canvas-width" placeholder="Width">
+                            <span class="settings-separator">×</span>
+                            <input type="number" class="settings-input" id="setting-canvas-height" placeholder="Height">
+                        </div>
+                    </div>
+                    <div class="settings-group">
+                        <label>High-quality Rendering</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-high-quality">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-group">
+                        <label>GPU Acceleration</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-gpu">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <!-- Shortcuts -->
+                <div class="property-section">
+                    <div class="section-title">Shortcuts</div>
+                    <div class="shortcuts-list" id="shortcuts-list">
+                        <!-- Shortcuts will be populated by JS -->
+                    </div>
+                    <button class="inline-btn" onclick="editor.resetShortcuts()">Reset to Defaults</button>
+                </div>
+                <!-- Privacy & Storage -->
+                <div class="property-section">
+                    <div class="section-title">Privacy & Storage</div>
+                    <div class="settings-group">
+                        <label>Enable Cookies</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="setting-cookies">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="inline-btn" onclick="editor.clearDrafts()">Clear Drafts</button>
+                        <button class="inline-btn" onclick="editor.clearRecentProjects()">Clear Recent Projects</button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-footer">
+                <button class="inline-btn secondary" onclick="editor.resetSettingsDefaults()">Reset to Defaults</button>
+                <div class="settings-footer-right">
+                    <button class="inline-btn" onclick="editor.closeSettingsPanel()">Cancel</button>
+                    <button class="inline-btn primary" onclick="editor.saveSettings()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+<script>
+// Ensure the Help → Settings menu item opens the full-page settings panel
+document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.querySelector('[data-action="help-settings"]');
+    if (btn) {
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            try {
+                if (window.editor && typeof editor.openSettingsPanel === 'function') {
+                    editor.openSettingsPanel();
+                } else {
+                    console.warn('editor.openSettingsPanel not available yet.');
+                    // Try to create a minimal action by toggling the overlay directly
+                    const ov = document.getElementById('settings-overlay');
+                    if (ov) ov.classList.add('visible');
+                    document.getElementById('app-container').classList.add('settings-active');
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        });
+    }
+});
+</script>
+
+
+<script>
+if (!window.BrushesEditor) window.BrushesEditor = function(){};
+BrushesEditor.prototype.openSettingsPanel = function(){ 
+    const overlay = document.getElementById('settings-overlay'); 
+    if (!overlay) return; 
+    overlay.classList.add('visible'); 
+    document.getElementById('app-container').classList.add('settings-active');
+};
+BrushesEditor.prototype.closeSettingsPanel = function(){
+            document.getElementById('app-container').classList.remove('settings-active'); 
+    const overlay = document.getElementById('settings-overlay'); 
+    if (!overlay) return; 
+    overlay.classList.remove('visible'); 
+    document.getElementById('app-container').classList.remove('settings-active');
+};
+</script>
+
+</body>
+</html>
