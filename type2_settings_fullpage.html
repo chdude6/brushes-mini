@@ -953,41 +953,13 @@
         }
 
     
-        .settings-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 3000;
-            backdrop-filter: blur(4px);
-            opacity: 0;
-            transition: opacity 0.2s cubic-bezier(.32,.72,.54,.95);
-        }
+        
         .settings-overlay.visible {
             display: flex;
             opacity: 1;
         }
-        .settings-panel {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            transform: translateY(32px) scale(0.98);
-            transition: transform 0.24s cubic-bezier(.32,.72,.54,.95);
-        }
-        .settings-overlay.visible .settings-panel {
-            transform: translateY(0) scale(1);
-        }
+        
+        .settings-overlay.visible 
         .settings-header {
             padding: 16px;
             border-bottom: 1px solid var(--border-color);
@@ -1158,6 +1130,84 @@
             background: var(--bg-tertiary);
         }
         
+
+/* Full-page Settings Panel (replaced) */
+.settings-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;
+    align-items: stretch;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: none;
+    opacity: 0;
+    transition: opacity 0.24s ease, transform 0.24s ease;
+}
+.settings-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+.settings-panel {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    margin: 0;
+    background: var(--bg-primary);
+    border: none;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    transform: translateY(12px);
+}
+.settings-overlay.visible .settings-panel {
+    transform: translateY(0);
+}
+.settings-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+}
+.settings-close-btn {
+    font-size: 22px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+.settings-content {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+.settings-footer {
+    padding: 16px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(0deg, rgba(255,255,255,0.01), transparent);
+}
+/* Hide main app chrome when settings page is active */
+.app-container.settings-active .tool-bar,
+.app-container.settings-active .workspace,
+.app-container.settings-active .status-bar,
+.app-container.settings-active .tabs-container,
+.app-container.settings-active .left-panel,
+.app-container.settings-active .properties-panel,
+.app-container.settings-active .right-panel,
+.app-container.settings-active .home-screen {
+    display: none !important;
+}
+
 </style>
 </head>
 <body>
@@ -4331,5 +4381,49 @@
         </div>
     </div>
     
+
+<script>
+// Ensure the Help → Settings menu item opens the full-page settings panel
+document.addEventListener('DOMContentLoaded', function(){
+    const btn = document.querySelector('[data-action="help-settings"]');
+    if (btn) {
+        btn.addEventListener('click', function(e){
+            e.preventDefault();
+            try {
+                if (window.editor && typeof editor.openSettingsPanel === 'function') {
+                    editor.openSettingsPanel();
+                } else {
+                    console.warn('editor.openSettingsPanel not available yet.');
+                    // Try to create a minimal action by toggling the overlay directly
+                    const ov = document.getElementById('settings-overlay');
+                    if (ov) ov.classList.add('visible');
+                    document.getElementById('app-container').classList.add('settings-active');
+                }
+            } catch(err) {
+                console.error(err);
+            }
+        });
+    }
+});
+</script>
+
+
+<script>
+if (!window.BrushesEditor) window.BrushesEditor = function(){};
+BrushesEditor.prototype.openSettingsPanel = function(){ 
+    const overlay = document.getElementById('settings-overlay'); 
+    if (!overlay) return; 
+    overlay.classList.add('visible'); 
+    document.getElementById('app-container').classList.add('settings-active');
+};
+BrushesEditor.prototype.closeSettingsPanel = function(){
+            document.getElementById('app-container').classList.remove('settings-active'); 
+    const overlay = document.getElementById('settings-overlay'); 
+    if (!overlay) return; 
+    overlay.classList.remove('visible'); 
+    document.getElementById('app-container').classList.remove('settings-active');
+};
+</script>
+
 </body>
 </html>
