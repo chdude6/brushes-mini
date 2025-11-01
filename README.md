@@ -74,7 +74,7 @@ Comprehensive documentation is available at [docs.html](https://ilovelasagne.git
 
 ## 📱 Browser Support
 
-- Chrome 80+
+- Chrome 82+
 - Firefox 75+
 - Safari 13+
 - Edge 80+
