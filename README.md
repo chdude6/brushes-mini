@@ -43,7 +43,7 @@ Brushes is a powerful, web-based image editor designed to provide a simple yet f
 
 ## 🚀 Quick Start
 
-1. **Open the Editor**: Visit [Brushes](https://ilovelasagne.github.io/brushes/) and click "Launch Editor"
+1. **Open the Editor**: Visit [Brushes](https://ilovelasagne.github.io/brushes-web/) and click "Launch Editor"
 2. **Create New Project**: Choose from templates or start with a custom size
 3. **Import Images**: Use "Insert Image" to add photos to your canvas
 4. **Edit & Enhance**: Use the toolbox to draw, paint, and apply effects
@@ -51,7 +51,7 @@ Brushes is a powerful, web-based image editor designed to provide a simple yet f
 
 ## 📖 Documentation
 
-Comprehensive documentation is available at [docs.html](https://ilovelasagne.github.io/brushes/docs.html), including:
+Comprehensive documentation is available at [docs.html](https://ilovelasagne.github.io/brushes-web/docs.html), including:
 - Detailed tool guides
 - Keyboard shortcuts
 - FAQ and troubleshooting
